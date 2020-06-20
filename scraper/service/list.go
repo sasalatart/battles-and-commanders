@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/sasalatart/batcoms/scraper/domain"
 
@@ -37,7 +38,12 @@ func (s *Scraper) List() []domain.BattleItem {
 						return
 					}
 
-					url := "https://en.wikipedia.org" + e.Attr("href")
+					href := e.Attr("href")
+					if strings.Contains(href, "://") && !strings.Contains(href, "wikipedia.org") {
+						return
+					}
+
+					url := "https://en.wikipedia.org" + href
 					*battles = append(*battles, domain.BattleItem{Name: e.Text, URL: url})
 				})
 			}
