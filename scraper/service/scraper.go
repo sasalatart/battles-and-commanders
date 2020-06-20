@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"io"
+	"log"
 
 	"github.com/gocolly/colly"
 	"github.com/sasalatart/batcoms/scraper/store"
@@ -25,20 +26,23 @@ func NewScraper(battlesStore store.BattlesStore, participantsStore store.Partici
 // battles, and another one for the participants in each one of those battles.
 func (s *Scraper) Export(battlesFileName, participantsFileName string) error {
 	if err := s.BattlesStore.Export(battlesFileName); err != nil {
-		return fmt.Errorf("Failed exporting the Scraper's results: %s", err.Error())
+		return fmt.Errorf("Failed exporting the Scraper's results: %s", err)
 	}
 	if err := s.ParticipantsStore.Export(participantsFileName); err != nil {
-		return fmt.Errorf("Failed exporting the Scraper's results: %s", err.Error())
+		return fmt.Errorf("Failed exporting the Scraper's results: %s", err)
 	}
 	return nil
 }
 
-func (s *Scraper) do(url string, subscribe func(c *colly.Collector)) {
+func (s *Scraper) do(url string, subscribe func(c *colly.Collector)) error {
 	c := colly.NewCollector()
 	subscribe(c)
 	c.OnRequest(func(r *colly.Request) {
 		message := fmt.Sprintf("Scraping %s\n", r.URL)
 		s.logger.Write([]byte(message))
 	})
-	c.Visit(url)
+	c.OnError(func(r *colly.Response, err error) {
+		log.Printf("Request for %s failed with response %s", r.Request.URL, err)
+	})
+	return c.Visit(url)
 }

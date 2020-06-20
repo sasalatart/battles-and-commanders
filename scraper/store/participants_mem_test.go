@@ -26,10 +26,10 @@ func TestParticipantsMem(t *testing.T) {
 	p2 := domain.Participant{Kind: kind, ID: 2, URL: "www.2.example.org", Flag: "www.flag2.example.org"}
 
 	if err := store.Save(p1); err != nil {
-		t.Errorf("Expected no error when saving participant %+v, but instead got: %s", p1, err.Error())
+		t.Errorf("Expected no error when saving participant %+v, but instead got: %s", p1, err)
 	}
 	if err := store.Save(p2); err != nil {
-		t.Errorf("Expected no error when saving participant %+v, but instead got: %s", p2, err.Error())
+		t.Errorf("Expected no error when saving participant %+v, but instead got: %s", p2, err)
 	}
 
 	if inexistentParticipant := store.Find(kind, 100); inexistentParticipant != nil {
