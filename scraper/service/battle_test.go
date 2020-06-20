@@ -20,7 +20,7 @@ func TestBattle(t *testing.T) {
 
 	battle, err := service.Battle(battleURL)
 	if err != nil {
-		t.Errorf("Unexpected service.Battle error: %s", err.Error())
+		t.Errorf("Unexpected service.Battle error: %s", err)
 	}
 
 	stringCases := []struct {

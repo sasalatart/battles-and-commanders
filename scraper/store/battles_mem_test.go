@@ -25,10 +25,10 @@ func TestBattlesMem(t *testing.T) {
 	b2 := domain.Battle{ID: 2, URL: "www.2.example.org"}
 
 	if err := store.Save(b1); err != nil {
-		t.Errorf("Expected no error when saving battle %+v, but instead got: %s", b1, err.Error())
+		t.Errorf("Expected no error when saving battle %+v, but instead got: %s", b1, err)
 	}
 	if err := store.Save(b2); err != nil {
-		t.Errorf("Expected no error when saving battle %+v, but instead got: %s", b2, err.Error())
+		t.Errorf("Expected no error when saving battle %+v, but instead got: %s", b2, err)
 	}
 
 	if inexistentBattle := store.Find(100); inexistentBattle != nil {

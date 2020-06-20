@@ -18,16 +18,16 @@ func PageSummary(url string) (domain.Summary, error) {
 
 	resp, err := http.Get(summaryURL)
 	if err != nil {
-		return summary, fmt.Errorf("Failed fetching %s: %s", summaryURL, err.Error())
+		return summary, fmt.Errorf("Failed fetching %s: %s", summaryURL, err)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return summary, fmt.Errorf("Failed reading response for %s: %s", summaryURL, err.Error())
+		return summary, fmt.Errorf("Failed reading response for %s: %s", summaryURL, err)
 	}
 	if err = json.Unmarshal(body, &summary); err != nil {
-		return summary, fmt.Errorf("Failed unmarshaling response for %s: %s", summaryURL, err.Error())
+		return summary, fmt.Errorf("Failed unmarshaling response for %s: %s", summaryURL, err)
 	}
 	return summary, nil
 }

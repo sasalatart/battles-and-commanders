@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/sasalatart/batcoms/scraper/domain"
@@ -12,16 +13,25 @@ import (
 const factionsCSSID = "batcoms-factions"
 const commandersCSSID = "batcoms-commanders"
 
-type onParticipantsSideDone func(id int, flagURL string)
+type onParticipantDone func(id int, flagURL string, err error)
 
 func (s *Scraper) subscribeFactions(c *colly.Collector, b *domain.Battle) {
 	setInfoBoxID(c, "belligerents", factionsCSSID)
+
+	handleFaction := func(id int, ids *[]int, err error) {
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		*ids = append(*ids, id)
+	}
+
 	c.OnHTML(infoBoxSelector, func(e *colly.HTMLElement) {
-		s.participantsSide(e, domain.FactionKind, "td:first-child", func(id int, _ string) {
-			*&b.Factions.A = append(*&b.Factions.A, id)
+		s.participantsSide(e, domain.FactionKind, "td:first-child", func(id int, _ string, err error) {
+			handleFaction(id, &b.Factions.A, err)
 		})
-		s.participantsSide(e, domain.FactionKind, "td:nth-child(2)", func(id int, _ string) {
-			*&b.Factions.B = append(*&b.Factions.B, id)
+		s.participantsSide(e, domain.FactionKind, "td:nth-child(2)", func(id int, _ string, err error) {
+			handleFaction(id, &b.Factions.B, err)
 		})
 	})
 }
@@ -29,20 +39,24 @@ func (s *Scraper) subscribeFactions(c *colly.Collector, b *domain.Battle) {
 func (s *Scraper) subscribeCommanders(c *colly.Collector, b *domain.Battle) {
 	setInfoBoxID(c, "Commanders and leaders", commandersCSSID)
 
-	glueCommander := func(id int, flag string) {
+	handleCommander := func(id int, flag string, ids *[]int, err error) {
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		*ids = append(*ids, id)
 		if f := s.ParticipantsStore.FindFactionByFlag(flag); f != nil {
 			b.CommandersByFaction[f.ID] = append(b.CommandersByFaction[f.ID], id)
 		}
 	}
 
 	c.OnHTML(infoBoxSelector, func(e *colly.HTMLElement) {
-		s.participantsSide(e, domain.CommanderKind, "td:first-child", func(id int, flag string) {
-			*&b.Commanders.A = append(*&b.Commanders.A, id)
-			glueCommander(id, flag)
+		s.participantsSide(e, domain.CommanderKind, "td:first-child", func(id int, flag string, err error) {
+			handleCommander(id, flag, &b.Commanders.A, err)
 		})
-		s.participantsSide(e, domain.CommanderKind, "td:nth-child(2)", func(id int, flag string) {
-			*&b.Commanders.B = append(*&b.Commanders.B, id)
-			glueCommander(id, flag)
+		s.participantsSide(e, domain.CommanderKind, "td:nth-child(2)", func(id int, flag string, err error) {
+			handleCommander(id, flag, &b.Commanders.B, err)
 		})
 	})
 }
@@ -55,7 +69,7 @@ func participantSelector(kind domain.ParticipantKind, sideSelector string) strin
 	return fmt.Sprintf("#%s > %s", commandersCSSID, sideSelector)
 }
 
-func (s *Scraper) participantsSide(e *colly.HTMLElement, kind domain.ParticipantKind, sideSelector string, onDone onParticipantsSideDone) {
+func (s *Scraper) participantsSide(e *colly.HTMLElement, kind domain.ParticipantKind, sideSelector string, onDone onParticipantDone) {
 	fullSelector := participantSelector(kind, sideSelector)
 	e.ForEach(fullSelector, func(_ int, side *colly.HTMLElement) {
 		side.ForEach("a", func(_ int, node *colly.HTMLElement) {
@@ -63,16 +77,19 @@ func (s *Scraper) participantsSide(e *colly.HTMLElement, kind domain.Participant
 				return
 			}
 
-			participantURL := "https://en.wikipedia.org" + node.Attr("href")
-			if p := s.ParticipantsStore.FindByURL(kind, participantURL); p != nil {
-				onDone(p.ID, flagURL(node))
+			pURL := "https://en.wikipedia.org" + node.Attr("href")
+			if p := s.ParticipantsStore.FindByURL(kind, pURL); p != nil {
+				onDone(p.ID, flagURL(node), nil)
 				return
 			}
 
-			summary, err := PageSummary(participantURL)
+			if strings.Contains(pURL, "redlink=1") {
+				return
+			}
+
+			summary, err := PageSummary(pURL)
 			if err != nil {
-				message := fmt.Sprintf("Failed to fetch summary URL %s: %s", participantURL, err.Error())
-				s.logger.Write([]byte(message))
+				log.Printf("Failed to fetch summary with URL %s: %s", pURL, err)
 				return
 			}
 
@@ -80,15 +97,14 @@ func (s *Scraper) participantsSide(e *colly.HTMLElement, kind domain.Participant
 			participant := domain.Participant{
 				Kind:        kind,
 				ID:          int(summary.PageID),
-				URL:         participantURL,
+				URL:         pURL,
 				Flag:        flag,
 				Name:        summary.DisplayTitle,
 				Description: summary.Description,
 				Extract:     summary.Extract,
 			}
-			// TODO: handle error case
-			s.ParticipantsStore.Save(participant)
-			onDone(participant.ID, flag)
+			err = s.ParticipantsStore.Save(participant)
+			onDone(participant.ID, flag, err)
 		})
 	})
 }

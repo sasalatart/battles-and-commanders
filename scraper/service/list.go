@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/sasalatart/batcoms/scraper/domain"
 
@@ -36,10 +37,13 @@ func (s *Scraper) List() []domain.BattleItem {
 						return
 					}
 
-					*battles = append(*battles, domain.BattleItem{Name: e.Text, URL: e.Attr("href")})
+					url := "https://en.wikipedia.org" + e.Attr("href")
+					*battles = append(*battles, domain.BattleItem{Name: e.Text, URL: url})
 				})
 			}
-			s.do(url, subscribe)
+			if err := s.do(url, subscribe); err != nil {
+				log.Printf("Error scraping list in %s: %s", url, err)
+			}
 		}(strategy, &battles)
 	}
 

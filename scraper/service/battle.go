@@ -14,13 +14,13 @@ func (s *Scraper) Battle(url string) (domain.Battle, error) {
 
 	summary, err := PageSummary(url)
 	if err != nil {
-		return b, fmt.Errorf("Failed to fetch summary for %s: %s", url, err.Error())
+		return b, fmt.Errorf("Failed to fetch summary for %s: %s", url, err)
 	}
 	b.ID = summary.PageID
 	b.Description = summary.Description
 	b.Extract = summary.Extract
 
-	s.do(url, func(c *colly.Collector) {
+	err = s.do(url, func(c *colly.Collector) {
 		s.subscribeMeta(c, &b)
 		s.subscribeFactions(c, &b)
 		s.subscribeCommanders(c, &b)
