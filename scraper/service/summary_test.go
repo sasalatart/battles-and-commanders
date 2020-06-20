@@ -14,7 +14,7 @@ func TestPageSummary(t *testing.T) {
 		if err == nil {
 			t.Error("Expected to return an error but instead returned nil")
 		}
-		expectedSubstring := "Failed fetching"
+		expectedSubstring := "not a wiki page"
 		got := err.Error()
 		if !strings.Contains(got, expectedSubstring) {
 			t.Errorf("Expected error message to contain %q, but instead was %q", expectedSubstring, got)
@@ -28,6 +28,8 @@ func TestPageSummary(t *testing.T) {
 		}
 		expected := domain.Summary{
 			PageID:       4284,
+			Type:         "standard",
+			Title:        "Battle of Stalingrad",
 			DisplayTitle: "Battle of Stalingrad",
 			Description:  "Major battle of World War II",
 			Extract:      "In the Battle of Stalingrad, Germany and its allies fought the Soviet Union for control of the city of Stalingrad in Southern Russia. Marked by fierce close-quarters combat and direct assaults on civilians in air raids, it is one of the bloodiest battles in the history of warfare, with an estimated 2 million total casualties. After their defeat at Stalingrad, the German High Command had to withdraw considerable military forces from the Western Front to replace their losses.",
