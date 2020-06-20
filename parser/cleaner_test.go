@@ -32,6 +32,10 @@ func TestClean(t *testing.T) {
 			expected: "1,129,619. 478,741 killed or missing 650,878 wounded or sick. 2,769 aircraft 4,341 tanks (~150 by Romanians) (25-30% were total write-offs.) 15,728 guns. See casualties section.",
 		},
 		{
+			input:    "\n8,300 killed,[1]3,400 captured",
+			expected: "8,300 killed, 3,400 captured",
+		},
+		{
 			input:    " .",
 			expected: ".",
 		},

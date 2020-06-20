@@ -35,6 +35,11 @@ var pipeline = []struct {
 		replaceWith: "$1 $2",
 	},
 	{
+		// Ensure there are spaces after commas for non-numeric text
+		regex:       regexp.MustCompile(`(\D),(\w)`),
+		replaceWith: "$1, $2",
+	},
+	{
 		// Ensure there are spaces after colons
 		regex:       regexp.MustCompile(`(:)([^\s])`),
 		replaceWith: "$1 $2",
@@ -61,8 +66,8 @@ var pipeline = []struct {
 	},
 }
 
-// Clean applies a series of transformations to its input in order to transform and remove
-// unwanted text that resulted from scraping.
+// Clean applies a series of transformations to its input in order to transform and remove unwanted
+// text that resulted from scraping.
 func Clean(text string) string {
 	result := strings.Trim(text, "\n")
 	for _, op := range pipeline {
