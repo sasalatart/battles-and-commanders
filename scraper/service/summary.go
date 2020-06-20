@@ -14,8 +14,12 @@ import (
 // a domain.Summary if successful, or an error if not
 func PageSummary(url string) (domain.Summary, error) {
 	summary := domain.Summary{}
-	summaryURL := strings.ReplaceAll(url, "/wiki/", "/api/rest_v1/page/summary/")
 
+	if !strings.Contains(url, "/wiki/") {
+		return summary, fmt.Errorf("URL is not a wiki page: %s", url)
+	}
+
+	summaryURL := strings.ReplaceAll(url, "/wiki/", "/api/rest_v1/page/summary/")
 	resp, err := http.Get(summaryURL)
 	if err != nil {
 		return summary, fmt.Errorf("Failed fetching %s: %s", summaryURL, err)
@@ -28,6 +32,9 @@ func PageSummary(url string) (domain.Summary, error) {
 	}
 	if err = json.Unmarshal(body, &summary); err != nil {
 		return summary, fmt.Errorf("Failed unmarshaling response for %s: %s", summaryURL, err)
+	}
+	if strings.Contains(strings.ToLower(summary.Title), "not found") || strings.Contains(summary.Type, "not_found") {
+		return summary, fmt.Errorf("No summary found in %s", summaryURL)
 	}
 	return summary, nil
 }
