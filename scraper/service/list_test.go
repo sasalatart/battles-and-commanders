@@ -1,18 +1,24 @@
-package scraper_test
+package service_test
 
 import (
 	"strconv"
 	"strings"
 	"testing"
 
+	"github.com/sasalatart/batcoms/scraper/service"
+	"github.com/sasalatart/batcoms/scraper/store"
+
 	"github.com/sasalatart/batcoms/mocks"
-	"github.com/sasalatart/batcoms/scraper"
 )
 
 func TestList(t *testing.T) {
-	loggerMock := mocks.Logger{}
-
-	scrapedBattles := scraper.ScrapeList(&loggerMock)
+	loggerMock := &mocks.Logger{}
+	service := service.NewScraper(
+		store.NewBattlesMem(),
+		store.NewParticipantsMem(),
+		loggerMock,
+	)
+	battlesList := service.List()
 
 	t.Run("Logs for each list and with a final count of scraped battles", func(t *testing.T) {
 		cc := []struct {
@@ -35,14 +41,14 @@ func TestList(t *testing.T) {
 		}
 
 		gotAmount := loggerMock.Logs[len(loggerMock.Logs)-1]
-		expectedAmount := len(scrapedBattles)
+		expectedAmount := len(battlesList)
 		if !strings.Contains(gotAmount, strconv.Itoa(expectedAmount)) {
 			t.Errorf("Expected the amounts log to contain the number %d, but instead logged %q", expectedAmount, gotAmount)
 		}
 	})
 
 	t.Run("Scraps more than 4500 battles", func(t *testing.T) {
-		got := len(scrapedBattles)
+		got := len(battlesList)
 		expectedMin := 4500
 		if got < 4500 {
 			t.Errorf("Expected to scrap more than %d battles, but only got %d", expectedMin, got)
@@ -51,7 +57,7 @@ func TestList(t *testing.T) {
 
 	t.Run("Contains battles for each one of the indexed lists", func(t *testing.T) {
 		indexedBattlesNames := make(map[string]string)
-		for _, battle := range scrapedBattles {
+		for _, battle := range battlesList {
 			indexedBattlesNames[battle.Name] = battle.Name
 		}
 
