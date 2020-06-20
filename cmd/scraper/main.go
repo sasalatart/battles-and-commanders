@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 
+	"github.com/sasalatart/batcoms/scraper/domain"
 	"github.com/sasalatart/batcoms/scraper/service"
 	"github.com/sasalatart/batcoms/scraper/store"
 )
@@ -12,14 +14,24 @@ func main() {
 	scraperService := service.NewScraper(
 		store.NewBattlesMem(),
 		store.NewParticipantsMem(),
-		log.Writer(),
+		ioutil.Discard,
 	)
 
-	scraperService.Battle("https://en.wikipedia.org/wiki/Battle_of_Megiddo_(15th_century_BC)")
-	scraperService.Battle("https://en.wikipedia.org/wiki/Battle_of_Austerlitz")
-	scraperService.Battle("https://en.wikipedia.org/wiki/Battle_of_Stalingrad")
+	semaphore := make(chan bool, 10)
+	list := scraperService.List()
+	for i, battle := range list {
+		semaphore <- true
+		go func(i int, b domain.BattleItem) {
+			_, err := scraperService.Battle(b.URL)
+			if err != nil {
+				log.Printf("Failed scraping %s: %s", b.URL, err)
+			}
+			fmt.Printf("\r%d/%d", i, len(list))
+			<-semaphore
+		}(i, battle)
+	}
 
 	if err := scraperService.Export("battles.json", "participants.json"); err != nil {
-		fmt.Printf("Error: %s", err)
+		log.Printf("Error: %s", err)
 	}
 }
