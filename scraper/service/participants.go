@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 
 	"github.com/sasalatart/batcoms/scraper/domain"
@@ -12,6 +13,8 @@ import (
 
 const factionsCSSID = "batcoms-factions"
 const commandersCSSID = "batcoms-commanders"
+
+var notesRegex = regexp.MustCompile(`\[\w*\s*\w\](:\d*)?`)
 
 type onParticipantDone func(id int, flagURL string, err error)
 
@@ -73,11 +76,14 @@ func (s *Scraper) participantsSide(e *colly.HTMLElement, kind domain.Participant
 	fullSelector := participantSelector(kind, sideSelector)
 	e.ForEach(fullSelector, func(_ int, side *colly.HTMLElement) {
 		side.ForEach("a", func(_ int, node *colly.HTMLElement) {
-			if node.Text == "" {
+			if node.Text == "" || notesRegex.Match([]byte(node.Text)) {
 				return
 			}
 
-			pURL := "https://en.wikipedia.org" + node.Attr("href")
+			pURL := node.Attr("href")
+			if !strings.Contains(pURL, "://") {
+				pURL = "https://en.wikipedia.org" + pURL
+			}
 			if p := s.ParticipantsStore.FindByURL(kind, pURL); p != nil {
 				onDone(p.ID, flagURL(node), nil)
 				return
@@ -89,7 +95,7 @@ func (s *Scraper) participantsSide(e *colly.HTMLElement, kind domain.Participant
 
 			summary, err := PageSummary(pURL)
 			if err != nil {
-				log.Printf("Failed to fetch summary with URL %s: %s", pURL, err)
+				log.Printf("Failed to fetch summary for %s: %s", pURL, err)
 				return
 			}
 
