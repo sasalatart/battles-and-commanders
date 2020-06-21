@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/sasalatart/batcoms/parser"
 	"github.com/sasalatart/batcoms/scraper/domain"
 )
 
@@ -35,6 +36,9 @@ func PageSummary(url string) (domain.Summary, error) {
 	}
 	if strings.Contains(strings.ToLower(summary.Title), "not found") || strings.Contains(summary.Type, "not_found") {
 		return summary, fmt.Errorf("No summary found in %s", summaryURL)
+	}
+	for _, p := range []*string{&summary.DisplayTitle, &summary.Description, &summary.Extract} {
+		*p = parser.Clean(*p)
 	}
 	return summary, nil
 }
