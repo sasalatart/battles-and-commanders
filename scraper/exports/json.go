@@ -1,19 +1,22 @@
 package exports
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 )
 
-// JSON saves the specified contents into the specified file name
-func JSON(fileName string, toExport interface{}) error {
-	file, err := json.MarshalIndent(toExport, "", "")
-	if err != nil {
-		return fmt.Errorf("Failed to marshal data for %q: %s", fileName, err)
+// JSON creates a file and saves the specified contents inside it in JSON format
+func JSON(fileName string, d interface{}) error {
+	buffer := &bytes.Buffer{}
+	encoder := json.NewEncoder(buffer)
+	encoder.SetEscapeHTML(false)
+	if err := encoder.Encode(d); err != nil {
+		return fmt.Errorf("Failed encoding %s as JSON: %s", fileName, err)
 	}
-	if err = ioutil.WriteFile(fileName, file, 0644); err != nil {
-		return fmt.Errorf("Failed to write %q: %s", fileName, err)
+	if err := ioutil.WriteFile(fileName, buffer.Bytes(), 0644); err != nil {
+		return fmt.Errorf("Failed to write %s: %s", fileName, err)
 	}
 	return nil
 }
