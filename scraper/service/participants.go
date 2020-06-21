@@ -3,19 +3,17 @@ package service
 import (
 	"fmt"
 	"log"
-	"regexp"
 	"strings"
 
 	"github.com/sasalatart/batcoms/parser"
 	"github.com/sasalatart/batcoms/scraper/domain"
+	"github.com/sasalatart/batcoms/scraper/urls"
 
 	"github.com/gocolly/colly"
 )
 
 const factionsCSSID = "batcoms-factions"
 const commandersCSSID = "batcoms-commanders"
-
-var genericURLs = regexp.MustCompile(`(?i)(history_of|list_of|campaign_against)`)
 
 type onParticipantDone func(id int, flagURL string, err error)
 
@@ -86,12 +84,12 @@ func (s *Scraper) participantsSide(e *colly.HTMLElement, kind domain.Participant
 			if !strings.Contains(pURL, "://") {
 				pURL = "https://en.wikipedia.org" + pURL
 			}
+
 			if p := s.ParticipantsStore.FindByURL(kind, pURL); p != nil {
 				onDone(p.ID, flagURL(node), nil)
 				return
 			}
-
-			if strings.Contains(pURL, "redlink=1") {
+			if urls.ShouldSkip(pURL) {
 				return
 			}
 
@@ -102,7 +100,7 @@ func (s *Scraper) participantsSide(e *colly.HTMLElement, kind domain.Participant
 			}
 
 			name := summary.DisplayTitle
-			if genericURLs.Match([]byte(pURL)) {
+			if urls.NotSpecific(pURL) {
 				name = cleanText
 			}
 
