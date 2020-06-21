@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/sasalatart/batcoms/parser"
 	"github.com/sasalatart/batcoms/scraper/domain"
 
 	"github.com/gocolly/colly"
@@ -14,7 +15,7 @@ import (
 const factionsCSSID = "batcoms-factions"
 const commandersCSSID = "batcoms-commanders"
 
-var notesRegex = regexp.MustCompile(`\[\w*\s*\w\](:\d*)?`)
+var genericURLs = regexp.MustCompile(`(?i)(history_of|list_of|campaign_against)`)
 
 type onParticipantDone func(id int, flagURL string, err error)
 
@@ -76,7 +77,8 @@ func (s *Scraper) participantsSide(e *colly.HTMLElement, kind domain.Participant
 	fullSelector := participantSelector(kind, sideSelector)
 	e.ForEach(fullSelector, func(_ int, side *colly.HTMLElement) {
 		side.ForEach("a", func(_ int, node *colly.HTMLElement) {
-			if node.Text == "" || notesRegex.Match([]byte(node.Text)) {
+			cleanText := parser.Clean(node.Text)
+			if cleanText == "" {
 				return
 			}
 
@@ -99,13 +101,18 @@ func (s *Scraper) participantsSide(e *colly.HTMLElement, kind domain.Participant
 				return
 			}
 
+			name := summary.DisplayTitle
+			if genericURLs.Match([]byte(pURL)) {
+				name = cleanText
+			}
+
 			flag := flagURL(node)
 			participant := domain.Participant{
 				Kind:        kind,
 				ID:          int(summary.PageID),
 				URL:         pURL,
 				Flag:        flag,
-				Name:        summary.DisplayTitle,
+				Name:        name,
 				Description: summary.Description,
 				Extract:     summary.Extract,
 			}
