@@ -10,18 +10,23 @@ var pipeline = []struct {
 	replaceWith string
 }{
 	{
-		// Remove references (example: [Note 1], [2], [3]:44)
-		regex:       regexp.MustCompile(`\[\w*\s*\w\](:\d*)?`),
+		// Remove irregular whitespaces
+		regex:       regexp.MustCompile(`\xa0`),
+		replaceWith: " ",
+	},
+	{
+		// Remove references (examples: [Note 1], [2], [better source needed], [3]:44)
+		regex:       regexp.MustCompile(`\[[\w\s]+\](:\d*)?`),
 		replaceWith: "",
 	},
 	{
 		// Remove line breaks after colons
-		regex:       regexp.MustCompile(`:[\n]+`),
+		regex:       regexp.MustCompile(`:\n+`),
 		replaceWith: ": ",
 	},
 	{
 		// Replace line breaks with periods
-		regex:       regexp.MustCompile(`[\n]+`),
+		regex:       regexp.MustCompile(`\n+`),
 		replaceWith: ". ",
 	},
 	{

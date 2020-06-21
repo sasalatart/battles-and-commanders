@@ -43,6 +43,10 @@ func TestClean(t *testing.T) {
 			input:    "word-1   word-2",
 			expected: "word-1 word-2",
 		},
+		{
+			input:    "irregular whitespace",
+			expected: "irregular whitespace",
+		},
 	}
 
 	for _, c := range cc {
