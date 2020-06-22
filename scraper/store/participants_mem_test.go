@@ -44,8 +44,4 @@ func TestParticipantsMem(t *testing.T) {
 	if !reflect.DeepEqual(*foundP1, p1) {
 		t.Errorf("Expected to find participant %+v when searching via its URL, but instead got %+v", p1, *foundP1)
 	}
-	foundP1 = store.FindFactionByFlag(p1.Flag)
-	if !reflect.DeepEqual(*foundP1, p1) {
-		t.Errorf("Expected to find faction %+v when searching via its FlagURL, but instead got %+v", p1, *foundP1)
-	}
 }

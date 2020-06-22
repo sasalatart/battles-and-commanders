@@ -10,10 +10,9 @@ import (
 
 // ParticipantsMem is an in-memory implementation of ParticipantsStore
 type ParticipantsMem struct {
-	mutex          sync.Mutex
-	byIDByKind     map[domain.ParticipantKind]map[int]*domain.Participant
-	byURLByKind    map[domain.ParticipantKind]map[string]int
-	factionsByFlag map[string]int
+	mutex       sync.Mutex
+	byIDByKind  map[domain.ParticipantKind]map[int]*domain.Participant
+	byURLByKind map[domain.ParticipantKind]map[string]int
 }
 
 // NewParticipantsMem returns a pointer to an empty, ready-to-use ParticipantsMem store
@@ -25,9 +24,8 @@ func NewParticipantsMem() *ParticipantsMem {
 		byURLByKind[kind] = make(map[string]int)
 	}
 	return &ParticipantsMem{
-		byIDByKind:     byIDByKind,
-		byURLByKind:    byURLByKind,
-		factionsByFlag: make(map[string]int),
+		byIDByKind:  byIDByKind,
+		byURLByKind: byURLByKind,
 	}
 }
 
@@ -57,19 +55,6 @@ func (r *ParticipantsMem) FindByURL(kind domain.ParticipantKind, url string) *do
 	return r.Find(kind, id)
 }
 
-// FindFactionByFlag does the same as Find, but instead of searching by ID, it searches by the flag
-// URL of the faction
-func (r *ParticipantsMem) FindFactionByFlag(flag string) *domain.Participant {
-	r.mutex.Lock()
-
-	id, found := r.factionsByFlag[flag]
-	r.mutex.Unlock()
-	if found != true {
-		return nil
-	}
-	return r.Find(domain.FactionKind, id)
-}
-
 // Save stores the given participant. It returns an error if the participant does not have an ID or
 // a URL
 func (r *ParticipantsMem) Save(p domain.Participant) error {
@@ -84,9 +69,6 @@ func (r *ParticipantsMem) Save(p domain.Participant) error {
 	}
 	r.byIDByKind[p.Kind][p.ID] = &p
 	r.byURLByKind[p.Kind][p.URL] = p.ID
-	if p.Kind == domain.FactionKind && p.Flag != "" {
-		r.factionsByFlag[p.Flag] = p.ID
-	}
 	return nil
 }
 

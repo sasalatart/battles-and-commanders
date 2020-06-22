@@ -15,30 +15,40 @@ import (
 const factionsCSSID = "batcoms-factions"
 const commandersCSSID = "batcoms-commanders"
 
+type flagsMapping map[string]int
 type onParticipantDone func(id int, flagURL string, err error)
 
-func (s *Scraper) subscribeFactions(c *colly.Collector, b *domain.Battle) {
+func (s *Scraper) subscribeParticipants(c *colly.Collector, b *domain.Battle) {
+	factionsByFlag := make(map[string]int)
+	s.subscribeFactions(c, b, factionsByFlag)
+	s.subscribeCommanders(c, b, factionsByFlag)
+}
+
+func (s *Scraper) subscribeFactions(c *colly.Collector, b *domain.Battle, fm flagsMapping) {
 	setInfoBoxID(c, "belligerents", factionsCSSID)
 
-	handleFaction := func(id int, ids *[]int, err error) {
+	handleFaction := func(id int, flag string, ids *[]int, err error) {
 		if err != nil {
 			log.Println(err)
 			return
+		}
+		if _, saved := fm[flag]; !saved && flag != "" {
+			fm[flag] = id
 		}
 		*ids = append(*ids, id)
 	}
 
 	c.OnHTML(infoBoxSelector, func(e *colly.HTMLElement) {
-		s.participantsSide(e, domain.FactionKind, "td:first-child", func(id int, _ string, err error) {
-			handleFaction(id, &b.Factions.A, err)
+		s.participantsSide(e, domain.FactionKind, "td:first-child", func(id int, flag string, err error) {
+			handleFaction(id, flag, &b.Factions.A, err)
 		})
-		s.participantsSide(e, domain.FactionKind, "td:nth-child(2)", func(id int, _ string, err error) {
-			handleFaction(id, &b.Factions.B, err)
+		s.participantsSide(e, domain.FactionKind, "td:nth-child(2)", func(id int, flag string, err error) {
+			handleFaction(id, flag, &b.Factions.B, err)
 		})
 	})
 }
 
-func (s *Scraper) subscribeCommanders(c *colly.Collector, b *domain.Battle) {
+func (s *Scraper) subscribeCommanders(c *colly.Collector, b *domain.Battle, fm flagsMapping) {
 	setInfoBoxID(c, "Commanders and leaders", commandersCSSID)
 
 	handleCommander := func(id int, flag string, ids *[]int, err error) {
@@ -46,11 +56,10 @@ func (s *Scraper) subscribeCommanders(c *colly.Collector, b *domain.Battle) {
 			log.Println(err)
 			return
 		}
-
-		*ids = append(*ids, id)
-		if f := s.ParticipantsStore.FindFactionByFlag(flag); f != nil {
-			b.CommandersByFaction[f.ID] = append(b.CommandersByFaction[f.ID], id)
+		if fID, saved := fm[flag]; saved {
+			b.CommandersByFaction[fID] = append(b.CommandersByFaction[fID], id)
 		}
+		*ids = append(*ids, id)
 	}
 
 	c.OnHTML(infoBoxSelector, func(e *colly.HTMLElement) {
