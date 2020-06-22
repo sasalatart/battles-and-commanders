@@ -22,8 +22,7 @@ func (s *Scraper) Battle(url string) (domain.Battle, error) {
 
 	err = s.do(url, func(c *colly.Collector) {
 		s.subscribeMeta(c, &b)
-		s.subscribeFactions(c, &b)
-		s.subscribeCommanders(c, &b)
+		s.subscribeParticipants(c, &b)
 		s.subscribeStrength(c, &b)
 		s.subscribeCasualties(c, &b)
 
