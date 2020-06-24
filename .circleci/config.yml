@@ -1,0 +1,108 @@
+version: 2.1
+
+aliases:
+  - &go-docker-image circleci/golang:1.13
+  - &node-docker-image circleci/node:12.13.1
+  - &working-directory ~/repo
+  - &go-mod-cache-key go-mod-v1-{{ checksum "go.sum" }}
+
+executors:
+  go_executor:
+    working_directory: *working-directory
+    docker:
+      - image: *go-docker-image
+  node_executor:
+    working_directory: *working-directory
+    docker:
+      - image: *node-docker-image
+
+commands:
+  checkout_and_cache:
+    description: Checkout code and restore cache
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - *go-mod-cache-key
+
+jobs:
+  commitlint:
+    description: Lint commit messages according to Conventional Commits
+    executor: node_executor
+    steps:
+      - checkout
+      - run:
+          name: Install
+          command: |
+            sudo npm install -g @commitlint/{config-conventional,cli}
+            echo "module.exports = {extends: ['@commitlint/config-conventional']}" > commitlint.config.js
+      - run:
+          name: commitlint
+          command: |
+            FROM_SHA="$(git log origin/master..$CIRCLE_SHA1 --oneline | tail -1 | awk '{print $1}')"
+            commitlint --from $FROM_SHA --to $CIRCLE_SHA1
+
+  bootstrap:
+    description: Install dependencies
+    executor: go_executor
+    steps:
+      - checkout_and_cache
+      - run: go get ./...
+      - save_cache:
+          key: *go-mod-cache-key
+          paths:
+            - "/go/pkg/mod"
+
+  gofmt:
+    description: Check if the code follows gofmt style
+    executor: go_executor
+    steps:
+      - checkout_and_cache
+      - run: test -z "$(gofmt -d .)"
+
+  golint:
+    description: Check if the code follows golint rules
+    executor: go_executor
+    steps:
+      - checkout_and_cache
+      - run: test -z "$(golint ./...)"
+
+  test:
+    description: Run tests
+    executor: go_executor
+    steps:
+      - checkout_and_cache
+      - run: go test ./...
+
+  build:
+    description: Build binaries
+    executor: go_executor
+    steps:
+      - checkout_and_cache
+      - run:
+          name: Build scraper
+          command: go build -o scraper-app cmd/scraper/main.go
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - commitlint:
+          filters:
+            branches:
+              ignore: master
+
+      - bootstrap
+      - gofmt:
+          requires:
+            - bootstrap
+      - golint:
+          requires:
+            - bootstrap
+      - test:
+          requires:
+            - gofmt
+            - golint
+      - build:
+          requires:
+            - test
