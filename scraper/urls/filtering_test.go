@@ -24,6 +24,8 @@ func TestURLs(t *testing.T) {
 			{"/wiki/List_of_kings_of_Leinster", true},
 			{"/wiki/Campaign_against_Dong_Zhuo", true},
 			{"/wiki/Dong_Zhuo", false},
+			{"/wiki/Timeline_of_World_War_I", true},
+			{"/wiki/World_War_I", false},
 		}
 
 		for _, c := range cases {
@@ -53,6 +55,7 @@ func TestURLs(t *testing.T) {
 			{"https://en.wikipedia.org/wiki/Battle_of_Vyazma", false},
 			{"/wiki/Talk:Battle_of_Vyazma", true},
 			{"/wiki/Battle_of_Vyazma", false},
+			{"/wiki/Category:Battles_of_World_War_I", true},
 			{"/wiki/Wikipedia:Citation_needed", true},
 			{"/wiki/Killed_in_action", true},
 			{"/wiki/POW", true},
@@ -92,6 +95,29 @@ func TestURLs(t *testing.T) {
 					c.expected,
 					got,
 				)
+			}
+		}
+	})
+
+	t.Run("IsExternal", func(t *testing.T) {
+		cases := []struct {
+			URI      string
+			expected bool
+		}{
+			{"https://www.example.org?q=v", true},
+			{"https://www.example.org", true},
+			{"http://www.example.org", true},
+			{"www.example.org", true},
+			{"example.org", true},
+			{"https://en.wikipedia.org/wiki/World_War_I", false},
+			{"en.wikipedia.org/wiki/World_War_I", false},
+			{"/wiki/World_War_I", false},
+		}
+
+		for _, c := range cases {
+			got := urls.IsExternal(c.URI)
+			if got != c.expected {
+				t.Errorf("Expected urls.IsExternal(%s) to be %t, but instead got %t", c.URI, c.expected, got)
 			}
 		}
 	})

@@ -3,9 +3,12 @@ package service
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 
+	"github.com/sasalatart/batcoms/parser"
 	"github.com/sasalatart/batcoms/scraper/domain"
+	"github.com/sasalatart/batcoms/scraper/urls"
 
 	"github.com/gocolly/colly"
 )
@@ -15,42 +18,72 @@ type listStrategy struct {
 	selector  string
 }
 
+var keywords = strings.Join([]string{
+	"action", "ambush", "assault", "attack",
+	"battle", "blockade", "bloodbath", "bombardment", "bombing", "burning",
+	"campaign", "capture", "clash", "clashes", "combat", "conflict", "confrontation", "conquest", "crisis", "crossing", "crusade",
+	"defense",
+	"engagement", "expedition",
+	"fall", "fight",
+	"incident", "insurgency", "intervention", "invasion",
+	"landing", "liberation",
+	"massacre", "march", "mutiny",
+	"occupation", "offensive", "operatie", "operation",
+	"prison break",
+	"raid", "rebellion", "recovery", "relief", "revolt", "rising",
+	"sack", "siege", "sinking", "skirmish", "stand", "standoff", "strike",
+	"takeover",
+	"uprising",
+	"war",
+}, "|")
+
+func buildRegex(format string) *regexp.Regexp {
+	return regexp.MustCompile("(?i)" + fmt.Sprintf(format, keywords))
+}
+
+var inside = buildRegex("(%s)s?\\s(at|for|in|of|on|to)")
+var suffix = buildRegex("\\s(%s)s?$")
+var prefix = buildRegex("^(%s)\\s")
+
 // List scrapes and retrieves the full list of Wikipedia's battles (name & URL only) when grouped by
 // centuries
 func (s *Scraper) List() []domain.BattleItem {
-	battles := []domain.BattleItem{}
+	urlsByName := make(map[string]string)
 
-	var strategies = [...]listStrategy{
-		{"before_301", "td:nth-last-child(2) > a"},
-		{"301-1300", "td:nth-last-child(3) > a"},
-		{"1301-1600", "td:nth-last-child(3) > a"},
-		{"1601-1800", "h2+ul a:first-child"},
-		{"1801-1900", "h2+ul a:first-child"},
-		{"1901-2000", "h2+ul a:first-child"},
-		{"since_2001", "td:first-child > a"},
+	for _, listURL := range urls.BattlesLists() {
+		subscribe := func(c *colly.Collector) {
+			c.OnHTML("#content a[href]", func(e *colly.HTMLElement) {
+				name := parser.Clean(e.Text)
+				if _, cached := urlsByName[name]; cached {
+					return
+				}
+
+				if name == "" || e.Attr("class") == "new" {
+					return
+				}
+
+				href := e.Attr("href")
+				if urls.IsExternal(href) || urls.NotSpecific(href) || urls.ShouldSkip(href) {
+					return
+				}
+
+				bT := []byte(name)
+				if !inside.Match(bT) && !suffix.Match(bT) && !prefix.Match(bT) {
+					return
+				}
+
+				urlsByName[name] = "https://en.wikipedia.org" + href
+			})
+		}
+
+		if err := s.do(listURL, subscribe); err != nil {
+			log.Printf("Error scraping list in %s: %s", listURL, err)
+		}
 	}
-	for _, strategy := range strategies {
-		func(ls listStrategy, battles *[]domain.BattleItem) {
-			url := fmt.Sprintf("https://en.wikipedia.org/wiki/List_of_battles_%s", ls.urlSuffix)
-			subscribe := func(c *colly.Collector) {
-				c.OnHTML(fmt.Sprintf("#content %s", ls.selector), func(e *colly.HTMLElement) {
-					if e.Attr("class") == "new" {
-						return
-					}
 
-					href := e.Attr("href")
-					if strings.Contains(href, "://") && !strings.Contains(href, "wikipedia.org") {
-						return
-					}
-
-					url := "https://en.wikipedia.org" + href
-					*battles = append(*battles, domain.BattleItem{Name: e.Text, URL: url})
-				})
-			}
-			if err := s.do(url, subscribe); err != nil {
-				log.Printf("Error scraping list in %s: %s", url, err)
-			}
-		}(strategy, &battles)
+	battles := []domain.BattleItem{}
+	for name, url := range urlsByName {
+		battles = append(battles, domain.BattleItem{URL: url, Name: name})
 	}
 
 	feedbackMessage := fmt.Sprintf("There are %d battles that can be scraped\n", len(battles))

@@ -21,22 +21,33 @@ func TestList(t *testing.T) {
 	battlesList := service.List()
 
 	t.Run("Logs for each list and with a final count of scraped battles", func(t *testing.T) {
-		cc := []struct {
-			log               string
-			expectedSubstring string
-		}{
-			{loggerMock.Logs[0], "before_301"},
-			{loggerMock.Logs[1], "301-1300"},
-			{loggerMock.Logs[2], "1301-1600"},
-			{loggerMock.Logs[3], "1601-1800"},
-			{loggerMock.Logs[4], "1801-1900"},
-			{loggerMock.Logs[5], "1901-2000"},
-			{loggerMock.Logs[6], "since_2001"},
+		cc := []string{
+			"American_Civil_War_battles",
+			"American_Revolutionary_War_battles",
+			"battles_(alphabetical)",
+			"battles_(geographic)",
+			"battles_before_301",
+			"battles_301-1300",
+			"battles_1301-1600",
+			"battles_1601-1800",
+			"battles_1801-1900",
+			"battles_1901-2000",
+			"battles_since_2001",
+			"Hundred_Years%27_War_battles",
+			"military_engagements_of_World_War_I",
+			"military_engagements_of_World_War_II",
+			"Napoleonic_battles",
 		}
 
 		for _, c := range cc {
-			if !strings.Contains(c.log, c.expectedSubstring) {
-				t.Errorf("Scraper did not log results for %s", c.expectedSubstring)
+			found := false
+			for _, log := range loggerMock.Logs {
+				if strings.Contains(log, c) {
+					found = true
+				}
+			}
+			if !found {
+				t.Errorf("Scraper did not log results for %s", c)
 			}
 		}
 
@@ -55,35 +66,73 @@ func TestList(t *testing.T) {
 		}
 	})
 
-	t.Run("Contains battles for each one of the indexed lists", func(t *testing.T) {
+	t.Run("Contains battles found from different patterns", func(t *testing.T) {
 		indexedBattlesNames := make(map[string]string)
 		for _, battle := range battlesList {
 			indexedBattlesNames[battle.Name] = battle.Name
 		}
 
-		cc := []struct {
-			battleName string
-			group      string
-		}{
-			{"Siege of Lachish", "before 301"},
-			{"Battle of Actium", "before 301"},
-			{"Battle of Adrianople", "between 301-1300"},
-			{"Battle of Hattin", "between 301-1300"},
-			{"Battle of Angora", "between 1301-1600"},
-			{"Battle of Constantinople", "between 1301-1600"},
-			{"Battle of Moscow (1612)", "between 1601-1800"},
-			{"Battle of Zenta", "between 1601-1800"},
-			{"Battle of Ulm", "between 1801-1900"},
-			{"Battle of Austerlitz", "between 1801-1900"},
-			{"Battle of Stalingrad", "between 1901-2000"},
-			{"Battle of Chuncheon", "between 1901-2000"},
-			{"Operation Defensive Shield", "after 2001"},
-			{"Battle of Aguelhok", "after 2001"},
+		nn := []string{
+			"Action at Blue Mills Landing",
+			"Ambush of Geary",
+			"Assault on Copenhagen",
+			"Attack at Country Harbour",
+			"Battle at Chedabucto",
+			"Battle for Baby 700",
+			"Battle in Shakhtarsk Raion",
+			"Battle of 1st Bull Run",
+			"Battle on Lake Peipus",
+			"Battles at Chignecto",
+			"Battles of Barfleur and La Hogue",
+			"Blockade of Germany",
+			"Cesena Bloodbath",
+			"Naval bombardment of Japan",
+			"Burning of Dungannon",
+			"Campaign to Defend Siping",
+			"Capture of Amara",
+			"Deir ez-Zor Governorate clashes",
+			"Combat of the Thirty",
+			"East Ghouta inter-rebel conflict",
+			"Lungi Lol confrontation",
+			"Manchu conquest of China",
+			"Nootka Crisis",
+			"The Crossing",
+			"Fourth Crusade",
+			"Defense of Oguta",
+			"Nejd Expedition",
+			"Fall of Ashdod",
+			"Francisco's Fight",
+			"Gulf of Sidra incident",
+			"Invasion of Guantánamo Bay",
+			"Kemp's Landing",
+			"Liberation of Paris",
+			"Long Run Massacre",
+			"Sherman's March to the Sea",
+			"United States occupation of Veracruz",
+			"Vardar Offensive",
+			"Operatie Kraai",
+			"Operation Achilles",
+			"Ndop prison break",
+			"Niger raid",
+			"Prayer Book Rebellion",
+			"Recovery of Ré island",
+			"Relief of Goes",
+			"Revolt of Babylon (626 BC)",
+			"Jacobite rising of 1689",
+			"Sack of Rome",
+			"Second Arab siege of Constantinople",
+			"Sinking of CSS Alabama",
+			"Skirmish at Blackwater Creek",
+			"Great Stand on the Ugra River",
+			"Gustafsen Lake Standoff",
+			"Syria missile strikes",
+			"United Arab Emirates takeover of Socotra",
+			"Greater Poland Uprising",
 		}
 
-		for _, c := range cc {
-			if indexedBattlesNames[c.battleName] != c.battleName {
-				t.Errorf("%q was not found in the list corresponding to battles %s", c.battleName, c.group)
+		for _, n := range nn {
+			if indexedBattlesNames[n] != n {
+				t.Errorf("%q was not found in the list of scraped battles", n)
 			}
 		}
 	})
