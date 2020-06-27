@@ -4,19 +4,21 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/sasalatart/batcoms/scraper/domain"
 	"github.com/sasalatart/batcoms/scraper/exports"
 )
 
 // BattlesMem is an in-memory implementation of BattlesStore
 type BattlesMem struct {
-	mutex sync.Mutex
-	byID  map[int]*domain.Battle
+	mutex     sync.Mutex
+	validator *validator.Validate
+	byID      map[int]*domain.Battle
 }
 
 // NewBattlesMem returns a pointer to an empty, ready-to-use BattlesMem store
 func NewBattlesMem() *BattlesMem {
-	return &BattlesMem{byID: make(map[int]*domain.Battle)}
+	return &BattlesMem{validator: validator.New(), byID: make(map[int]*domain.Battle)}
 }
 
 // Find searches for the pointer to a battle by its ID. If none is found, nil is returned
@@ -36,11 +38,8 @@ func (r *BattlesMem) Save(b domain.Battle) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
-	if b.ID == 0 {
-		return fmt.Errorf("Expected battle %+v to have an ID, but got none", b)
-	}
-	if b.URL == "" {
-		return fmt.Errorf("Expected battle %+v to have an URL, but got none", b)
+	if err := r.validator.Struct(b); err != nil {
+		return fmt.Errorf("Failed saving battle with URL %s: %s", b.URL, err)
 	}
 	r.byID[b.ID] = &b
 	return nil
