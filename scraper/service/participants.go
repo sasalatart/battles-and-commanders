@@ -15,16 +15,19 @@ import (
 const factionsCSSID = "batcoms-factions"
 const commandersCSSID = "batcoms-commanders"
 
-type flagsMapping map[string]int
+type factionsMapper map[string]int
+type commandersMapper map[string][]int
 type onParticipantDone func(id int, flagURL string, err error)
 
 func (s *Scraper) subscribeParticipants(c *colly.Collector, b *domain.Battle) {
 	factionsByFlag := make(map[string]int)
+	commandersByFlag := make(map[string][]int)
 	s.subscribeFactions(c, b, factionsByFlag)
-	s.subscribeCommanders(c, b, factionsByFlag)
+	s.subscribeCommanders(c, b, commandersByFlag)
+	subscribeGroupings(c, b, factionsByFlag, commandersByFlag)
 }
 
-func (s *Scraper) subscribeFactions(c *colly.Collector, b *domain.Battle, fm flagsMapping) {
+func (s *Scraper) subscribeFactions(c *colly.Collector, b *domain.Battle, fm factionsMapper) {
 	setInfoBoxID(c, "belligerents", factionsCSSID)
 
 	handleFaction := func(id int, flag string, ids *[]int, err error) {
@@ -48,7 +51,7 @@ func (s *Scraper) subscribeFactions(c *colly.Collector, b *domain.Battle, fm fla
 	})
 }
 
-func (s *Scraper) subscribeCommanders(c *colly.Collector, b *domain.Battle, fm flagsMapping) {
+func (s *Scraper) subscribeCommanders(c *colly.Collector, b *domain.Battle, cm commandersMapper) {
 	setInfoBoxID(c, "Commanders and leaders", commandersCSSID)
 
 	handleCommander := func(id int, flag string, ids *[]int, err error) {
@@ -56,8 +59,8 @@ func (s *Scraper) subscribeCommanders(c *colly.Collector, b *domain.Battle, fm f
 			log.Println(err)
 			return
 		}
-		if fID, saved := fm[flag]; saved {
-			b.CommandersByFaction[fID] = append(b.CommandersByFaction[fID], id)
+		if flag != "" {
+			cm[flag] = append(cm[flag], id)
 		}
 		*ids = append(*ids, id)
 	}
@@ -127,6 +130,32 @@ func (s *Scraper) participantsSide(e *colly.HTMLElement, kind domain.Participant
 			onDone(participant.ID, flag, err)
 		})
 	})
+}
+
+func subscribeGroupings(c *colly.Collector, b *domain.Battle, factionsByFlag map[string]int, commandersByFlag map[string][]int) {
+	handler := func(_ *colly.Response) {
+		for fFlag, fID := range factionsByFlag {
+			for cFlag, cIDs := range commandersByFlag {
+				if fFlag != cFlag {
+					continue
+				}
+
+				b.CommandersByFaction[fID] = cIDs
+				break
+			}
+		}
+
+		groupIfOneFaction := func(factions []int, commanders []int) {
+			if len(factions) != 1 || len(commanders) == 0 {
+				return
+			}
+
+			b.CommandersByFaction[factions[0]] = commanders
+		}
+		groupIfOneFaction(b.Factions.A, b.Commanders.A)
+		groupIfOneFaction(b.Factions.B, b.Commanders.B)
+	}
+	c.OnScraped(handler)
 }
 
 func flagURL(participantNode *colly.HTMLElement) string {
