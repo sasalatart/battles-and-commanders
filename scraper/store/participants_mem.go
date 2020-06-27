@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/sasalatart/batcoms/scraper/domain"
 	"github.com/sasalatart/batcoms/scraper/exports"
 )
@@ -11,6 +12,7 @@ import (
 // ParticipantsMem is an in-memory implementation of ParticipantsStore
 type ParticipantsMem struct {
 	mutex       sync.Mutex
+	validator   *validator.Validate
 	byIDByKind  map[domain.ParticipantKind]map[int]*domain.Participant
 	byURLByKind map[domain.ParticipantKind]map[string]int
 }
@@ -24,6 +26,7 @@ func NewParticipantsMem() *ParticipantsMem {
 		byURLByKind[kind] = make(map[string]int)
 	}
 	return &ParticipantsMem{
+		validator:   validator.New(),
 		byIDByKind:  byIDByKind,
 		byURLByKind: byURLByKind,
 	}
@@ -61,11 +64,8 @@ func (r *ParticipantsMem) Save(p domain.Participant) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
-	if p.ID == 0 {
-		return fmt.Errorf("Expected %+v to have an ID, but none was present", p)
-	}
-	if p.URL == "" {
-		return fmt.Errorf("Expected %+v to have an URL, but none was present", p)
+	if err := r.validator.Struct(p); err != nil {
+		return fmt.Errorf("Failed saving participant with URL %s: %s", p.URL, err)
 	}
 	r.byIDByKind[p.Kind][p.ID] = &p
 	r.byURLByKind[p.Kind][p.URL] = p.ID

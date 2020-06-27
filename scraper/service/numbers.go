@@ -9,7 +9,7 @@ import (
 	"github.com/sasalatart/batcoms/scraper/domain"
 )
 
-func subscribeNumbersFor(c *colly.Collector, trTitle string, storeIn *struct{ A, B string }) {
+func subscribeNumbersFor(c *colly.Collector, trTitle string, storeIn *domain.SideNumbers) {
 	trID := "batcoms-" + strings.ReplaceAll(strings.ToLower(trTitle), " ", "")
 	setInfoBoxID(c, trTitle, trID)
 	c.OnHTML(fmt.Sprintf("#%s > td:first-child", trID), func(e *colly.HTMLElement) {

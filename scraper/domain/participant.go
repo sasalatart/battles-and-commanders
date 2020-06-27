@@ -5,7 +5,7 @@ type ParticipantKind int
 
 const (
 	// FactionKind represents a faction participant
-	FactionKind ParticipantKind = iota
+	FactionKind ParticipantKind = iota + 1
 	// CommanderKind represents a commander participant
 	CommanderKind
 )
@@ -13,11 +13,11 @@ const (
 // Participant stores the details of an entity that participated in a battle. These can either be a
 // faction or a commander
 type Participant struct {
-	Kind        ParticipantKind
-	ID          int
-	URL         string
+	Kind        ParticipantKind `validate:"required"`
+	ID          int             `validate:"required,min=1"`
+	URL         string          `validate:"required,url"`
 	Flag        string
-	Name        string
+	Name        string `validate:"required"`
 	Description string
-	Extract     string
+	Extract     string `validate:"required"`
 }
