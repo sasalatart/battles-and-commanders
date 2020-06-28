@@ -63,7 +63,7 @@ func (s *Scraper) List() []domain.BattleItem {
 				}
 
 				href := e.Attr("href")
-				if urls.IsExternal(href) || urls.NotSpecific(href) || urls.ShouldSkip(href) {
+				if urls.ShouldSkip(href) || urls.NotSpecific(href) {
 					return
 				}
 
