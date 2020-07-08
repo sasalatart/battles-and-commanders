@@ -29,12 +29,16 @@ func TestDate(t *testing.T) {
 			[]string{"272 BC"},
 		},
 		{
-			"Late 686",
-			[]string{"686"},
-		},
-		{
 			"344 CE",
 			[]string{"344"},
+		},
+		{
+			"First half of 1263",
+			[]string{"1263"},
+		},
+		{
+			"Late 686",
+			[]string{"686"},
 		},
 		{
 			"404 BC or 403 BC",
@@ -105,10 +109,6 @@ func TestDate(t *testing.T) {
 			[]string{"218-12 BC"},
 		},
 		{
-			"First half of 1263",
-			[]string{"1263"},
-		},
-		{
 			"Mid to Late November 2001",
 			[]string{"2001-11"},
 		},
@@ -149,6 +149,10 @@ func TestDate(t *testing.T) {
 			[]string{"1775-04-19", "1783-09-03"},
 		},
 		{
+			"May 13, 1867 to May 24, 1867",
+			[]string{"1867-05-13", "1867-05-24"},
+		},
+		{
 			"January-March 309 B.C.",
 			[]string{"309-01 BC", "309-03 BC"},
 		},
@@ -179,10 +183,6 @@ func TestDate(t *testing.T) {
 		{
 			"May 1913 - 25 September 1920",
 			[]string{"1913-05", "1920-09-25"},
-		},
-		{
-			"May 13, 1867 to May 24, 1867",
-			[]string{"1867-05-13", "1867-05-24"},
 		},
 		{
 			"February 1482 – January 2, 1492",
