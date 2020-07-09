@@ -42,16 +42,15 @@ var fragmentOrNestedWikis = regexp.MustCompile(`(?i)/wiki/([\w-]*#|[\w-]+/)[\w-]
 // NotSpecific returns true when the URL refers to a Wikipedia article that is not specific enough
 // to be a battle or participant. Example: https://en.wikipedia.org/wiki/History_of_Norway
 func NotSpecific(url string) bool {
-	return genericURLs.Match([]byte(url))
+	return genericURLs.MatchString(url)
 }
 
 // ShouldSkip returns true when the URL refers to a non-wiki URL, or to a Wikipedia article that is
 // not really a battle or participant, but that usually appears in places where they could be
 // mistaken for being one. Example: https://en.wikipedia.org/wiki/Prisoner_of_war
 func ShouldSkip(url string) bool {
-	bytesURL := []byte(url)
 	return !strings.Contains(url, "/wiki/") ||
-		redLinks.Match(bytesURL) ||
-		confusingURLs.Match(bytesURL) ||
-		fragmentOrNestedWikis.Match(bytesURL)
+		redLinks.MatchString(url) ||
+		confusingURLs.MatchString(url) ||
+		fragmentOrNestedWikis.MatchString(url)
 }
