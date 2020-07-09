@@ -6,20 +6,20 @@ import (
 	"strings"
 )
 
-// genericPatterns represent text that usually appears in links and that is not specific enough to
-// be a valid battle or participant
-var genericPatterns = strings.Join([]string{
+// notSpecificMatcher represents text that usually appears in links and that is not specific enough
+// to be a valid battle or participant
+var notSpecificMatcher = regexp.MustCompile(`(?i)` + strings.Join([]string{
 	"campaign_against",
 	"history_of",
 	"list_of",
 	"timeline_of",
-}, "|")
+}, "|"))
 
-// confusingPatterns represent text that usually appears in links and that could potentially be
+// falsePositivesMatcher represents text that usually appears in links and that could potentially be
 // confused to be a battle or participant
-var confusingPatterns = strings.Join([]string{
-	"(category|file|help|portal|talk|wikipedia):",
-	"[\\w-]*(advisor|chief_of|division|force|marines|politics|rangers|regiment)[\\w-]*",
+var falsePositivesMatcher = regexp.MustCompile(fmt.Sprintf(`(?i)/wiki/(%s)`, strings.Join([]string{
+	`(category|file|help|portal|talk|wikipedia):`,
+	`[\w-]*(advisor|chief_of|division|force|marines|politics|rangers|regiment)[\w-]*`,
 	"army", "auxiliaries",
 	"caliphate", "cia", "commandery", "conscription", "crusades",
 	"empire",
@@ -31,18 +31,19 @@ var confusingPatterns = strings.Join([]string{
 	"offensive_jihad",
 	"participants", "pow", "prisoner_of_war",
 	"roman_emperor",
-	"sicherheitsdienst", "surrender_\\(military\\)",
-}, "|")
+	"sicherheitsdienst", `surrender_\(military\)`,
+}, "|")))
 
-var genericURLs = regexp.MustCompile(fmt.Sprintf(`(?i)\w*%s\w*`, genericPatterns))
-var redLinks = regexp.MustCompile(`(?i)[\?\&]redlink=1`)
-var confusingURLs = regexp.MustCompile(fmt.Sprintf("(?i)/wiki/(%s)", confusingPatterns))
-var fragmentOrNestedWikis = regexp.MustCompile(`(?i)/wiki/([\w-]*#|[\w-]+/)[\w-]+`)
+// redLinksMatcher matches links that do not yet exist (Wikipedia adds a "redlink" query param)
+var redLinksMatcher = regexp.MustCompile(`(?i)[\?\&]redlink=1`)
+
+// fragmentsMatcher matches fragments in URLs (foo.bar/baz#fragment) and nested resources
+var fragmentsMatcher = regexp.MustCompile(`(?i)/wiki/([\w-]*#|[\w-]+/)[\w-]+`)
 
 // NotSpecific returns true when the URL refers to a Wikipedia article that is not specific enough
 // to be a battle or participant. Example: https://en.wikipedia.org/wiki/History_of_Norway
 func NotSpecific(url string) bool {
-	return genericURLs.MatchString(url)
+	return notSpecificMatcher.MatchString(url)
 }
 
 // ShouldSkip returns true when the URL refers to a non-wiki URL, or to a Wikipedia article that is
@@ -50,7 +51,7 @@ func NotSpecific(url string) bool {
 // mistaken for being one. Example: https://en.wikipedia.org/wiki/Prisoner_of_war
 func ShouldSkip(url string) bool {
 	return !strings.Contains(url, "/wiki/") ||
-		redLinks.MatchString(url) ||
-		confusingURLs.MatchString(url) ||
-		fragmentOrNestedWikis.MatchString(url)
+		redLinksMatcher.MatchString(url) ||
+		fragmentsMatcher.MatchString(url) ||
+		falsePositivesMatcher.MatchString(url)
 }
