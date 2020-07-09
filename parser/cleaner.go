@@ -5,13 +5,13 @@ import (
 	"strings"
 )
 
-var pipeline = []struct {
+var cleanerPipeline = []struct {
 	regex       *regexp.Regexp
 	replaceWith string
 }{
 	{
 		// Remove irregular whitespaces
-		regex:       regexp.MustCompile(`\xa0`),
+		regex:       regexp.MustCompile(`[\xa0  ]`),
 		replaceWith: " ",
 	},
 	{
@@ -75,7 +75,7 @@ var pipeline = []struct {
 // text that resulted from scraping.
 func Clean(text string) string {
 	result := strings.Trim(text, "\n")
-	for _, op := range pipeline {
+	for _, op := range cleanerPipeline {
 		result = op.regex.ReplaceAllString(result, op.replaceWith)
 	}
 	return result
