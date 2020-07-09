@@ -44,8 +44,8 @@ func TestClean(t *testing.T) {
 			expected: "word-1 word-2",
 		},
 		{
-			input:    "irregular whitespace",
-			expected: "irregular whitespace",
+			input:    "Irregular whitespace. Another irregular whitespace.",
+			expected: "Irregular whitespace. Another irregular whitespace.",
 		},
 	}
 
