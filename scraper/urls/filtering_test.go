@@ -53,6 +53,7 @@ func TestURLs(t *testing.T) {
 			{"example.org", true},
 			{"https://en.wikipedia.org#The_Eight_Saints", true},
 			{"https://en.wikipedia.org/wiki/Sudan_Liberation_Movement/Army", true},
+			{"https://en.wikipedia.org/wiki/Baldwin,_Sheriff_of_Lanark/Clydesdale", true},
 			{"https://en.wikipedia.org/wiki/Talk:Battle_of_Vyazma", true},
 			{"https://en.wikipedia.org/wiki/Battle_of_Vyazma", false},
 			{"en.wikipedia.org/wiki/Battle_of_Vyazma", false},
