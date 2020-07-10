@@ -32,7 +32,7 @@ func TestPageSummary(t *testing.T) {
 			Title:        "Battle of Stalingrad",
 			DisplayTitle: "Battle of Stalingrad",
 			Description:  "Major battle of World War II",
-			Extract:      "In the Battle of Stalingrad, Germany and its allies fought the Soviet Union for control of the city of Stalingrad in Southern Russia. Marked by fierce close-quarters combat and direct assaults on civilians in air raids, it is one of the bloodiest battles in the history of warfare, with an estimated 2 million total casualties. After their defeat at Stalingrad, the German High Command had to withdraw considerable military forces from the Western Front to replace their losses.",
+			Extract:      "In the Battle of Stalingrad, Germany and its allies fought the Soviet Union for control of the city of Stalingrad in Southern Russia. Marked by fierce close-quarters combat and direct assaults on civilians in air raids, it is the bloodiest battle in the history of warfare, with an estimated 2 million total casualties. After their defeat at Stalingrad, the German High Command had to withdraw considerable military forces from the Western Front to replace their losses.",
 		}
 		if got != expected {
 			t.Errorf("Expected %v, but got %v instead", expected, got)
