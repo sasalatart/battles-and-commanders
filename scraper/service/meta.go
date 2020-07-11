@@ -11,7 +11,6 @@ import (
 func (s *Scraper) subscribeMeta(c *colly.Collector, b *domain.Battle) {
 	c.OnHTML(infoBoxSelector, func(e *colly.HTMLElement) {
 		b.Name = parser.Clean(e.ChildText("th.summary"))
-
 		e.ForEachWithBreak("tr:nth-child(2) > td", func(_ int, c *colly.HTMLElement) bool {
 			if !strings.Contains(strings.ToLower(c.Text), "part of") {
 				return true
@@ -23,24 +22,27 @@ func (s *Scraper) subscribeMeta(c *colly.Collector, b *domain.Battle) {
 	})
 
 	c.OnHTML(infoBoxSelector+" tbody", func(e *colly.HTMLElement) {
-		searchForTRAndSetIn := func(toSearch, childSelector string, toSet *string) {
+		search := func(childSelector string, toSearch ...string) string {
+			var res string
 			e.ForEachWithBreak("tr", func(_ int, c *colly.HTMLElement) bool {
-				if strings.ToLower(c.ChildText("th")) != toSearch {
-					return true
+				for _, s := range toSearch {
+					if s == strings.ToLower(c.ChildText("th")) {
+						res = parser.Clean(c.ChildText(childSelector))
+						return false
+					}
 				}
 
-				*toSet = parser.Clean(c.ChildText(childSelector))
-				return false
+				return true
 			})
+			return res
 		}
 
-		searchForTRAndSetIn("date", "td", &b.Date)
-		searchForTRAndSetIn("result", "td", &b.Result)
-		searchForTRAndSetIn("territorialchanges", "td", &b.TerritorialChanges)
-		searchForTRAndSetIn("location", ".location", &b.Location.Place)
+		b.Date = search("td", "date")
+		b.Result = search("td", "result", "status")
+		b.TerritorialChanges = search("td", "territorialchanges")
+		b.Location.Place = search(".location", "location")
 
-		var redundantCoordinates string
-		searchForTRAndSetIn("location", ".location #coordinates", &redundantCoordinates)
+		redundantCoordinates := search(".location #coordinates", "location")
 		redundantCoordinates = strings.ReplaceAll(redundantCoordinates, "Coordinates: ", "")
 		b.Location.Place = strings.ReplaceAll(b.Location.Place, redundantCoordinates, "")
 		b.Location.Place = strings.ReplaceAll(b.Location.Place, "Coordinates: ", "")
