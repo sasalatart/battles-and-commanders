@@ -3,6 +3,7 @@ package service_test
 import (
 	"io/ioutil"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/sasalatart/batcoms/scraper/domain"
@@ -22,6 +23,12 @@ func TestBattle(t *testing.T) {
 			t.Fatalf("Unexpected service.Battle error: %s", err)
 		}
 		return battle
+	}
+
+	assertStruct := func(t *testing.T, name string, got, expected interface{}) {
+		if !reflect.DeepEqual(got, expected) {
+			t.Errorf("Expected %s to be %+v, but instead got %+v", name, expected, got)
+		}
 	}
 
 	t.Run("Usual structure", func(t *testing.T) {
@@ -95,135 +102,107 @@ func TestBattle(t *testing.T) {
 			}
 		}
 
-		expectedStrength := map[string]string{
-			"A": "65,000–68,000 (not including III Corps)",
-			"B": "84,000–95,000",
-		}
-		if battle.Strength.A != expectedStrength["A"] || battle.Strength.B != expectedStrength["B"] {
-			t.Errorf("Expected battle Strength to be %+v, but instead got %+v", expectedStrength, battle.Strength)
-		}
+		assertStruct(t, "factions", battle.Factions, domain.SideParticipants{
+			A: []int{21418258},
+			B: []int{20611504, 13277},
+		})
+		assertStruct(t, "commanders", battle.Commanders, domain.SideParticipants{
+			A: []int{69880},
+			B: []int{27126603, 251000, 11551, 14092123},
+		})
+		assertStruct(t, "strength", battle.Strength, domain.SideNumbers{
+			A:  "65,000–68,000 (not including III Corps)",
+			B:  "84,000–95,000",
+			AB: "",
+		})
+		assertStruct(t, "casualties", battle.Casualties, domain.SideNumbers{
+			A:  "1,305 dead. 6,991 wounded. 8,279 total casualties. 573 captured. 1 standard lost. Total: 9,000",
+			B:  "16,000 dead or wounded. 20,000 captured. 186 guns lost. 45 standards lost. Total: 36,000",
+			AB: "",
+		})
+		assertStruct(t, "commanders grouping", battle.CommandersByFaction, map[int][]int{
+			13277:    {11551, 14092123},
+			20611504: {27126603, 251000},
+			21418258: {69880},
+		})
 
-		expectedCasualties := map[string]string{
-			"A": "1,305 dead. 6,991 wounded. 8,279 total casualties. 573 captured. 1 standard lost. Total: 9,000",
-			"B": "16,000 dead or wounded. 20,000 captured. 186 guns lost. 45 standards lost. Total: 36,000",
-		}
-		if battle.Casualties.A != expectedCasualties["A"] || battle.Casualties.B != expectedCasualties["B"] {
-			t.Errorf("Expected battle Casualties to be %+v, but instead got %+v", expectedCasualties, battle.Casualties)
-		}
-
-		factions := battle.Factions
-		expectedFactions := map[string][]int{
-			"A": {21418258},
-			"B": {20611504, 13277},
-		}
-		if !reflect.DeepEqual(factions.A, expectedFactions["A"]) || !reflect.DeepEqual(factions.B, expectedFactions["B"]) {
-			t.Errorf("Expected Factions to be %+v, but instead got %+v", expectedFactions, factions)
-		}
-
-		type participantCase struct {
+		participantsNamesCases := []struct {
 			label        string
 			id           int
 			expectedName string
-		}
-
-		assertParticipantIs := func(kind domain.ParticipantKind, c participantCase) {
-			t.Helper()
-			participant := participantsStore.Find(kind, c.id)
-			if participant == nil {
-				t.Fatalf("No participant found with id %d for %q", c.id, c.label)
-			}
-			got := participant.Name
-			if c.expectedName != got {
-				t.Errorf("Expected %s to have name %q, but instead got %q", c.label, c.expectedName, got)
-			}
-		}
-
-		factionsNamesCases := []participantCase{
+		}{
 			{
 				label:        "FactionA1",
-				id:           expectedFactions["A"][0],
+				id:           21418258,
 				expectedName: "First French Empire",
 			},
 			{
 				label:        "FactionB1",
-				id:           expectedFactions["B"][0],
+				id:           20611504,
 				expectedName: "Russian Empire",
 			},
 			{
 				label:        "FactionB2",
-				id:           expectedFactions["B"][1],
+				id:           13277,
 				expectedName: "Holy Roman Empire",
 			},
-		}
-		for _, bc := range factionsNamesCases {
-			assertParticipantIs(domain.FactionKind, bc)
-		}
-
-		commanders := battle.Commanders
-		expectedCommanders := map[string][]int{
-			"A": {69880},
-			"B": {27126603, 251000, 11551, 14092123},
-		}
-		if !reflect.DeepEqual(commanders.A, expectedCommanders["A"]) || !reflect.DeepEqual(commanders.B, expectedCommanders["B"]) {
-			t.Errorf("Expected Commanders to be %+v, but instead got %+v", expectedCommanders, commanders)
-		}
-
-		commandersNamesCases := []participantCase{
 			{
 				label:        "CommanderA1",
-				id:           expectedCommanders["A"][0],
+				id:           69880,
 				expectedName: "Napoleon",
 			},
 			{
 				label:        "CommanderB1",
-				id:           expectedCommanders["B"][0],
+				id:           27126603,
 				expectedName: "Alexander I of Russia",
 			},
 			{
 				label:        "CommanderB2",
-				id:           expectedCommanders["B"][1],
+				id:           251000,
 				expectedName: "Mikhail Kutuzov",
 			},
 			{
 				label:        "CommanderB3",
-				id:           expectedCommanders["B"][2],
+				id:           11551,
 				expectedName: "Francis II, Holy Roman Emperor",
 			},
 			{
 				label:        "CommanderB4",
-				id:           expectedCommanders["B"][3],
+				id:           14092123,
 				expectedName: "Franz von Weyrother",
 			},
 		}
-		for _, cc := range commandersNamesCases {
-			assertParticipantIs(domain.CommanderKind, cc)
-		}
-
-		expectedCommandersGrouping := map[int][]int{
-			13277:    {11551, 14092123},
-			20611504: {27126603, 251000},
-			21418258: {69880},
-		}
-		if !reflect.DeepEqual(battle.CommandersByFaction, expectedCommandersGrouping) {
-			t.Errorf(
-				"Expected commanders to be grouped as %+v, but instead got %+v",
-				expectedCommandersGrouping,
-				battle.CommandersByFaction,
-			)
+		for _, pc := range participantsNamesCases {
+			kind := domain.FactionKind
+			if strings.HasPrefix(strings.ToLower(pc.label), "commander") {
+				kind = domain.CommanderKind
+			}
+			participant := participantsStore.Find(kind, pc.id)
+			if participant == nil {
+				t.Fatalf("No participant found with id %d for %q", pc.id, pc.label)
+			}
+			got := participant.Name
+			if pc.expectedName != got {
+				t.Errorf("Expected %s to have name %q, but instead got %q", pc.label, pc.expectedName, got)
+			}
 		}
 	})
 
-	t.Run("Battle with non-participant specific casualties and losses", func(t *testing.T) {
-		const battleURL = "https://en.wikipedia.org/wiki/Indian_Rebellion_of_1857"
-		battle := assertBattle(t, battleURL)
-		if battle.Casualties.A != "" || battle.Casualties.B != "" {
-			t.Error("Expected Casualties.A and Casualties.B to be empty, but got values")
-		}
+	t.Run("Battle with non participant-specific casualties and losses", func(t *testing.T) {
+		battle := assertBattle(t, "https://en.wikipedia.org/wiki/Indian_Rebellion_of_1857")
+		assertStruct(t, "casualties", battle.Casualties, domain.SideNumbers{
+			A:  "",
+			B:  "",
+			AB: "6,000 Europeans killed. As many as 800,000 Indians and possibly more, both in the rebellion and in famines and epidemics of disease in its wake, by comparison of 1857 population estimates with Indian Census of 1871.",
+		})
+	})
 
-		got := battle.Casualties.AB
-		expected := "6,000 Europeans killed. As many as 800,000 Indians and possibly more, both in the rebellion and in famines and epidemics of disease in its wake, by comparison of 1857 population estimates with Indian Census of 1871."
-		if got != expected {
-			t.Errorf("Expected Casualties.AB to be %s, but instead got %s", expected, got)
-		}
+	t.Run("Battle with participant-specific and overall casualties and losses", func(t *testing.T) {
+		battle := assertBattle(t, "https://en.wikipedia.org/wiki/Chilean_Civil_War_of_1891")
+		assertStruct(t, "casualties", battle.Casualties, domain.SideNumbers{
+			A:  "",
+			B:  "1 armoured frigate",
+			AB: "5,000",
+		})
 	})
 }

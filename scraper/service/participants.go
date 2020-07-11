@@ -28,7 +28,7 @@ func (s *Scraper) subscribeParticipants(c *colly.Collector, b *domain.Battle) {
 }
 
 func (s *Scraper) subscribeFactions(c *colly.Collector, b *domain.Battle, fm factionsMapper) {
-	setInfoBoxID(c, "belligerents", factionsCSSID)
+	subscribeInfoBoxID(c, "belligerents", factionsCSSID)
 
 	handleFaction := func(id int, flag string, ids *[]int, err error) {
 		if err != nil {
@@ -52,7 +52,7 @@ func (s *Scraper) subscribeFactions(c *colly.Collector, b *domain.Battle, fm fac
 }
 
 func (s *Scraper) subscribeCommanders(c *colly.Collector, b *domain.Battle, cm commandersMapper) {
-	setInfoBoxID(c, "Commanders and leaders", commandersCSSID)
+	subscribeInfoBoxID(c, "Commanders and leaders", commandersCSSID)
 
 	handleCommander := func(id int, flag string, ids *[]int, err error) {
 		if err != nil {
