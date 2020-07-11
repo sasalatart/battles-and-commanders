@@ -22,11 +22,11 @@ func main() {
 	for i, battle := range list {
 		semaphore <- true
 		go func(i int, b domain.BattleItem) {
+			fmt.Printf("\r%d/%d", i, len(list))
 			_, err := scraperService.Battle(b.URL)
 			if err != nil {
 				log.Printf("Failed scraping %s: %s", b.URL, err)
 			}
-			fmt.Printf("\r%d/%d", i, len(list))
 			<-semaphore
 		}(i, battle)
 	}
