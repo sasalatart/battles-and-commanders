@@ -22,17 +22,17 @@ func TestPageSummary(t *testing.T) {
 	})
 
 	t.Run("Fills a domain.Summary when given a valid Wikipedia page URL", func(t *testing.T) {
-		got, err := service.PageSummary("https://en.wikipedia.org/wiki/Battle_of_Stalingrad")
+		got, err := service.PageSummary("https://en.wikipedia.org/wiki/Battle_of_Austerlitz")
 		if err != nil {
 			t.Errorf("Expected to not have an error, but instead received %v", err)
 		}
 		expected := domain.Summary{
-			PageID:       4284,
+			PageID:       118372,
 			Type:         "standard",
-			Title:        "Battle of Stalingrad",
-			DisplayTitle: "Battle of Stalingrad",
-			Description:  "Major battle of World War II",
-			Extract:      "In the Battle of Stalingrad, Germany and its allies fought the Soviet Union for control of the city of Stalingrad in Southern Russia. Marked by fierce close-quarters combat and direct assaults on civilians in air raids, it is the bloodiest battle in the history of warfare, with an estimated 2 million total casualties. After their defeat at Stalingrad, the German High Command had to withdraw considerable military forces from the Western Front to replace their losses.",
+			Title:        "Battle of Austerlitz",
+			DisplayTitle: "Battle of Austerlitz",
+			Description:  "Decisive battle of the Napoleonic Wars",
+			Extract:      "The Battle of Austerlitz, also known as the Battle of the Three Emperors, was one of the most important and decisive engagements of the Napoleonic Wars. In what is widely regarded as the greatest victory achieved by Napoleon, the Grande Armée of France defeated a larger Russian and Austrian army led by Emperor Alexander I and Holy Roman Emperor Francis II. The battle occurred near the town of Austerlitz in the Austrian Empire. Austerlitz brought the War of the Third Coalition to a rapid end, with the Treaty of Pressburg signed by the Austrians later in the month. The battle is often cited as a tactical masterpiece, in the same league as other historic engagements like Cannae or Gaugamela.",
 		}
 		if got != expected {
 			t.Errorf("Expected %v, but got %v instead", expected, got)
