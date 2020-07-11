@@ -44,11 +44,14 @@ func TestClean(t *testing.T) {
 			expected: "word-1 word-2",
 		},
 		{
+			input:    "The time:Tomorrow at 5: 49pm",
+			expected: "The time: Tomorrow at 5:49pm",
+		},
+		{
 			input:    "Irregular whitespace. Another irregular whitespace.",
 			expected: "Irregular whitespace. Another irregular whitespace.",
 		},
 	}
-
 	for _, c := range cc {
 		got := parser.Clean(c.input)
 		if got != c.expected {

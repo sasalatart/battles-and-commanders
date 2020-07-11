@@ -46,8 +46,8 @@ var cleanerPipeline = []struct {
 	},
 	{
 		// Ensure there are spaces after colons
-		regex:       regexp.MustCompile(`(:)([^\s])`),
-		replaceWith: "$1 $2",
+		regex:       regexp.MustCompile(`:([^\s])`),
+		replaceWith: ": $1",
 	},
 	{
 		// Ensure there are spaces before opening brackes
@@ -68,6 +68,11 @@ var cleanerPipeline = []struct {
 		// Ensure numbers are not mixed between themselves (example: 1,129,619478,741 -> 1,129,619. 478,741)
 		regex:       regexp.MustCompile(`(,\d{3})(\d{1,})`),
 		replaceWith: "$1. $2",
+	},
+	{
+		// Ensure there are no spaces before and after time colons
+		regex:       regexp.MustCompile(`(?i)(\d)\s*:\s*(\d{1,2})\s*([a|p]\.?m\.?|hrs)`),
+		replaceWith: "$1:$2$3",
 	},
 }
 
