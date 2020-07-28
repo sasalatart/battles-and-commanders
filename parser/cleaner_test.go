@@ -58,4 +58,7 @@ func TestClean(t *testing.T) {
 			t.Errorf("Expected\n%q\nto be parsed as:\n%q\nbut instead got:\n%q", c.input, c.expected, got)
 		}
 	}
+	if !t.Failed() {
+		t.Log("Cleans out unwanted sequences")
+	}
 }

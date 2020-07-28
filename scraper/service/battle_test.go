@@ -31,7 +31,8 @@ func TestBattle(t *testing.T) {
 		}
 	}
 
-	t.Run("Usual structure", func(t *testing.T) {
+	t.Run("UsualStructure", func(t *testing.T) {
+		t.Parallel()
 		const battleURL = "https://en.wikipedia.org/wiki/Battle_of_Austerlitz"
 		battle := assertBattle(t, battleURL)
 
@@ -186,23 +187,34 @@ func TestBattle(t *testing.T) {
 				t.Errorf("Expected %s to have name %q, but instead got %q", pc.label, pc.expectedName, got)
 			}
 		}
+		if !t.Failed() {
+			t.Log("Builds the battle properly")
+		}
 	})
 
-	t.Run("Battle with non participant-specific casualties and losses", func(t *testing.T) {
+	t.Run("WithOverallCasualtiesAndLossesOnly", func(t *testing.T) {
+		t.Parallel()
 		battle := assertBattle(t, "https://en.wikipedia.org/wiki/Indian_Rebellion_of_1857")
 		assertStruct(t, "casualties", battle.Casualties, domain.SideNumbers{
 			A:  "",
 			B:  "",
 			AB: "6,000 Europeans killed. As many as 800,000 Indians and possibly more, both in the rebellion and in famines and epidemics of disease in its wake, by comparison of 1857 population estimates with Indian Census of 1871.",
 		})
+		if !t.Failed() {
+			t.Log("Stores the information in the appropriate place")
+		}
 	})
 
-	t.Run("Battle with participant-specific and overall casualties and losses", func(t *testing.T) {
+	t.Run("WithSpecificAndOverallCasualtiesAndLosses", func(t *testing.T) {
+		t.Parallel()
 		battle := assertBattle(t, "https://en.wikipedia.org/wiki/Chilean_Civil_War_of_1891")
 		assertStruct(t, "casualties", battle.Casualties, domain.SideNumbers{
 			A:  "",
 			B:  "1 armoured frigate",
 			AB: "5,000",
 		})
+		if !t.Failed() {
+			t.Log("Stores the information in the appropriate places")
+		}
 	})
 }
