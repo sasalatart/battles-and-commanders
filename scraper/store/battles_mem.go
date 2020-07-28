@@ -11,7 +11,7 @@ import (
 
 // BattlesMem is an in-memory implementation of BattlesStore
 type BattlesMem struct {
-	mutex     sync.Mutex
+	mutex     sync.RWMutex
 	validator *validator.Validate
 	byID      map[int]*domain.Battle
 }
@@ -23,8 +23,8 @@ func NewBattlesMem() *BattlesMem {
 
 // Find searches for the pointer to a battle by its ID. If none is found, nil is returned
 func (r *BattlesMem) Find(id int) *domain.Battle {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
 
 	battle, found := r.byID[id]
 	if found != true {

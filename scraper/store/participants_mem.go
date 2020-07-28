@@ -11,7 +11,7 @@ import (
 
 // ParticipantsMem is an in-memory implementation of ParticipantsStore
 type ParticipantsMem struct {
-	mutex       sync.Mutex
+	mutex       sync.RWMutex
 	validator   *validator.Validate
 	byIDByKind  map[domain.ParticipantKind]map[int]*domain.Participant
 	byURLByKind map[domain.ParticipantKind]map[string]int
@@ -35,8 +35,8 @@ func NewParticipantsMem() *ParticipantsMem {
 // Find searches for the pointer to a participant by its kind and ID. If none is found, nil is
 // returned
 func (r *ParticipantsMem) Find(kind domain.ParticipantKind, id int) *domain.Participant {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
 
 	p, found := r.byIDByKind[kind][id]
 	if found != true {
@@ -48,10 +48,10 @@ func (r *ParticipantsMem) Find(kind domain.ParticipantKind, id int) *domain.Part
 // FindByURL does the same as Find, but instead of searching by ID, it searches by the URL of a
 // participant
 func (r *ParticipantsMem) FindByURL(kind domain.ParticipantKind, url string) *domain.Participant {
-	r.mutex.Lock()
+	r.mutex.RLock()
 
 	id, found := r.byURLByKind[kind][url]
-	r.mutex.Unlock()
+	r.mutex.RUnlock()
 	if found != true {
 		return nil
 	}
