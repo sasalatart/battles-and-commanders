@@ -6,6 +6,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 type dateMatcher struct {
@@ -316,7 +318,7 @@ func Date(text string) ([]string, error) {
 	}
 
 	if len(dates) == 0 {
-		return dates, fmt.Errorf("Unable to parse date %q", t)
+		return dates, errors.Errorf("Unable to parse date %q", t)
 	}
 
 	min, max := minMax(dates)

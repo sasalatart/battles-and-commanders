@@ -1,9 +1,8 @@
 package mocks
 
 import (
-	"fmt"
-
 	"github.com/imdario/mergo"
+	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/scraper/domain"
 )
 
@@ -21,7 +20,7 @@ func Faction(overrides domain.Participant) (domain.Participant, error) {
 	}
 
 	if err := mergo.Merge(&mock, overrides, mergo.WithOverride); err != nil {
-		return mock, fmt.Errorf("Failed creating faction mock: %s", err)
+		return mock, errors.Wrap(err, "Creating faction mock")
 	}
 	return mock, nil
 }
@@ -40,7 +39,7 @@ func Commander(overrides domain.Participant) (domain.Participant, error) {
 	}
 
 	if err := mergo.Merge(&mock, overrides, mergo.WithOverride); err != nil {
-		return mock, fmt.Errorf("Failed creating commander mock: %s", err)
+		return mock, errors.Wrap(err, "Creating commander mock")
 	}
 	return mock, nil
 }

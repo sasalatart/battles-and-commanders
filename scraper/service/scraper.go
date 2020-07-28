@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/gocolly/colly"
+	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/scraper/store"
 )
 
@@ -26,10 +27,10 @@ func NewScraper(battlesStore store.BattlesStore, participantsStore store.Partici
 // battles, and another one for the participants in each one of those battles.
 func (s *Scraper) Export(battlesFileName, participantsFileName string) error {
 	if err := s.BattlesStore.Export(battlesFileName); err != nil {
-		return fmt.Errorf("Failed exporting the Scraper's results: %s", err)
+		return errors.Wrap(err, "Exporting battles results")
 	}
 	if err := s.ParticipantsStore.Export(participantsFileName); err != nil {
-		return fmt.Errorf("Failed exporting the Scraper's results: %s", err)
+		return errors.Wrap(err, "Exporting participants results")
 	}
 	return nil
 }

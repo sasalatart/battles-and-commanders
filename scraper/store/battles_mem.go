@@ -1,10 +1,10 @@
 package store
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/scraper/domain"
 	"github.com/sasalatart/batcoms/scraper/exports"
 )
@@ -39,7 +39,7 @@ func (r *BattlesMem) Save(b domain.Battle) error {
 	defer r.mutex.Unlock()
 
 	if err := r.validator.Struct(b); err != nil {
-		return fmt.Errorf("Failed saving battle with URL %s: %s", b.URL, err)
+		return errors.Wrapf(err, "Saving battle with URL %s", b.URL)
 	}
 	r.byID[b.ID] = &b
 	return nil
