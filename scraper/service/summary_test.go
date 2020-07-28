@@ -31,7 +31,7 @@ func TestPageSummary(t *testing.T) {
 			Type:         "standard",
 			Title:        "Battle of Austerlitz",
 			DisplayTitle: "Battle of Austerlitz",
-			Description:  "Decisive battle of the Napoleonic Wars",
+			Description:  "Battle of the Napoleonic Wars",
 			Extract:      "The Battle of Austerlitz, also known as the Battle of the Three Emperors, was one of the most important and decisive engagements of the Napoleonic Wars. In what is widely regarded as the greatest victory achieved by Napoleon, the Grande Armée of France defeated a larger Russian and Austrian army led by Emperor Alexander I and Holy Roman Emperor Francis II. The battle occurred near the town of Austerlitz in the Austrian Empire. Austerlitz brought the War of the Third Coalition to a rapid end, with the Treaty of Pressburg signed by the Austrians later in the month. The battle is often cited as a tactical masterpiece, in the same league as other historic engagements like Cannae or Gaugamela.",
 		}
 		if got != expected {
