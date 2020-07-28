@@ -27,7 +27,6 @@ func TestURLs(t *testing.T) {
 			{"/wiki/Timeline_of_World_War_I", true},
 			{"/wiki/World_War_I", false},
 		}
-
 		for _, c := range cases {
 			got := urls.NotSpecific(c.url)
 			if got != c.expected {
@@ -38,6 +37,9 @@ func TestURLs(t *testing.T) {
 					got,
 				)
 			}
+		}
+		if !t.Failed() {
+			t.Log("Returns true for URLs regarded as not specific enough, and false for specific ones")
 		}
 	})
 
@@ -97,7 +99,6 @@ func TestURLs(t *testing.T) {
 			{"/wiki/Roman_Emperor", true},
 			{"/wiki/United_States_Army_Rangers", true},
 		}
-
 		for _, c := range cases {
 			got := urls.ShouldSkip(c.url)
 			if got != c.expected {
@@ -108,6 +109,9 @@ func TestURLs(t *testing.T) {
 					got,
 				)
 			}
+		}
+		if !t.Failed() {
+			t.Log("Returns true for URLs that should be skipped, and false for those that should not")
 		}
 	})
 }

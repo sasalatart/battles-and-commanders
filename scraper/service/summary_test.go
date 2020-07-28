@@ -9,7 +9,8 @@ import (
 )
 
 func TestPageSummary(t *testing.T) {
-	t.Run("Returns an error when given an invalid URL", func(t *testing.T) {
+	t.Run("InvalidURL", func(t *testing.T) {
+		t.Parallel()
 		_, err := service.PageSummary("https://i-do-not-exist.org")
 		if err == nil {
 			t.Error("Expected to return an error but instead returned nil")
@@ -19,9 +20,13 @@ func TestPageSummary(t *testing.T) {
 		if !strings.Contains(got, expectedSubstring) {
 			t.Errorf("Expected error message to contain %q, but instead was %q", expectedSubstring, got)
 		}
+		if !t.Failed() {
+			t.Log("Returns an error when given an invalid URL")
+		}
 	})
 
-	t.Run("Fills a domain.Summary when given a valid Wikipedia page URL", func(t *testing.T) {
+	t.Run("ValidURL", func(t *testing.T) {
+		t.Parallel()
 		got, err := service.PageSummary("https://en.wikipedia.org/wiki/Battle_of_Austerlitz")
 		if err != nil {
 			t.Errorf("Expected to not have an error, but instead received %v", err)
@@ -36,6 +41,9 @@ func TestPageSummary(t *testing.T) {
 		}
 		if got != expected {
 			t.Errorf("Expected %v, but got %v instead", expected, got)
+		}
+		if !t.Failed() {
+			t.Log("Fills a domain.Summary when given a valid Wikipedia page URL")
 		}
 	})
 }

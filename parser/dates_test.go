@@ -269,7 +269,6 @@ func TestDate(t *testing.T) {
 			[]string{"1612-12-09", "1612-12-10"},
 		},
 	}
-
 	for _, c := range cases {
 		got, err := parser.Date(c.raw)
 
@@ -281,5 +280,8 @@ func TestDate(t *testing.T) {
 		if !reflect.DeepEqual(got, c.expected) {
 			t.Errorf("Expected %q to be parsed as %q, but instead got %q", c.raw, c.expected, got)
 		}
+	}
+	if !t.Failed() {
+		t.Log("Parses dates and ranges written in different formats into YYYY-MM-DD format")
 	}
 }
