@@ -1,9 +1,8 @@
 package service
 
 import (
-	"fmt"
-
 	"github.com/gocolly/colly"
+	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/scraper/domain"
 )
 
@@ -14,7 +13,7 @@ func (s *Scraper) Battle(url string) (domain.Battle, error) {
 
 	summary, err := PageSummary(url)
 	if err != nil {
-		return b, fmt.Errorf("Failed to fetch summary for %s: %s", url, err)
+		return b, errors.Wrapf(err, "Fetching summary for %s", url)
 	}
 	b.ID = summary.PageID
 	b.Description = summary.Description

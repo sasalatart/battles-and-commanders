@@ -1,10 +1,10 @@
 package store
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/scraper/domain"
 	"github.com/sasalatart/batcoms/scraper/exports"
 )
@@ -65,7 +65,7 @@ func (r *ParticipantsMem) Save(p domain.Participant) error {
 	defer r.mutex.Unlock()
 
 	if err := r.validator.Struct(p); err != nil {
-		return fmt.Errorf("Failed saving participant with URL %s: %s", p.URL, err)
+		return errors.Wrapf(err, "Saving participant with URL %s", p.URL)
 	}
 	r.byIDByKind[p.Kind][p.ID] = &p
 	r.byURLByKind[p.Kind][p.URL] = p.ID
