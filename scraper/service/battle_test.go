@@ -58,7 +58,7 @@ func TestBattle(t *testing.T) {
 			{
 				attr:     "Description",
 				got:      battle.Description,
-				expected: "Decisive battle of the Napoleonic Wars",
+				expected: "Battle of the Napoleonic Wars",
 			},
 			{
 				attr:     "Extract",
@@ -73,7 +73,7 @@ func TestBattle(t *testing.T) {
 			{
 				attr:     "Place",
 				got:      battle.Location.Place,
-				expected: "Austerlitz, Moravia, Austrian Empire (now Slavkov u Brna, Czech Republic)",
+				expected: "Austerlitz, Moravia, Austria",
 			},
 			{
 				attr:     "Latitude",
@@ -104,24 +104,24 @@ func TestBattle(t *testing.T) {
 
 		assertStruct(t, "factions", battle.Factions, domain.SideParticipants{
 			A: []int{21418258},
-			B: []int{20611504, 13277},
+			B: []int{20611504, 266894},
 		})
 		assertStruct(t, "commanders", battle.Commanders, domain.SideParticipants{
 			A: []int{69880},
 			B: []int{27126603, 251000, 11551, 14092123},
 		})
 		assertStruct(t, "strength", battle.Strength, domain.SideNumbers{
-			A:  "65,000–68,000 (not including III Corps)",
+			A:  "65,000–75,000",
 			B:  "84,000–95,000",
 			AB: "",
 		})
 		assertStruct(t, "casualties", battle.Casualties, domain.SideNumbers{
-			A:  "1,305 dead. 6,991 wounded. 8,279 total casualties. 573 captured. 1 standard lost. Total: 9,000",
-			B:  "16,000 dead or wounded. 20,000 captured. 186 guns lost. 45 standards lost. Total: 36,000",
+			A:  "1,305 killed 6,991 wounded 573 captured",
+			B:  "16,000 killed and wounded 20,000 captured",
 			AB: "",
 		})
 		assertStruct(t, "commanders grouping", battle.CommandersByFaction, map[int][]int{
-			13277:    {11551, 14092123},
+			266894:   {11551, 14092123},
 			20611504: {27126603, 251000},
 			21418258: {69880},
 		})
@@ -143,8 +143,8 @@ func TestBattle(t *testing.T) {
 			},
 			{
 				label:        "FactionB2",
-				id:           13277,
-				expectedName: "Holy Roman Empire",
+				id:           266894,
+				expectedName: "Austrian Empire",
 			},
 			{
 				label:        "CommanderA1",
