@@ -1,0 +1,5 @@
+PSQL_HOST: localhost
+PSQL_PORT: 5432
+PSQL_USER: postgres
+PSQL_NAME: batcoms
+PSQL_PASS: password
