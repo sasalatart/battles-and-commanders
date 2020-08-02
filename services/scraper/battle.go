@@ -17,6 +17,7 @@ func (s *Scraper) SBattle(url string) (domain.SBattle, error) {
 		return b, errors.Wrapf(err, "Fetching summary for %s", url)
 	}
 	b.ID = summary.PageID
+	b.Name = summary.Title
 	b.Description = summary.Description
 	b.Extract = summary.Extract
 

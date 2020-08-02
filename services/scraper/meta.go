@@ -10,7 +10,6 @@ import (
 
 func (s *Scraper) subscribeMeta(c *colly.Collector, b *domain.SBattle) {
 	c.OnHTML(infoBoxSelector, func(e *colly.HTMLElement) {
-		b.Name = parser.Clean(e.ChildText("th.summary"))
 		e.ForEachWithBreak("tr:nth-child(2) > td", func(_ int, c *colly.HTMLElement) bool {
 			if !strings.Contains(strings.ToLower(c.Text), "part of") {
 				return true
