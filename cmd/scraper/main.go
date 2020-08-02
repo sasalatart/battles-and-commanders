@@ -5,15 +5,15 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/sasalatart/batcoms/scraper/domain"
-	"github.com/sasalatart/batcoms/scraper/service"
-	"github.com/sasalatart/batcoms/scraper/store"
+	"github.com/sasalatart/batcoms/domain"
+	"github.com/sasalatart/batcoms/services/scraper"
+	"github.com/sasalatart/batcoms/store/memory"
 )
 
 func main() {
-	scraperService := service.NewScraper(
-		store.NewBattlesMem(),
-		store.NewParticipantsMem(),
+	scraperService := scraper.New(
+		memory.NewSBattlesStore(),
+		memory.NewSParticipantsStore(),
 		ioutil.Discard,
 	)
 
@@ -22,8 +22,8 @@ func main() {
 	for i, battle := range list {
 		semaphore <- true
 		fmt.Printf("\r%d/%d", i, len(list))
-		go func(i int, b domain.BattleItem) {
-			if _, err := scraperService.Battle(b.URL); err != nil {
+		go func(i int, b domain.SBattleItem) {
+			if _, err := scraperService.SBattle(b.URL); err != nil {
 				log.Printf("Failed scraping %s: %s", b.URL, err)
 			}
 			<-semaphore
