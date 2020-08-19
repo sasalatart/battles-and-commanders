@@ -17,16 +17,17 @@ func TestCommandersStore(t *testing.T) {
 	t.Run("CreateOne", func(t *testing.T) {
 		mustSetupCreateOne := func(t *testing.T, mockUUID uuid.UUID, input domain.CreateCommanderInput, executes bool) (*gorm.DB, sqlmock.Sqlmock) {
 			_, gormDB, mock := mustSetupDB(t)
-			if executes {
-				mock.ExpectBegin()
-				mock.ExpectQuery(`^INSERT INTO "commanders" (.*)`).
-					WithArgs(input.WikiID, input.URL, input.Name, input.Summary).
-					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(mockUUID))
-				mock.ExpectQuery(`^SELECT "id" FROM "commanders"`).
-					WithArgs(mockUUID).
-					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(mockUUID))
-				mock.ExpectCommit()
+			if !executes {
+				return gormDB, mock
 			}
+			mock.ExpectBegin()
+			mock.ExpectQuery(`^INSERT INTO "commanders" (.*)`).
+				WithArgs(input.WikiID, input.URL, input.Name, input.Summary).
+				WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(mockUUID))
+			mock.ExpectQuery(`^SELECT "id" FROM "commanders"`).
+				WithArgs(mockUUID).
+				WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(mockUUID))
+			mock.ExpectCommit()
 			return gormDB, mock
 		}
 		t.Run("WithValidInput", func(t *testing.T) {
@@ -43,6 +44,9 @@ func TestCommandersStore(t *testing.T) {
 				t.Errorf("Expected to return an ID %s, but instead got %s", mockUUID, id)
 			}
 			assertMeetsExpectations(t, mock)
+			if !t.Failed() {
+				t.Log("Creates the commander in the database")
+			}
 		})
 		t.Run("WithInvalidInput", func(t *testing.T) {
 			mockUUID := uuid.NewV4()
@@ -58,6 +62,9 @@ func TestCommandersStore(t *testing.T) {
 				t.Error("Expected error to be a validation error, but it was not")
 			}
 			assertMeetsExpectations(t, mock)
+			if !t.Failed() {
+				t.Log("Fails validation and does not create the commander in the database")
+			}
 		})
 	})
 }

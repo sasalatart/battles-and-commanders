@@ -7,7 +7,7 @@ import (
 )
 
 // CreateFactionInput returns an instance of domain.CreateFactionInput that may be used for mocking
-// inputs used to create factions. The overrides parameter may contain values used to override the
+// inputs to create factions. The overrides parameter may contain values used to override the
 // fallback values used by the default mock
 func CreateFactionInput(overrides domain.CreateFactionInput) (domain.CreateFactionInput, error) {
 	mock := domain.CreateFactionInput{

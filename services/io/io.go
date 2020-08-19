@@ -11,7 +11,7 @@ type Exporter interface {
 type ExporterFunc func(fileName string, d interface{}) error
 
 // ImportedData contains scraped battles and participants that have been read from a previously
-// exported file. These have been indexed by their wikipedia IDs
+// exported file. These have been indexed by their Wikipedia IDs
 type ImportedData struct {
 	SBattlesByID    map[string]domain.SBattle
 	SFactionsByID   map[string]domain.SParticipant `json:"FactionsByID"`

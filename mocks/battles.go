@@ -8,7 +8,7 @@ import (
 )
 
 // CreateBattleInput returns an instance of domain.CreateBattleInput that may be used for mocking
-// inputs used to create battles. The overrides parameter may contain values used to override the
+// inputs to create battles. The overrides parameter may contain values used to override the
 // fallback values used by the default mock
 func CreateBattleInput(overrides domain.CreateBattleInput) (domain.CreateBattleInput, error) {
 	mock := domain.CreateBattleInput{
@@ -27,20 +27,18 @@ func CreateBattleInput(overrides domain.CreateBattleInput) (domain.CreateBattleI
 		Result:             "Decisive French victory. Treaty of Pressburg. Effective end of the Third Coalition",
 		TerritorialChanges: "Dissolution of the Holy Roman Empire and creation of the Confederation of the Rhine",
 		Strength: domain.SideNumbers{
-			A:  "65,000–75,000",
-			B:  "84,000–95,000",
-			AB: "",
+			A: "65,000–75,000",
+			B: "84,000–95,000",
 		},
 		Casualties: domain.SideNumbers{
-			A:  "1,305 killed 6,991 wounded 573 captured",
-			B:  "16,000 killed and wounded 20,000 captured",
-			AB: "",
+			A: "1,305 killed 6,991 wounded 573 captured",
+			B: "16,000 killed and wounded 20,000 captured",
 		},
-		FactionsBySide: domain.ParticipantsUUIDsBySide{
+		FactionsBySide: domain.ParticipantsIDsBySide{
 			A: []uuid.UUID{uuid.NewV4()},
 			B: []uuid.UUID{uuid.NewV4(), uuid.NewV4()},
 		},
-		CommandersBySide: domain.ParticipantsUUIDsBySide{
+		CommandersBySide: domain.ParticipantsIDsBySide{
 			A: []uuid.UUID{uuid.NewV4()},
 			B: []uuid.UUID{uuid.NewV4(), uuid.NewV4(), uuid.NewV4(), uuid.NewV4()},
 		},

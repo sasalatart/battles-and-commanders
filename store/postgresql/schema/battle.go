@@ -20,13 +20,13 @@ const (
 // Battle is used to store data that defines a specific battle. This struct defines the SQL schema
 type Battle struct {
 	Base
-	WikiID                  int    `gorm:"not null;index"`
+	WikiID                  int    `gorm:"not null;unique_index"`
 	URL                     string `gorm:"not null;unique_index"`
 	Name                    string `gorm:"not null;unique_index"`
 	PartOf                  string
 	Summary                 string `gorm:"not null"`
-	StartDate               string `gorm:"not null;index:start_date"`
-	EndDate                 string `gorm:"not null;index:end_date"`
+	StartDate               string `gorm:"not null;index"`
+	EndDate                 string `gorm:"not null;index"`
 	Place                   string `gorm:"not null"`
 	Latitude                string
 	Longitude               string

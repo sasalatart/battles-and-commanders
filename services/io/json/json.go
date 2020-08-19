@@ -22,7 +22,7 @@ func Export(fileName string, d interface{}) error {
 	return nil
 }
 
-// Import reads scraped battles & participants exported files ands reimports them into memory
+// Import reads the specified JSON file's contents into memory
 func Import(fileName string, d interface{}) error {
 	battlesFile, err := ioutil.ReadFile(fileName)
 	if err != nil {

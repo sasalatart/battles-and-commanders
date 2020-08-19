@@ -20,7 +20,7 @@ type BattlesDataStore struct {
 	validator *validator.Validate
 }
 
-// NewBattlesDataStore returns a pointer to ready-to-use postgresql.BattlesDataStore
+// NewBattlesDataStore returns a pointer to a ready-to-use postgresql.BattlesDataStore
 func NewBattlesDataStore(db *gorm.DB) *BattlesDataStore {
 	return &BattlesDataStore{db, validator.New()}
 }
@@ -113,8 +113,8 @@ func deserializeBattle(b *schema.Battle) (domain.Battle, error) {
 }
 
 // CreateOne creates a battle in the database, together with entries in the corresponding tables
-// that let us relate the battle with other participants. The operation returns the UUID of the
-// new battle
+// that let us relate the battle with other participants. The operation returns the ID of the new
+// battle
 func (s *BattlesDataStore) CreateOne(data domain.CreateBattleInput) (uuid.UUID, error) {
 	if err := s.validator.Struct(data); err != nil {
 		return uuid.UUID{}, errors.Wrap(err, "Validating battle creation input")

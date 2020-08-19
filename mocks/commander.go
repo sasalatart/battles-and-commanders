@@ -7,8 +7,8 @@ import (
 )
 
 // CreateCommanderInput returns an instance of domain.CreateCommanderInput that may be used for
-// mocking inputs used to create commanders. The overrides parameter may contain values used to
-// override the fallback values used by the default mock
+// mocking inputs to create commanders. The overrides parameter may contain values used to override
+// the fallback values used by the default mock
 func CreateCommanderInput(overrides domain.CreateCommanderInput) (domain.CreateCommanderInput, error) {
 	mock := domain.CreateCommanderInput{
 		WikiID:  69880,

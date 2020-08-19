@@ -45,7 +45,7 @@ func (s *SBattlesStore) Save(b domain.SBattle) error {
 	return nil
 }
 
-// Export saves data stored to the specified file, in JSON format using its input io.ExporterFunc
+// Export saves data stored to the specified file using its input io.ExporterFunc
 func (s *SBattlesStore) Export(fileName string, exporterFunc io.ExporterFunc) error {
 	return exporterFunc(fileName, s.byID)
 }

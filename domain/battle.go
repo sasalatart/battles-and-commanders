@@ -37,15 +37,15 @@ type CommandersBySide struct {
 	B []Commander
 }
 
-// ParticipantsUUIDsBySide groups the UUIDs of the participants of a specific kind (either factions
-// or commanders) that participated in a battle into the two opposing sides. These sides are A and B
-type ParticipantsUUIDsBySide struct {
+// ParticipantsIDsBySide groups the IDs of the participants of a specific kind (either factions or
+// commanders) that participated in a battle into the two opposing sides. These sides are A and B
+type ParticipantsIDsBySide struct {
 	A []uuid.UUID
 	B []uuid.UUID
 }
 
 // CommandersByFaction is a map that indexes the IDs of commanders according to the faction to which
-// they belong
+// they belong during a specific battle
 type CommandersByFaction map[uuid.UUID][]uuid.UUID
 
 // CreateBattleInput is a struct that contains all of the data required to create a battle. This
@@ -63,7 +63,7 @@ type CreateBattleInput struct {
 	TerritorialChanges  string
 	Strength            SideNumbers
 	Casualties          SideNumbers
-	FactionsBySide      ParticipantsUUIDsBySide
-	CommandersBySide    ParticipantsUUIDsBySide
+	FactionsBySide      ParticipantsIDsBySide
+	CommandersBySide    ParticipantsIDsBySide
 	CommandersByFaction CommandersByFaction
 }

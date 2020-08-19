@@ -72,7 +72,7 @@ func (s *SParticipantsStore) Save(p domain.SParticipant) error {
 	return nil
 }
 
-// Export saves data stored to the specified file, in JSON format
+// Export saves data stored to the specified file using its input io.ExporterFunc
 func (s *SParticipantsStore) Export(fileName string, exporterFunc io.ExporterFunc) error {
 	return exporterFunc(fileName, struct {
 		FactionsByID   map[int]*domain.SParticipant

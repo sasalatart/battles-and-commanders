@@ -7,7 +7,7 @@ import (
 
 	"github.com/gocolly/colly"
 	"github.com/pkg/errors"
-	ioSrvc "github.com/sasalatart/batcoms/services/io"
+	batcomsio "github.com/sasalatart/batcoms/services/io"
 	"github.com/sasalatart/batcoms/store/memory"
 )
 
@@ -16,7 +16,7 @@ import (
 type Scraper struct {
 	SBattlesStore      *memory.SBattlesStore
 	SParticipantsStore *memory.SParticipantsStore
-	exporterFunc       ioSrvc.ExporterFunc
+	exporterFunc       batcomsio.ExporterFunc
 	logger             io.Writer
 }
 
@@ -24,7 +24,7 @@ type Scraper struct {
 func New(
 	sbStore *memory.SBattlesStore,
 	spStore *memory.SParticipantsStore,
-	exporterFunc ioSrvc.ExporterFunc,
+	exporterFunc batcomsio.ExporterFunc,
 	logger io.Writer,
 ) Scraper {
 	return Scraper{sbStore, spStore, exporterFunc, logger}

@@ -17,7 +17,7 @@ type FactionsDataStore struct {
 	validator *validator.Validate
 }
 
-// NewFactionsDataStore returns a pointer to ready-to-use postgresql.FactionsDataStore
+// NewFactionsDataStore returns a pointer to a ready-to-use postgresql.FactionsDataStore
 func NewFactionsDataStore(db *gorm.DB) *FactionsDataStore {
 	return &FactionsDataStore{db, validator.New()}
 }
@@ -41,7 +41,7 @@ func deserializeFaction(f *schema.Faction) domain.Faction {
 	}
 }
 
-// CreateOne creates a faction in the database. The operation returns the UUID of the new faction
+// CreateOne creates a faction in the database. The operation returns the ID of the new faction
 func (s *FactionsDataStore) CreateOne(data domain.CreateFactionInput) (uuid.UUID, error) {
 	if err := s.validator.Struct(data); err != nil {
 		return uuid.UUID{}, errors.Wrap(err, "Validating faction creation input")

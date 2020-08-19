@@ -17,7 +17,7 @@ type CommandersDataStore struct {
 	validator *validator.Validate
 }
 
-// NewCommandersDataStore returns a pointer to ready-to-use postgresql.CommandersDataStore
+// NewCommandersDataStore returns a pointer to a ready-to-use postgresql.CommandersDataStore
 func NewCommandersDataStore(db *gorm.DB) *CommandersDataStore {
 	return &CommandersDataStore{db, validator.New()}
 }
@@ -41,10 +41,10 @@ func deserializeCommander(c *schema.Commander) domain.Commander {
 	}
 }
 
-// CreateOne creates a commander in the database. The operation returns the UUID of the new commander
+// CreateOne creates a commander in the database. The operation returns the ID of the new commander
 func (s *CommandersDataStore) CreateOne(data domain.CreateCommanderInput) (uuid.UUID, error) {
 	if err := s.validator.Struct(data); err != nil {
-		return uuid.UUID{}, errors.Wrapf(err, "Validating commander creation input with URL %s", data.URL)
+		return uuid.UUID{}, errors.Wrap(err, "Validating commander creation input")
 	}
 	c := serializeCommander(domain.Commander{
 		WikiID:  data.WikiID,
