@@ -32,15 +32,15 @@ func SBattle(overrides domain.SBattle) (domain.SBattle, error) {
 			A: "1,305 killed 6,991 wounded 573 captured",
 			B: "16,000 killed and wounded 20,000 captured",
 		},
-		Factions: domain.SideParticipants{
+		Factions: domain.ScrapedSideParticipants{
 			A: []int{21418258},
 			B: []int{20611504, 266894},
 		},
-		Commanders: domain.SideParticipants{
+		Commanders: domain.ScrapedSideParticipants{
 			A: []int{69880},
 			B: []int{27126603, 251000, 11551, 14092123},
 		},
-		CommandersByFaction: map[int][]int{
+		CommandersByFaction: domain.ScrapedCommandersByFaction{
 			21418258: {69880},
 			20611504: {27126603, 251000},
 			266894:   {11551, 14092123},
@@ -48,7 +48,7 @@ func SBattle(overrides domain.SBattle) (domain.SBattle, error) {
 	}
 
 	if err := mergo.Merge(&mock, overrides, mergo.WithOverride); err != nil {
-		return mock, errors.Wrap(err, "Creating battle mock")
+		return mock, errors.Wrap(err, "Creating scraped battle mock")
 	}
 	return mock, nil
 }

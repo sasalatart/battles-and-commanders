@@ -7,6 +7,7 @@ import (
 
 	"github.com/gocolly/colly"
 	"github.com/pkg/errors"
+	batcomsio "github.com/sasalatart/batcoms/services/io"
 	"github.com/sasalatart/batcoms/store/memory"
 )
 
@@ -15,21 +16,27 @@ import (
 type Scraper struct {
 	SBattlesStore      *memory.SBattlesStore
 	SParticipantsStore *memory.SParticipantsStore
+	exporterFunc       batcomsio.ExporterFunc
 	logger             io.Writer
 }
 
 // New creates a new Scraper instance
-func New(sbStore *memory.SBattlesStore, spStore *memory.SParticipantsStore, logger io.Writer) Scraper {
-	return Scraper{sbStore, spStore, logger}
+func New(
+	sbStore *memory.SBattlesStore,
+	spStore *memory.SParticipantsStore,
+	exporterFunc batcomsio.ExporterFunc,
+	logger io.Writer,
+) Scraper {
+	return Scraper{sbStore, spStore, exporterFunc, logger}
 }
 
 // Export exports the scrapers' relevant information into two main normalized JSON files: one for
 // battles, and another one for the participants in each one of those battles.
 func (s *Scraper) Export(battlesFileName, participantsFileName string) error {
-	if err := s.SBattlesStore.Export(battlesFileName); err != nil {
+	if err := s.SBattlesStore.Export(battlesFileName, s.exporterFunc); err != nil {
 		return errors.Wrap(err, "Exporting battles results")
 	}
-	if err := s.SParticipantsStore.Export(participantsFileName); err != nil {
+	if err := s.SParticipantsStore.Export(participantsFileName, s.exporterFunc); err != nil {
 		return errors.Wrap(err, "Exporting participants results")
 	}
 	return nil

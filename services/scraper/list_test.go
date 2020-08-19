@@ -12,10 +12,12 @@ import (
 )
 
 func TestList(t *testing.T) {
+	exporterMock := mocks.Exporter{}
 	loggerMock := &mocks.Logger{}
 	scraperService := scraper.New(
 		memory.NewSBattlesStore(),
 		memory.NewSParticipantsStore(),
+		exporterMock.Export,
 		loggerMock,
 	)
 	battlesList := scraperService.List()

@@ -6,7 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/domain"
-	"github.com/sasalatart/batcoms/store/exports"
+	"github.com/sasalatart/batcoms/services/io"
 )
 
 // SBattlesStore is an in-memory implementation of store.SBattles
@@ -45,7 +45,7 @@ func (s *SBattlesStore) Save(b domain.SBattle) error {
 	return nil
 }
 
-// Export saves data stored to the specified file, in JSON format
-func (s *SBattlesStore) Export(fileName string) error {
-	return exports.JSON(fileName, s.byID)
+// Export saves data stored to the specified file using its input io.ExporterFunc
+func (s *SBattlesStore) Export(fileName string, exporterFunc io.ExporterFunc) error {
+	return exporterFunc(fileName, s.byID)
 }

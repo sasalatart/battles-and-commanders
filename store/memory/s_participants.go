@@ -6,7 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/domain"
-	"github.com/sasalatart/batcoms/store/exports"
+	"github.com/sasalatart/batcoms/services/io"
 )
 
 // SParticipantsStore is an in-memory implementation of store.SParticipants
@@ -72,9 +72,9 @@ func (s *SParticipantsStore) Save(p domain.SParticipant) error {
 	return nil
 }
 
-// Export saves data stored to the specified file, in JSON format
-func (s *SParticipantsStore) Export(fileName string) error {
-	return exports.JSON(fileName, struct {
+// Export saves data stored to the specified file using its input io.ExporterFunc
+func (s *SParticipantsStore) Export(fileName string, exporterFunc io.ExporterFunc) error {
+	return exporterFunc(fileName, struct {
 		FactionsByID   map[int]*domain.SParticipant
 		CommandersByID map[int]*domain.SParticipant
 	}{

@@ -1,9 +1,11 @@
 package postgresql
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/jinzhu/gorm"
+	"github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/postgres" // postgres drivers
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -22,6 +24,16 @@ func Connect() *gorm.DB {
 	if err != nil {
 		panic(errors.Wrap(err, "Unable to connect to database"))
 	}
-	defer db.Close()
 	return db
+}
+
+func fromJSONB(data postgres.Jsonb, storeTo interface{}) error {
+	parsed, err := data.MarshalJSON()
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(parsed, storeTo); err != nil {
+		return err
+	}
+	return nil
 }

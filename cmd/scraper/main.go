@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/sasalatart/batcoms/domain"
+	"github.com/sasalatart/batcoms/services/io/json"
 	"github.com/sasalatart/batcoms/services/scraper"
 	"github.com/sasalatart/batcoms/store/memory"
 )
@@ -14,6 +15,7 @@ func main() {
 	scraperService := scraper.New(
 		memory.NewSBattlesStore(),
 		memory.NewSParticipantsStore(),
+		json.Export,
 		ioutil.Discard,
 	)
 
