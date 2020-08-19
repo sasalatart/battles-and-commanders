@@ -9,7 +9,7 @@ import (
 
 // SBattle scrapes information about the battle found in the URL passed to it
 func (s *Scraper) SBattle(url string) (domain.SBattle, error) {
-	b := domain.SBattle{URL: url, CommandersByFaction: make(map[int][]int)}
+	b := domain.SBattle{URL: url, CommandersByFaction: make(domain.ScrapedCommandersByFaction)}
 	var err error
 
 	summary, err := summaries.Get(url)

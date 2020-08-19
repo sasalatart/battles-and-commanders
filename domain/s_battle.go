@@ -1,11 +1,15 @@
 package domain
 
-// SideParticipants stores participants IDs grouped into each side of a battle. The struct may be
-// used for either factions or commanders
-type SideParticipants struct {
+// ScrapedSideParticipants stores participants IDs grouped into each side of a battle. The struct
+// may be used for either factions or commanders
+type ScrapedSideParticipants struct {
 	A []int `validate:"unique"`
 	B []int `validate:"unique"`
 }
+
+// ScrapedCommandersByFaction is a map that groups all of the Wikipedia ids of commanders that
+// participated in a specific battle into their corresponding faction Wikipedia ids
+type ScrapedCommandersByFaction map[int][]int
 
 // SBattle stores all the details regarding a specific battle as scraped from Wikipedia
 type SBattle struct {
@@ -21,7 +25,7 @@ type SBattle struct {
 	TerritorialChanges  string
 	Strength            SideNumbers
 	Casualties          SideNumbers
-	Factions            SideParticipants
-	Commanders          SideParticipants
-	CommandersByFaction map[int][]int
+	Factions            ScrapedSideParticipants
+	Commanders          ScrapedSideParticipants
+	CommandersByFaction ScrapedCommandersByFaction
 }

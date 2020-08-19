@@ -20,7 +20,7 @@ func SFaction(overrides domain.SParticipant) (domain.SParticipant, error) {
 	}
 
 	if err := mergo.Merge(&mock, overrides, mergo.WithOverride); err != nil {
-		return mock, errors.Wrap(err, "Creating faction mock")
+		return mock, errors.Wrap(err, "Creating scraped faction mock")
 	}
 	return mock, nil
 }
@@ -39,7 +39,7 @@ func SCommander(overrides domain.SParticipant) (domain.SParticipant, error) {
 	}
 
 	if err := mergo.Merge(&mock, overrides, mergo.WithOverride); err != nil {
-		return mock, errors.Wrap(err, "Creating commander mock")
+		return mock, errors.Wrap(err, "Creating scraped commander mock")
 	}
 	return mock, nil
 }

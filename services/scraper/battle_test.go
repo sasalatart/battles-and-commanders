@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/sasalatart/batcoms/domain"
+	"github.com/sasalatart/batcoms/mocks"
 	"github.com/sasalatart/batcoms/services/scraper"
 	"github.com/sasalatart/batcoms/store/memory"
 )
@@ -14,7 +15,8 @@ import (
 func TestBattle(t *testing.T) {
 	sbStore := memory.NewSBattlesStore()
 	spStore := memory.NewSParticipantsStore()
-	scraperService := scraper.New(sbStore, spStore, ioutil.Discard)
+	exporterMock := mocks.Exporter{}
+	scraperService := scraper.New(sbStore, spStore, exporterMock.Export, ioutil.Discard)
 
 	assertBattle := func(t *testing.T, url string) domain.SBattle {
 		t.Helper()
@@ -103,11 +105,11 @@ func TestBattle(t *testing.T) {
 			}
 		}
 
-		assertStruct(t, "factions", battle.Factions, domain.SideParticipants{
+		assertStruct(t, "factions", battle.Factions, domain.ScrapedSideParticipants{
 			A: []int{21418258},
 			B: []int{20611504, 266894},
 		})
-		assertStruct(t, "commanders", battle.Commanders, domain.SideParticipants{
+		assertStruct(t, "commanders", battle.Commanders, domain.ScrapedSideParticipants{
 			A: []int{69880},
 			B: []int{27126603, 251000, 11551, 14092123},
 		})
@@ -121,7 +123,7 @@ func TestBattle(t *testing.T) {
 			B:  "16,000 killed and wounded 20,000 captured",
 			AB: "",
 		})
-		assertStruct(t, "commanders grouping", battle.CommandersByFaction, map[int][]int{
+		assertStruct(t, "commanders grouping", battle.CommandersByFaction, domain.ScrapedCommandersByFaction{
 			266894:   {11551, 14092123},
 			20611504: {27126603, 251000},
 			21418258: {69880},
