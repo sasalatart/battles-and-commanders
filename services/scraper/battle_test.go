@@ -200,7 +200,7 @@ func TestBattle(t *testing.T) {
 		assertStruct(t, "casualties", battle.Casualties, domain.SideNumbers{
 			A:  "",
 			B:  "",
-			AB: "6,000 Europeans killed. As many as 800,000 Indians and possibly more, both in the rebellion and in famines and epidemics of disease in its wake, by comparison of 1857 population estimates with Indian Census of 1871.",
+			AB: "6,000 British killed. As many as 800,000 Indians and possibly more, both in the rebellion and in famines and epidemics of disease in its wake, by comparison of 1857 population estimates with Indian Census of 1871.",
 		})
 		if !t.Failed() {
 			t.Log("Stores the information in the appropriate place")
