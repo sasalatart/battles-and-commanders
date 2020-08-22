@@ -17,10 +17,11 @@ import (
 
 type participantsIDsByWikiID map[int]uuid.UUID
 
-func main() {
+func init() {
 	config.Setup()
-	vpr := viper.GetViper()
+}
 
+func main() {
 	db := postgresql.Connect()
 	defer db.Close()
 
@@ -39,8 +40,8 @@ func main() {
 	db.Model(&schema.BattleCommanderFaction{}).AddForeignKey("faction_id", "factions(id)", "CASCADE", "CASCADE")
 
 	importedData := &io.ImportedData{}
-	battlesFileName := vpr.GetString("SCRAPER_RESULTS.BATTLES")
-	participantsFileName := vpr.GetString("SCRAPER_RESULTS.PARTICIPANTS")
+	battlesFileName := viper.GetString("SCRAPER_RESULTS.BATTLES")
+	participantsFileName := viper.GetString("SCRAPER_RESULTS.PARTICIPANTS")
 	if err := json.Import(battlesFileName, &importedData.SBattlesByID); err != nil {
 		fmt.Println(err)
 	}
