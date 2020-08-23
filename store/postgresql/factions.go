@@ -42,7 +42,7 @@ func deserializeFaction(f *schema.Faction) domain.Faction {
 	}
 }
 
-// FindOne finds the first faction in the database that matches the query.
+// FindOne finds the first faction in the database that matches the query
 func (s *FactionsDataStore) FindOne(query interface{}, args ...interface{}) (domain.Faction, error) {
 	f := &schema.Faction{}
 	if err := s.db.Where(query, args...).Find(f).Error; gorm.IsRecordNotFoundError(err) {

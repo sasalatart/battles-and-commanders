@@ -5,6 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/domain"
+	"github.com/sasalatart/batcoms/store"
 	"github.com/sasalatart/batcoms/store/postgresql/schema"
 	uuid "github.com/satori/go.uuid"
 )
@@ -39,6 +40,17 @@ func deserializeCommander(c *schema.Commander) domain.Commander {
 		Name:    c.Name,
 		Summary: c.Summary,
 	}
+}
+
+// FindOne finds the first commander in the database that matches the query
+func (s *CommandersDataStore) FindOne(query interface{}, args ...interface{}) (domain.Commander, error) {
+	c := &schema.Commander{}
+	if err := s.db.Where(query, args...).Find(c).Error; gorm.IsRecordNotFoundError(err) {
+		return domain.Commander{}, store.ErrNotFound
+	} else if err != nil {
+		return domain.Commander{}, errors.Wrap(err, "Executing CommandersDataStore.FindOne")
+	}
+	return deserializeCommander(c), nil
 }
 
 // CreateOne creates a commander in the database. The operation returns the ID of the new commander

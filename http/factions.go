@@ -7,7 +7,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func handleFaction(s store.Factions) func(*fiber.Ctx) {
+func handleFaction(s store.FactionsFinder) func(*fiber.Ctx) {
 	return func(c *fiber.Ctx) {
 		faction, err := s.FindOne(domain.Faction{
 			ID: c.Locals("factionId").(uuid.UUID),
@@ -20,6 +20,6 @@ func handleFaction(s store.Factions) func(*fiber.Ctx) {
 	}
 }
 
-func registerFactionsRoutes(app *fiber.App, fs store.Factions) {
+func registerFactionsRoutes(app *fiber.App, fs store.FactionsFinder) {
 	app.Get("/factions/:factionId", idFrom("factionId"), handleFaction(fs))
 }

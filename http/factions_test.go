@@ -3,7 +3,6 @@ package http_test
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"testing"
 
@@ -17,32 +16,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type response struct {
-	status       int
-	errorMessage string
-	faction      domain.Faction
-}
-
 func TestFactionsRoutes(t *testing.T) {
 	t.Run("FindOne", func(t *testing.T) {
 		t.Parallel()
 		assertFindOne := func(app *fiber.App, route string, expectedResponse response) {
 			t.Helper()
-			req, err := http.NewRequest("GET", route, nil)
-			require.NoError(t, err, route)
-			res, err := app.Test(req, -1)
-			require.NoError(t, err, route)
+			res := mustGet(t, app, route)
 			assert.Equalf(t, expectedResponse.status, res.StatusCode, "HTTP status for %q", route)
 			if expectedResponse.errorMessage != "" {
-				body, err := ioutil.ReadAll(res.Body)
-				require.NoError(t, err, "Reading from body")
-				assert.Equal(t, expectedResponse.errorMessage, string(body), "Comparing body with expected error message")
+				assertErrorMessage(t, res, expectedResponse.errorMessage)
 				return
 			}
 			factionFromBody := &domain.Faction{}
-			err = json.NewDecoder(res.Body).Decode(factionFromBody)
+			err := json.NewDecoder(res.Body).Decode(factionFromBody)
 			require.NoError(t, err, "Decoding body into faction struct")
-			assert.True(t, assert.ObjectsAreEqual(expectedResponse.faction, *factionFromBody), "Comparing body with expected faction")
+			expectedFaction := expectedResponse.body.(domain.Faction)
+			assert.True(t, assert.ObjectsAreEqual(expectedFaction, *factionFromBody), "Comparing body with expected faction")
 		}
 		t.Run("ValidPersistedUUID", func(t *testing.T) {
 			factionMock := mocks.Faction()
@@ -50,32 +39,32 @@ func TestFactionsRoutes(t *testing.T) {
 			factionsStoreMock.On("FindOne", domain.Faction{
 				ID: factionMock.ID,
 			}).Return(factionMock, nil)
-			app := batcomshttp.Setup(factionsStoreMock, true)
+			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersStore), true)
 			expectedResponse := response{
-				status:  http.StatusOK,
-				faction: factionMock,
+				status: http.StatusOK,
+				body:   factionMock,
 			}
 			assertFindOne(app, fmt.Sprintf("/factions/%s", factionMock.ID), expectedResponse)
 			factionsStoreMock.AssertExpectations(t)
 		})
 		t.Run("ValidNonPersistedUUID", func(t *testing.T) {
-			uuidMock := uuid.NewV4()
+			uuid := uuid.NewV4()
 			factionsStoreMock := &mocks.FactionsStore{}
 			factionsStoreMock.On("FindOne", domain.Faction{
-				ID: uuidMock,
+				ID: uuid,
 			}).Return(domain.Faction{}, store.ErrNotFound)
-			app := batcomshttp.Setup(factionsStoreMock, true)
+			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersStore), true)
 			expectedResponse := response{
 				status:       http.StatusNotFound,
 				errorMessage: fiber.ErrNotFound.Message,
 			}
-			assertFindOne(app, fmt.Sprintf("/factions/%s", uuidMock), expectedResponse)
+			assertFindOne(app, fmt.Sprintf("/factions/%s", uuid), expectedResponse)
 			factionsStoreMock.AssertExpectations(t)
 		})
 		t.Run("InvalidUUID", func(t *testing.T) {
 			invalidUUID := "invalid-uuid"
 			factionsStoreMock := &mocks.FactionsStore{}
-			app := batcomshttp.Setup(factionsStoreMock, true)
+			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersStore), true)
 			expectedResponse := response{
 				status:       http.StatusBadRequest,
 				errorMessage: fiber.ErrBadRequest.Message,

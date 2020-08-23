@@ -18,6 +18,7 @@ func main() {
 	defer db.Close()
 
 	fs := postgresql.NewFactionsDataStore(db)
-	server := http.Setup(fs, false)
+	cs := postgresql.NewCommandersDataStore(db)
+	server := http.Setup(fs, cs, false)
 	log.Fatal(server.Listen(viper.GetInt("PORT")))
 }

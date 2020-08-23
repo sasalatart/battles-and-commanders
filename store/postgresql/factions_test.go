@@ -38,16 +38,16 @@ func TestFactionsStore(t *testing.T) {
 		t.Run("WithNonPersistedUUID", func(t *testing.T) {
 			db, mock := mustSetupDB(t)
 			defer db.Close()
-			uuidMock := uuid.NewV4()
+			uuid := uuid.NewV4()
 			mock.ExpectQuery(`^SELECT \* FROM "factions"`).
-				WithArgs(uuidMock).
+				WithArgs(uuid).
 				WillReturnError(gorm.ErrRecordNotFound)
 			fs := postgresql.NewFactionsDataStore(db)
 			_, err := fs.FindOne(domain.Faction{
-				ID: uuidMock,
+				ID: uuid,
 			})
 			require.Error(t, err, "Finding faction")
-			assert.IsType(t, store.ErrNotFound, err, "Not found error")
+			assert.IsType(t, store.ErrNotFound, err, "Comparing store error")
 			assertMeetsExpectations(t, mock)
 		})
 	})
