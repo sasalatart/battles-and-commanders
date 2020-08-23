@@ -1,15 +1,12 @@
 package mocks
 
 import (
-	"github.com/imdario/mergo"
-	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/domain"
 )
 
-// SBattle returns an instance of domain.SBattle that may be used for testing purposes. Some values
-// may be overriden by the input battle.
-func SBattle(overrides domain.SBattle) (domain.SBattle, error) {
-	mock := domain.SBattle{
+// SBattle returns an instance of domain.SBattle that may be used for testing purposes
+func SBattle() domain.SBattle {
+	return domain.SBattle{
 		ID:          118372,
 		URL:         "https://en.wikipedia.org/wiki/Battle_of_Austerlitz",
 		Name:        "Battle of Austerlitz",
@@ -46,9 +43,4 @@ func SBattle(overrides domain.SBattle) (domain.SBattle, error) {
 			266894:   {11551, 14092123},
 		},
 	}
-
-	if err := mergo.Merge(&mock, overrides, mergo.WithOverride); err != nil {
-		return mock, errors.Wrap(err, "Creating scraped battle mock")
-	}
-	return mock, nil
 }

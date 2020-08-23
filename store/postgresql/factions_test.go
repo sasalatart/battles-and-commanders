@@ -9,16 +9,54 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/domain"
 	"github.com/sasalatart/batcoms/mocks"
+	"github.com/sasalatart/batcoms/store"
 	"github.com/sasalatart/batcoms/store/postgresql"
 	uuid "github.com/satori/go.uuid"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFactionsStore(t *testing.T) {
+	t.Run("FindOne", func(t *testing.T) {
+		t.Run("WithPersistedUUID", func(t *testing.T) {
+			db, mock := mustSetupDB(t)
+			defer db.Close()
+			factionMock := mocks.Faction()
+			mock.ExpectQuery(`^SELECT \* FROM "factions"`).
+				WithArgs(factionMock.ID).
+				WillReturnRows(sqlmock.NewRows(
+					[]string{"id", "wiki_id", "url", "name", "summary"},
+				).AddRow(factionMock.ID, factionMock.WikiID, factionMock.URL, factionMock.Name, factionMock.Summary))
+			fs := postgresql.NewFactionsDataStore(db)
+			foundFaction, err := fs.FindOne(domain.Faction{
+				ID: factionMock.ID,
+			})
+			require.NoError(t, err, "Finding faction")
+			assert.True(t, assert.ObjectsAreEqual(factionMock, foundFaction), "Comparing found faction with queried one")
+			assertMeetsExpectations(t, mock)
+		})
+		t.Run("WithNonPersistedUUID", func(t *testing.T) {
+			db, mock := mustSetupDB(t)
+			defer db.Close()
+			uuidMock := uuid.NewV4()
+			mock.ExpectQuery(`^SELECT \* FROM "factions"`).
+				WithArgs(uuidMock).
+				WillReturnError(gorm.ErrRecordNotFound)
+			fs := postgresql.NewFactionsDataStore(db)
+			_, err := fs.FindOne(domain.Faction{
+				ID: uuidMock,
+			})
+			require.Error(t, err, "Finding faction")
+			assert.IsType(t, store.ErrNotFound, err, "Not found error")
+			assertMeetsExpectations(t, mock)
+		})
+	})
+
 	t.Run("CreateOne", func(t *testing.T) {
 		mustSetupCreateOne := func(t *testing.T, mockUUID uuid.UUID, input domain.CreateFactionInput, executes bool) (*gorm.DB, sqlmock.Sqlmock) {
-			_, gormDB, mock := mustSetupDB(t)
+			db, mock := mustSetupDB(t)
 			if !executes {
-				return gormDB, mock
+				return db, mock
 			}
 			mock.ExpectBegin()
 			mock.ExpectQuery(`^INSERT INTO "factions" (.*)`).
@@ -28,43 +66,32 @@ func TestFactionsStore(t *testing.T) {
 				WithArgs(mockUUID).
 				WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(mockUUID))
 			mock.ExpectCommit()
-			return gormDB, mock
+			return db, mock
 		}
 		t.Run("WithValidInput", func(t *testing.T) {
 			mockUUID := uuid.NewV4()
-			input, err := mocks.CreateFactionInput(domain.CreateFactionInput{})
+			input := mocks.CreateFactionInput()
 			db, mock := mustSetupCreateOne(t, mockUUID, input, true)
 			defer db.Close()
-			store := postgresql.NewFactionsDataStore(db)
-			id, err := store.CreateOne(input)
-			if err != nil {
-				t.Errorf("Unexpected error creating faction: %v", err)
-			}
-			if id != mockUUID {
-				t.Errorf("Expected to return an ID %s, but instead got %s", mockUUID, id)
-			}
+			fs := postgresql.NewFactionsDataStore(db)
+			id, err := fs.CreateOne(input)
+			require.NoError(t, err, "Creating faction")
+			assert.Equal(t, mockUUID, id, "ID of created faction")
 			assertMeetsExpectations(t, mock)
-			if !t.Failed() {
-				t.Log("Creates the faction in the database")
-			}
 		})
 		t.Run("WithInvalidInput", func(t *testing.T) {
 			mockUUID := uuid.NewV4()
-			input, err := mocks.CreateFactionInput(domain.CreateFactionInput{URL: "not-a-url"})
+			input := mocks.CreateFactionInput()
+			input.URL = "not-a-url"
 			db, mock := mustSetupCreateOne(t, mockUUID, input, false)
 			defer db.Close()
-			store := postgresql.NewFactionsDataStore(db)
-			_, err = store.CreateOne(input)
-			if err == nil {
-				t.Error("Expected error when creating faction, but got none")
-			}
+			fs := postgresql.NewFactionsDataStore(db)
+			_, err := fs.CreateOne(input)
+			require.Error(t, err, "Creating faction")
 			if _, isValidationError := errors.Cause(err).(validator.ValidationErrors); !isValidationError {
 				t.Error("Expected error to be a validation error, but it was not")
 			}
 			assertMeetsExpectations(t, mock)
-			if !t.Failed() {
-				t.Log("Fails validation and does not create the faction in the database")
-			}
 		})
 	})
 }

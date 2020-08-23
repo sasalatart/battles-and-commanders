@@ -4,7 +4,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/sasalatart/batcoms/domain"
 	"github.com/sasalatart/batcoms/mocks"
 	"github.com/sasalatart/batcoms/store/memory"
 )
@@ -12,15 +11,16 @@ import (
 func TestSParticipantsMemStore(t *testing.T) {
 	store := memory.NewSParticipantsStore()
 
-	f, err := mocks.SFaction(domain.SParticipant{})
-	if err = store.Save(f); err != nil {
+	f := mocks.SFaction()
+	if err := store.Save(f); err != nil {
 		t.Fatalf("Expected no error when saving faction %+v, but instead got: %s", f, err)
 	} else {
 		t.Log("Saves factions")
 	}
 
-	c, err := mocks.SCommander(domain.SParticipant{ID: f.ID})
-	if err = store.Save(c); err != nil {
+	c := mocks.SCommander()
+	c.ID = f.ID
+	if err := store.Save(c); err != nil {
 		t.Fatalf("Expected no error when saving commander %+v, but instead got: %s", c, err)
 	} else {
 		t.Log("Saves commanders")

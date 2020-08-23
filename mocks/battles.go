@@ -1,17 +1,14 @@
 package mocks
 
 import (
-	"github.com/imdario/mergo"
-	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/domain"
 	uuid "github.com/satori/go.uuid"
 )
 
 // CreateBattleInput returns an instance of domain.CreateBattleInput that may be used for mocking
-// inputs to create battles. The overrides parameter may contain values used to override the
-// fallback values used by the default mock
-func CreateBattleInput(overrides domain.CreateBattleInput) (domain.CreateBattleInput, error) {
-	mock := domain.CreateBattleInput{
+// inputs to create battles
+func CreateBattleInput() domain.CreateBattleInput {
+	return domain.CreateBattleInput{
 		WikiID:    118372,
 		URL:       "https://en.wikipedia.org/wiki/Battle_of_Austerlitz",
 		Name:      "Battle of Austerlitz",
@@ -43,8 +40,4 @@ func CreateBattleInput(overrides domain.CreateBattleInput) (domain.CreateBattleI
 			B: []uuid.UUID{uuid.NewV4(), uuid.NewV4(), uuid.NewV4(), uuid.NewV4()},
 		},
 	}
-	if err := mergo.Merge(&mock, overrides, mergo.WithOverride); err != nil {
-		return mock, errors.Wrap(err, "Creating battle mock")
-	}
-	return mock, nil
 }

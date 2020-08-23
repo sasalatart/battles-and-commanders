@@ -19,9 +19,9 @@ func TestBattlesStore(t *testing.T) {
 	t.Run("CreateOne", func(t *testing.T) {
 		mustSetupCreateOne := func(t *testing.T, mockUUID uuid.UUID, input domain.CreateBattleInput, executes bool) (*gorm.DB, sqlmock.Sqlmock) {
 			t.Helper()
-			_, gormDB, mock := mustSetupDB(t)
+			db, mock := mustSetupDB(t)
 			if !executes {
-				return gormDB, mock
+				return db, mock
 			}
 			strength, err := json.Marshal(input.Strength)
 			if err != nil {
@@ -69,11 +69,11 @@ func TestBattlesStore(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			}
 			mock.ExpectCommit()
-			return gormDB, mock
+			return db, mock
 		}
 		t.Run("WithValidInput", func(t *testing.T) {
 			mockUUID := uuid.NewV4()
-			input, err := mocks.CreateBattleInput(domain.CreateBattleInput{})
+			input := mocks.CreateBattleInput()
 			db, mock := mustSetupCreateOne(t, mockUUID, input, true)
 			defer db.Close()
 			store := postgresql.NewBattlesDataStore(db)
@@ -91,11 +91,12 @@ func TestBattlesStore(t *testing.T) {
 		})
 		t.Run("WithInvalidInput", func(t *testing.T) {
 			mockUUID := uuid.NewV4()
-			input, err := mocks.CreateBattleInput(domain.CreateBattleInput{URL: "not-a-url"})
+			input := mocks.CreateBattleInput()
+			input.URL = "not-a-url"
 			db, mock := mustSetupCreateOne(t, mockUUID, input, false)
 			defer db.Close()
 			store := postgresql.NewBattlesDataStore(db)
-			_, err = store.CreateOne(input)
+			_, err := store.CreateOne(input)
 			if err == nil {
 				t.Error("Expected error when creating battle, but got none")
 			}

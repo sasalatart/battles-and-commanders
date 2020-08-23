@@ -16,3 +16,8 @@ type SParticipants interface {
 	Save(p domain.SParticipant) error
 	Export(fileName string) error
 }
+
+// Factions is the interface through which Faction may be saved and found
+type Factions interface {
+	FindOne(query interface{}, args ...interface{}) (domain.Faction, error)
+}
