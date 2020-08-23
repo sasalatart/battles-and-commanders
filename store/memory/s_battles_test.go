@@ -4,7 +4,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/sasalatart/batcoms/domain"
 	"github.com/sasalatart/batcoms/mocks"
 	"github.com/sasalatart/batcoms/store/memory"
 )
@@ -12,8 +11,8 @@ import (
 func TestSBattlesMemStore(t *testing.T) {
 	store := memory.NewSBattlesStore()
 
-	b, err := mocks.SBattle(domain.SBattle{})
-	if err = store.Save(b); err != nil {
+	b := mocks.SBattle()
+	if err := store.Save(b); err != nil {
 		t.Fatalf("Expected no error when saving battle %+v, but instead got: %s", b, err)
 	} else {
 		t.Log("Saves battles")

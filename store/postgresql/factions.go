@@ -5,6 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/domain"
+	"github.com/sasalatart/batcoms/store"
 	"github.com/sasalatart/batcoms/store/postgresql/schema"
 	uuid "github.com/satori/go.uuid"
 )
@@ -39,6 +40,17 @@ func deserializeFaction(f *schema.Faction) domain.Faction {
 		Name:    f.Name,
 		Summary: f.Summary,
 	}
+}
+
+// FindOne finds the first faction in the database that matches the query.
+func (s *FactionsDataStore) FindOne(query interface{}, args ...interface{}) (domain.Faction, error) {
+	f := &schema.Faction{}
+	if err := s.db.Where(query, args...).Find(f).Error; gorm.IsRecordNotFoundError(err) {
+		return domain.Faction{}, store.ErrNotFound
+	} else if err != nil {
+		return domain.Faction{}, errors.Wrap(err, "Executing FactionsDataStore.FindOne")
+	}
+	return deserializeFaction(f), nil
 }
 
 // CreateOne creates a faction in the database. The operation returns the ID of the new faction

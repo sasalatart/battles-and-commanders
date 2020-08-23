@@ -12,14 +12,13 @@ require (
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gocolly/colly v1.2.0
 	github.com/gofiber/fiber v1.14.2
-	github.com/imdario/mergo v0.3.9
 	github.com/jinzhu/gorm v1.9.15
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/viper v1.7.1
-	github.com/stretchr/testify v1.6.1 // indirect
+	github.com/stretchr/testify v1.6.1
 	github.com/temoto/robotstxt v1.1.1 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )
