@@ -9,12 +9,13 @@ import (
 )
 
 // Setup sets up a new fiber server, registers the route handlers, and returns a pointer to it.
-func Setup(fs store.Factions, debug bool) *fiber.App {
+func Setup(fs store.FactionsFinder, cs store.CommandersFinder, debug bool) *fiber.App {
 	app := fiber.New()
 	app.Settings.ErrorHandler = errorsHandlerFactory(debug)
 	app.Use(middleware.Recover())
 	app.Use(middleware.Logger())
 	registerFactionsRoutes(app, fs)
+	registerCommandersRoutes(app, cs)
 	return app
 }
 

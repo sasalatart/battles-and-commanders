@@ -17,7 +17,12 @@ type SParticipants interface {
 	Export(fileName string) error
 }
 
-// Factions is the interface through which Faction may be saved and found
-type Factions interface {
+// FactionsFinder is the interface through which factions may be found
+type FactionsFinder interface {
 	FindOne(query interface{}, args ...interface{}) (domain.Faction, error)
+}
+
+// CommandersFinder is the interface through which commanders may be found
+type CommandersFinder interface {
+	FindOne(query interface{}, args ...interface{}) (domain.Commander, error)
 }
