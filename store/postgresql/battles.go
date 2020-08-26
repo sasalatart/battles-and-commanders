@@ -8,6 +8,7 @@ import (
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/domain"
+	"github.com/sasalatart/batcoms/store"
 	"github.com/sasalatart/batcoms/store/postgresql/schema"
 	uuid "github.com/satori/go.uuid"
 )
@@ -110,6 +111,22 @@ func deserializeBattle(b *schema.Battle) (domain.Battle, error) {
 		CommandersByFaction: commandersByFaction,
 	}
 	return res, nil
+}
+
+// FindOne finds the first battle in the database that matches the query, together with its
+// participants
+func (s *BattlesDataStore) FindOne(query interface{}, args ...interface{}) (domain.Battle, error) {
+	b := new(schema.Battle)
+	db := s.db.
+		Preload("BattleFactions.Faction").
+		Preload("BattleCommanders.Commander").
+		Preload("BattleCommanderFactions")
+	if err := db.Where(query, args...).Find(b).Error; gorm.IsRecordNotFoundError(err) {
+		return domain.Battle{}, store.ErrNotFound
+	} else if err != nil {
+		return domain.Battle{}, errors.Wrap(err, "Executing BattlesDataStore.FindOne")
+	}
+	return deserializeBattle(b)
 }
 
 // CreateOne creates a battle in the database, together with entries in the corresponding tables

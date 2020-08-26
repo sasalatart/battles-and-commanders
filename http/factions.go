@@ -10,7 +10,7 @@ import (
 func handleFaction(s store.FactionsFinder) func(*fiber.Ctx) {
 	return func(c *fiber.Ctx) {
 		faction, err := s.FindOne(domain.Faction{
-			ID: c.Locals("factionId").(uuid.UUID),
+			ID: c.Locals("factionID").(uuid.UUID),
 		})
 		if err != nil {
 			c.Next(err)
@@ -21,5 +21,5 @@ func handleFaction(s store.FactionsFinder) func(*fiber.Ctx) {
 }
 
 func registerFactionsRoutes(app *fiber.App, fs store.FactionsFinder) {
-	app.Get("/factions/:factionId", idFrom("factionId"), handleFaction(fs))
+	app.Get("/factions/:factionID", idFrom("factionID"), handleFaction(fs))
 }
