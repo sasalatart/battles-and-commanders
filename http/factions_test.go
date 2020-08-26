@@ -17,7 +17,7 @@ import (
 )
 
 func TestFactionsRoutes(t *testing.T) {
-	t.Run("FindOne", func(t *testing.T) {
+	t.Run("GET /factions/:factionID", func(t *testing.T) {
 		t.Parallel()
 		assertFindOne := func(app *fiber.App, route string, expectedResponse response) {
 			t.Helper()
@@ -27,7 +27,7 @@ func TestFactionsRoutes(t *testing.T) {
 				assertErrorMessage(t, res, expectedResponse.errorMessage)
 				return
 			}
-			factionFromBody := &domain.Faction{}
+			factionFromBody := new(domain.Faction)
 			err := json.NewDecoder(res.Body).Decode(factionFromBody)
 			require.NoError(t, err, "Decoding body into faction struct")
 			expectedFaction := expectedResponse.body.(domain.Faction)
@@ -39,7 +39,7 @@ func TestFactionsRoutes(t *testing.T) {
 			factionsStoreMock.On("FindOne", domain.Faction{
 				ID: factionMock.ID,
 			}).Return(factionMock, nil)
-			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersStore), true)
+			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersStore), new(mocks.BattlesStore), true)
 			expectedResponse := response{
 				status: http.StatusOK,
 				body:   factionMock,
@@ -53,7 +53,7 @@ func TestFactionsRoutes(t *testing.T) {
 			factionsStoreMock.On("FindOne", domain.Faction{
 				ID: uuid,
 			}).Return(domain.Faction{}, store.ErrNotFound)
-			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersStore), true)
+			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersStore), new(mocks.BattlesStore), true)
 			expectedResponse := response{
 				status:       http.StatusNotFound,
 				errorMessage: fiber.ErrNotFound.Message,
@@ -64,7 +64,7 @@ func TestFactionsRoutes(t *testing.T) {
 		t.Run("InvalidUUID", func(t *testing.T) {
 			invalidUUID := "invalid-uuid"
 			factionsStoreMock := &mocks.FactionsStore{}
-			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersStore), true)
+			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersStore), new(mocks.BattlesStore), true)
 			expectedResponse := response{
 				status:       http.StatusBadRequest,
 				errorMessage: fiber.ErrBadRequest.Message,

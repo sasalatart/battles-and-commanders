@@ -26,3 +26,8 @@ type FactionsFinder interface {
 type CommandersFinder interface {
 	FindOne(query interface{}, args ...interface{}) (domain.Commander, error)
 }
+
+// BattlesFinder is the interface through which battles may be found
+type BattlesFinder interface {
+	FindOne(query interface{}, args ...interface{}) (domain.Battle, error)
+}

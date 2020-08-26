@@ -17,7 +17,7 @@ import (
 )
 
 func TestCommandersRoutes(t *testing.T) {
-	t.Run("FindOne", func(t *testing.T) {
+	t.Run("GET /commanders/:commanderID", func(t *testing.T) {
 		t.Parallel()
 		assertFindOne := func(app *fiber.App, route string, expectedResponse response) {
 			t.Helper()
@@ -27,7 +27,7 @@ func TestCommandersRoutes(t *testing.T) {
 				assertErrorMessage(t, res, expectedResponse.errorMessage)
 				return
 			}
-			commanderFromBody := &domain.Commander{}
+			commanderFromBody := new(domain.Commander)
 			err := json.NewDecoder(res.Body).Decode(commanderFromBody)
 			require.NoError(t, err, "Decoding body into commander struct")
 			expectedCommander := expectedResponse.body.(domain.Commander)
@@ -39,7 +39,7 @@ func TestCommandersRoutes(t *testing.T) {
 			commandersStoreMock.On("FindOne", domain.Commander{
 				ID: commanderMock.ID,
 			}).Return(commanderMock, nil)
-			app := batcomshttp.Setup(new(mocks.FactionsStore), commandersStoreMock, true)
+			app := batcomshttp.Setup(new(mocks.FactionsStore), commandersStoreMock, new(mocks.BattlesStore), true)
 			expectedResponse := response{
 				status: http.StatusOK,
 				body:   commanderMock,
@@ -53,7 +53,7 @@ func TestCommandersRoutes(t *testing.T) {
 			commandersStoreMock.On("FindOne", domain.Commander{
 				ID: uuid,
 			}).Return(domain.Commander{}, store.ErrNotFound)
-			app := batcomshttp.Setup(new(mocks.FactionsStore), commandersStoreMock, true)
+			app := batcomshttp.Setup(new(mocks.FactionsStore), commandersStoreMock, new(mocks.BattlesStore), true)
 			expectedResponse := response{
 				status:       http.StatusNotFound,
 				errorMessage: fiber.ErrNotFound.Message,
@@ -64,7 +64,7 @@ func TestCommandersRoutes(t *testing.T) {
 		t.Run("InvalidUUID", func(t *testing.T) {
 			invalidUUID := "invalid-uuid"
 			commandersStoreMock := &mocks.CommandersStore{}
-			app := batcomshttp.Setup(new(mocks.FactionsStore), commandersStoreMock, true)
+			app := batcomshttp.Setup(new(mocks.FactionsStore), commandersStoreMock, new(mocks.BattlesStore), true)
 			expectedResponse := response{
 				status:       http.StatusBadRequest,
 				errorMessage: fiber.ErrBadRequest.Message,

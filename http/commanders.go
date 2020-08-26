@@ -10,7 +10,7 @@ import (
 func handleCommander(s store.CommandersFinder) func(*fiber.Ctx) {
 	return func(c *fiber.Ctx) {
 		commander, err := s.FindOne(domain.Commander{
-			ID: c.Locals("commanderId").(uuid.UUID),
+			ID: c.Locals("commanderID").(uuid.UUID),
 		})
 		if err != nil {
 			c.Next(err)
@@ -21,5 +21,5 @@ func handleCommander(s store.CommandersFinder) func(*fiber.Ctx) {
 }
 
 func registerCommandersRoutes(app *fiber.App, cs store.CommandersFinder) {
-	app.Get("/commanders/:commanderId", idFrom("commanderId"), handleCommander(cs))
+	app.Get("/commanders/:commanderID", idFrom("commanderID"), handleCommander(cs))
 }

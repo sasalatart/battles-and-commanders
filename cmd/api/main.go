@@ -19,6 +19,7 @@ func main() {
 
 	fs := postgresql.NewFactionsDataStore(db)
 	cs := postgresql.NewCommandersDataStore(db)
-	server := http.Setup(fs, cs, false)
+	bs := postgresql.NewBattlesDataStore(db)
+	server := http.Setup(fs, cs, bs, false)
 	log.Fatal(server.Listen(viper.GetInt("PORT")))
 }

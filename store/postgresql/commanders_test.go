@@ -9,49 +9,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/domain"
 	"github.com/sasalatart/batcoms/mocks"
-	"github.com/sasalatart/batcoms/store"
 	"github.com/sasalatart/batcoms/store/postgresql"
 	uuid "github.com/satori/go.uuid"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestCommandersStore(t *testing.T) {
-	t.Run("FindOne", func(t *testing.T) {
-		t.Run("WithPersistedUUID", func(t *testing.T) {
-			db, mock := mustSetupDB(t)
-			defer db.Close()
-			commanderMock := mocks.Commander()
-			mock.ExpectQuery(`^SELECT \* FROM "commanders"`).
-				WithArgs(commanderMock.ID).
-				WillReturnRows(sqlmock.NewRows(
-					[]string{"id", "wiki_id", "url", "name", "summary"},
-				).AddRow(commanderMock.ID, commanderMock.WikiID, commanderMock.URL, commanderMock.Name, commanderMock.Summary))
-			fs := postgresql.NewCommandersDataStore(db)
-			foundCommander, err := fs.FindOne(domain.Commander{
-				ID: commanderMock.ID,
-			})
-			require.NoError(t, err, "Finding commander")
-			assert.True(t, assert.ObjectsAreEqual(commanderMock, foundCommander), "Comparing found commander with queried one")
-			assertMeetsExpectations(t, mock)
-		})
-		t.Run("WithNonPersistedUUID", func(t *testing.T) {
-			db, mock := mustSetupDB(t)
-			defer db.Close()
-			uuid := uuid.NewV4()
-			mock.ExpectQuery(`^SELECT \* FROM "commanders"`).
-				WithArgs(uuid).
-				WillReturnError(gorm.ErrRecordNotFound)
-			fs := postgresql.NewCommandersDataStore(db)
-			_, err := fs.FindOne(domain.Commander{
-				ID: uuid,
-			})
-			require.Error(t, err, "Finding commander")
-			assert.IsType(t, store.ErrNotFound, err, "Comparing store error")
-			assertMeetsExpectations(t, mock)
-		})
-	})
-
 	t.Run("CreateOne", func(t *testing.T) {
 		mustSetupCreateOne := func(t *testing.T, mockUUID uuid.UUID, input domain.CreateCommanderInput, executes bool) (*gorm.DB, sqlmock.Sqlmock) {
 			db, mock := mustSetupDB(t)

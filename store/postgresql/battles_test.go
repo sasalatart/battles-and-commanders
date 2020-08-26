@@ -63,10 +63,12 @@ func TestBattlesStore(t *testing.T) {
 					WithArgs(sqlmock.AnyArg(), mockUUID, sqlmock.AnyArg()).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			}
-			for range input.CommandersByFaction {
-				mock.ExpectExec(`^UPDATE "battle_commander_factions"`).
-					WithArgs(mockUUID, sqlmock.AnyArg(), sqlmock.AnyArg()).
-					WillReturnResult(sqlmock.NewResult(1, 1))
+			for fID, cIDs := range input.CommandersByFaction {
+				for _, cID := range cIDs {
+					mock.ExpectQuery(`^SELECT \* FROM "battle_commander_factions"`).
+						WithArgs(mockUUID, sqlmock.AnyArg(), sqlmock.AnyArg()).
+						WillReturnRows(sqlmock.NewRows([]string{"battle_id", "commander_id", "faction_id"}).AddRow(mockUUID, cID, fID))
+				}
 			}
 			mock.ExpectCommit()
 			return db, mock
