@@ -35,11 +35,11 @@ func TestFactionsRoutes(t *testing.T) {
 		}
 		t.Run("ValidPersistedUUID", func(t *testing.T) {
 			factionMock := mocks.Faction()
-			factionsStoreMock := &mocks.FactionsStore{}
+			factionsStoreMock := new(mocks.FactionsDataStore)
 			factionsStoreMock.On("FindOne", domain.Faction{
 				ID: factionMock.ID,
 			}).Return(factionMock, nil)
-			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersStore), new(mocks.BattlesStore), true)
+			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersDataStore), new(mocks.BattlesDataStore), true)
 			expectedResponse := response{
 				status: http.StatusOK,
 				body:   factionMock,
@@ -49,11 +49,11 @@ func TestFactionsRoutes(t *testing.T) {
 		})
 		t.Run("ValidNonPersistedUUID", func(t *testing.T) {
 			uuid := uuid.NewV4()
-			factionsStoreMock := &mocks.FactionsStore{}
+			factionsStoreMock := new(mocks.FactionsDataStore)
 			factionsStoreMock.On("FindOne", domain.Faction{
 				ID: uuid,
 			}).Return(domain.Faction{}, store.ErrNotFound)
-			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersStore), new(mocks.BattlesStore), true)
+			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersDataStore), new(mocks.BattlesDataStore), true)
 			expectedResponse := response{
 				status:       http.StatusNotFound,
 				errorMessage: fiber.ErrNotFound.Message,
@@ -63,8 +63,8 @@ func TestFactionsRoutes(t *testing.T) {
 		})
 		t.Run("InvalidUUID", func(t *testing.T) {
 			invalidUUID := "invalid-uuid"
-			factionsStoreMock := &mocks.FactionsStore{}
-			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersStore), new(mocks.BattlesStore), true)
+			factionsStoreMock := new(mocks.FactionsDataStore)
+			app := batcomshttp.Setup(factionsStoreMock, new(mocks.CommandersDataStore), new(mocks.BattlesDataStore), true)
 			expectedResponse := response{
 				status:       http.StatusBadRequest,
 				errorMessage: fiber.ErrBadRequest.Message,
