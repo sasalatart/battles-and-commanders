@@ -1,92 +1,110 @@
 package mocks
 
 import (
+	"log"
+
 	"github.com/sasalatart/batcoms/domain"
+	"github.com/sasalatart/batcoms/services/parser"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/mock"
 )
 
-var baseBattleMock = domain.Battle{
-	ID:        uuid.NewV4(),
-	WikiID:    118372,
-	URL:       "https://en.wikipedia.org/wiki/Battle_of_Austerlitz",
-	Name:      "Battle of Austerlitz",
-	PartOf:    "Part of the War of the Third Coalition",
-	Summary:   "The Battle of Austerlitz, also known as the Battle of the Three Emperors, was one of the most important and decisive engagements of the Napoleonic Wars. In what is widely regarded as the greatest victory achieved by Napoleon, the Grande Armée of France defeated a larger Russian and Austrian army led by Emperor Alexander I and Holy Roman Emperor Francis II. The battle occurred near the town of Austerlitz in the Austrian Empire. Austerlitz brought the War of the Third Coalition to a rapid end, with the Treaty of Pressburg signed by the Austrians later in the month. The battle is often cited as a tactical masterpiece, in the same league as other historic engagements like Cannae or Gaugamela.",
-	StartDate: "1805-12-02",
-	EndDate:   "1805-12-02",
-	Location: domain.Location{
-		Place:     "Austerlitz, Moravia, Austria",
-		Latitude:  "49°8′N",
-		Longitude: "16°46′E",
-	},
-	Result:             "Decisive French victory. Treaty of Pressburg. Effective end of the Third Coalition",
-	TerritorialChanges: "Dissolution of the Holy Roman Empire and creation of the Confederation of the Rhine",
-	Strength: domain.SideNumbers{
-		A: "65,000–75,000",
-		B: "84,000–95,000",
-	},
-	Casualties: domain.SideNumbers{
-		A: "1,305 killed 6,991 wounded 573 captured",
-		B: "16,000 killed and wounded 20,000 captured",
-	},
-	Factions: domain.FactionsBySide{
-		A: []domain.Faction{Faction()},
-		B: []domain.Faction{Faction2(), Faction3()},
-	},
-	Commanders: domain.CommandersBySide{
-		A: []domain.Commander{Commander()},
-		B: []domain.Commander{Commander2(), Commander3(), Commander4(), Commander5()},
-	},
-	CommandersByFaction: domain.CommandersByFaction{
-		Faction().ID:  []uuid.UUID{Commander().ID},
-		Faction2().ID: []uuid.UUID{Commander2().ID, Commander3().ID},
-		Faction3().ID: []uuid.UUID{Commander4().ID, Commander5().ID},
-	},
-}
+var battleUUID = uuid.NewV4()
 
-// BattlesStore mocks the behaviour of store.BattlesFinder interface
-type BattlesStore struct {
+// BattlesDataStore mocks datastores used to find & create battles
+type BattlesDataStore struct {
 	mock.Mock
 }
 
-// FindOne mocks finding one commander via BattlesStore
-func (bs *BattlesStore) FindOne(query interface{}, args ...interface{}) (domain.Battle, error) {
+// FindOne mocks finding one battle via BattlesDataStore
+func (bs *BattlesDataStore) FindOne(query interface{}, args ...interface{}) (domain.Battle, error) {
 	mockArgs := bs.Called(append([]interface{}{query}, args...)...)
 	return mockArgs.Get(0).(domain.Battle), mockArgs.Error(1)
 }
 
+// CreateOne mocks creating one battle via BattlesDataStore
+func (bs *BattlesDataStore) CreateOne(data domain.CreateBattleInput) (uuid.UUID, error) {
+	mockArgs := bs.Called(data)
+	return mockArgs.Get(0).(uuid.UUID), mockArgs.Error(1)
+}
+
 // Battle returns an instance of domain.Battle that may be used for mocking purposes
 func Battle() domain.Battle {
-	mock := baseBattleMock
-	return mock
+	sb := SBattle()
+	dates, err := parser.Date(sb.Date)
+	if err != nil {
+		log.Fatalf("Cannot parse date %q, and therefore mock.Battle is not valid: %s", sb.Date, err)
+	}
+	return domain.Battle{
+		ID:        battleUUID,
+		WikiID:    sb.ID,
+		URL:       sb.URL,
+		Name:      sb.Name,
+		PartOf:    sb.PartOf,
+		Summary:   sb.Extract,
+		StartDate: dates[0],
+		EndDate:   dates[len(dates)-1],
+		Location: domain.Location{
+			Place:     sb.Location.Place,
+			Latitude:  sb.Location.Latitude,
+			Longitude: sb.Location.Longitude,
+		},
+		Result:             sb.Result,
+		TerritorialChanges: sb.TerritorialChanges,
+		Strength: domain.SideNumbers{
+			A:  sb.Strength.A,
+			B:  sb.Strength.B,
+			AB: sb.Strength.AB,
+		},
+		Casualties: domain.SideNumbers{
+			A:  sb.Casualties.A,
+			B:  sb.Casualties.B,
+			AB: sb.Casualties.AB,
+		},
+		Factions: domain.FactionsBySide{
+			A: []domain.Faction{Faction()},
+			B: []domain.Faction{Faction2(), Faction3()},
+		},
+		Commanders: domain.CommandersBySide{
+			A: []domain.Commander{Commander()},
+			B: []domain.Commander{Commander2(), Commander3(), Commander4(), Commander5()},
+		},
+		CommandersByFaction: domain.CommandersByFaction{
+			Faction().ID:  []uuid.UUID{Commander().ID},
+			Faction2().ID: []uuid.UUID{Commander2().ID, Commander3().ID},
+			Faction3().ID: []uuid.UUID{Commander4().ID, Commander5().ID},
+		},
+	}
 }
 
 // CreateBattleInput returns an instance of domain.CreateBattleInput that may be used for mocking
 // inputs to create battles
 func CreateBattleInput() domain.CreateBattleInput {
+	b := Battle()
 	return domain.CreateBattleInput{
-		WikiID:    baseBattleMock.WikiID,
-		URL:       baseBattleMock.URL,
-		Name:      baseBattleMock.Name,
-		PartOf:    baseBattleMock.PartOf,
-		Summary:   baseBattleMock.Summary,
-		StartDate: baseBattleMock.StartDate,
-		EndDate:   baseBattleMock.EndDate,
+		WikiID:    b.WikiID,
+		URL:       b.URL,
+		Name:      b.Name,
+		PartOf:    b.PartOf,
+		Summary:   b.Summary,
+		StartDate: b.StartDate,
+		EndDate:   b.EndDate,
 		Location: domain.Location{
-			Place:     baseBattleMock.Location.Place,
-			Latitude:  baseBattleMock.Location.Latitude,
-			Longitude: baseBattleMock.Location.Longitude,
+			Place:     b.Location.Place,
+			Latitude:  b.Location.Latitude,
+			Longitude: b.Location.Longitude,
 		},
-		Result:             baseBattleMock.Result,
-		TerritorialChanges: baseBattleMock.TerritorialChanges,
+		Result:             b.Result,
+		TerritorialChanges: b.TerritorialChanges,
 		Strength: domain.SideNumbers{
-			A: baseBattleMock.Strength.A,
-			B: baseBattleMock.Strength.B,
+			A:  b.Strength.A,
+			B:  b.Strength.B,
+			AB: b.Strength.AB,
 		},
 		Casualties: domain.SideNumbers{
-			A: baseBattleMock.Casualties.A,
-			B: baseBattleMock.Casualties.B,
+			A:  b.Casualties.A,
+			B:  b.Casualties.B,
+			AB: b.Casualties.AB,
 		},
 		FactionsBySide: domain.ParticipantsIDsBySide{
 			A: []uuid.UUID{Faction().ID},

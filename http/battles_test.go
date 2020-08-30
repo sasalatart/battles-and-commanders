@@ -35,11 +35,11 @@ func TestBattlesRoutes(t *testing.T) {
 		}
 		t.Run("ValidPersistedUUID", func(t *testing.T) {
 			battleMock := mocks.Battle()
-			battlesStoreMock := &mocks.BattlesStore{}
+			battlesStoreMock := new(mocks.BattlesDataStore)
 			battlesStoreMock.On("FindOne", domain.Battle{
 				ID: battleMock.ID,
 			}).Return(battleMock, nil)
-			app := batcomshttp.Setup(new(mocks.FactionsStore), new(mocks.CommandersStore), battlesStoreMock, true)
+			app := batcomshttp.Setup(new(mocks.FactionsDataStore), new(mocks.CommandersDataStore), battlesStoreMock, true)
 			expectedResponse := response{
 				status: http.StatusOK,
 				body:   battleMock,
@@ -49,11 +49,11 @@ func TestBattlesRoutes(t *testing.T) {
 		})
 		t.Run("ValidNonPersistedUUID", func(t *testing.T) {
 			uuid := uuid.NewV4()
-			battlesStoreMock := &mocks.BattlesStore{}
+			battlesStoreMock := new(mocks.BattlesDataStore)
 			battlesStoreMock.On("FindOne", domain.Battle{
 				ID: uuid,
 			}).Return(domain.Battle{}, store.ErrNotFound)
-			app := batcomshttp.Setup(new(mocks.FactionsStore), new(mocks.CommandersStore), battlesStoreMock, true)
+			app := batcomshttp.Setup(new(mocks.FactionsDataStore), new(mocks.CommandersDataStore), battlesStoreMock, true)
 			expectedResponse := response{
 				status:       http.StatusNotFound,
 				errorMessage: fiber.ErrNotFound.Message,
@@ -63,8 +63,8 @@ func TestBattlesRoutes(t *testing.T) {
 		})
 		t.Run("InvalidUUID", func(t *testing.T) {
 			invalidUUID := "invalid-uuid"
-			battlesStoreMock := &mocks.BattlesStore{}
-			app := batcomshttp.Setup(new(mocks.FactionsStore), new(mocks.CommandersStore), battlesStoreMock, true)
+			battlesStoreMock := new(mocks.BattlesDataStore)
+			app := batcomshttp.Setup(new(mocks.FactionsDataStore), new(mocks.CommandersDataStore), battlesStoreMock, true)
 			expectedResponse := response{
 				status:       http.StatusBadRequest,
 				errorMessage: fiber.ErrBadRequest.Message,
