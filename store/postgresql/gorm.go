@@ -8,6 +8,7 @@ import (
 	"github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/postgres" // postgres drivers
 	"github.com/pkg/errors"
+	"github.com/sasalatart/batcoms/store/postgresql/schema"
 	"github.com/spf13/viper"
 )
 
@@ -25,6 +26,23 @@ func Connect() *gorm.DB {
 		panic(errors.Wrap(err, "Unable to connect to database"))
 	}
 	return db
+}
+
+// Reset drops all existing tables, and automigrates them again
+func Reset(db *gorm.DB) {
+	db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;`)
+	schemas := []interface{}{&schema.BattleCommanderFaction{}, &schema.BattleFaction{}, &schema.BattleCommander{}, &schema.Faction{}, &schema.Commander{}, &schema.Battle{}}
+	for _, s := range schemas {
+		db.DropTableIfExists(s)
+		db.AutoMigrate(s)
+	}
+	db.Model(&schema.BattleFaction{}).AddForeignKey("battle_id", "battles(id)", "CASCADE", "CASCADE")
+	db.Model(&schema.BattleFaction{}).AddForeignKey("faction_id", "factions(id)", "CASCADE", "CASCADE")
+	db.Model(&schema.BattleCommander{}).AddForeignKey("battle_id", "battles(id)", "CASCADE", "CASCADE")
+	db.Model(&schema.BattleCommander{}).AddForeignKey("commander_id", "commanders(id)", "CASCADE", "CASCADE")
+	db.Model(&schema.BattleCommanderFaction{}).AddForeignKey("battle_id", "battles(id)", "CASCADE", "CASCADE")
+	db.Model(&schema.BattleCommanderFaction{}).AddForeignKey("commander_id", "commanders(id)", "CASCADE", "CASCADE")
+	db.Model(&schema.BattleCommanderFaction{}).AddForeignKey("faction_id", "factions(id)", "CASCADE", "CASCADE")
 }
 
 func fromJSONB(data postgres.Jsonb, storeTo interface{}) error {
