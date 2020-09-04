@@ -5,6 +5,9 @@ import (
 
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/fiber/middleware"
+	"github.com/sasalatart/batcoms/http/battles"
+	"github.com/sasalatart/batcoms/http/commanders"
+	"github.com/sasalatart/batcoms/http/factions"
 	"github.com/sasalatart/batcoms/store"
 )
 
@@ -14,9 +17,9 @@ func Setup(fs store.FactionsFinder, cs store.CommandersFinder, bs store.BattlesF
 	app.Settings.ErrorHandler = errorsHandlerFactory(debug)
 	app.Use(middleware.Recover())
 	app.Use(middleware.Logger())
-	registerFactionsRoutes(app, fs)
-	registerCommandersRoutes(app, cs)
-	registerBattlesRoutes(app, bs)
+	factions.RegisterRoutes(app, fs)
+	commanders.RegisterRoutes(app, cs)
+	battles.RegisterRoutes(app, bs)
 	return app
 }
 

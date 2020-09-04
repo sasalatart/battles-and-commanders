@@ -1,9 +1,14 @@
 PORT: 3000
+PORT_TEST: 8888
 PSQL_HOST: localhost
 PSQL_PORT: 5432
 PSQL_USER: postgres
 PSQL_NAME: batcoms
+PSQL_NAME_TEST: batcoms_test
 PSQL_PASS: password
 SCRAPER_RESULTS:
   BATTLES: battles.json
   PARTICIPANTS: participants.json
+TEST_SEEDERS:
+  BATTLES: seeders/battles.json
+  PARTICIPANTS: seeders/participants.json
