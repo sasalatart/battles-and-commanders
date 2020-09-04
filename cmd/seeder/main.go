@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/sasalatart/batcoms/config"
+	"github.com/sasalatart/batcoms/services/io"
 	"github.com/sasalatart/batcoms/services/seeder"
 	"github.com/sasalatart/batcoms/store/postgresql"
 	"github.com/spf13/viper"
@@ -14,14 +15,13 @@ func init() {
 }
 
 func main() {
-	db := postgresql.Connect()
+	db := postgresql.Connect(nil)
 	defer db.Close()
 
-	postgresql.Reset(db)
 	battlesFileName := viper.GetString("SCRAPER_RESULTS.BATTLES")
 	participantsFileName := viper.GetString("SCRAPER_RESULTS.PARTICIPANTS")
-	importedData, err := seeder.JSONImport(battlesFileName, participantsFileName)
-	if err != nil {
+	importedData := new(io.ImportedData)
+	if err := seeder.JSONImport(battlesFileName, participantsFileName, importedData); err != nil {
 		log.Fatalf("Failed seeding: %s", err)
 	}
 	seederService := seeder.Service{
@@ -31,5 +31,6 @@ func main() {
 		BattlesCreator:    postgresql.NewBattlesDataStore(db),
 		Logger:            log.Writer(),
 	}
+	postgresql.Reset(db)
 	seederService.Seed()
 }

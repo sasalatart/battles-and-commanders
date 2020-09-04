@@ -3,10 +3,19 @@ version: 2.1
 aliases:
   - &go-docker-image circleci/golang:1.13
   - &node-docker-image circleci/node:12.13.1
+  - &postgres-docker-image circleci/postgres:10.5-alpine-ram
   - &working-directory ~/repo
   - &go-mod-cache-key go-mod-v1-{{ checksum "go.sum" }}
 
 executors:
+  app_executor:
+    working_directory: *working-directory
+    docker:
+      - image: *go-docker-image
+      - image: *postgres-docker-image
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: batcoms_test
   go_executor:
     working_directory: *working-directory
     docker:
@@ -24,6 +33,26 @@ commands:
       - restore_cache:
           keys:
             - *go-mod-cache-key
+
+  install_dockerize:
+    description: Install Dockerize
+    steps:
+      - run:
+          name: Download and configure Dockerize
+          command: |
+            wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
+            sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
+            rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.3.0
+
+  wait_for:
+    description: Waits for a port to be ready and listening
+    parameters:
+      port:
+        type: integer
+    steps:
+      - run: dockerize -wait tcp://localhost:<< parameters.port >> -timeout 1m
 
 jobs:
   commitlint:
@@ -69,9 +98,26 @@ jobs:
 
   test:
     description: Run tests
-    executor: go_executor
+    executor: app_executor
     steps:
       - checkout_and_cache
+      - install_dockerize
+
+      - run:
+          name: Build API
+          command: go build -o api cmd/api/main.go
+
+      - wait_for:
+          port: 5432
+
+      - run:
+          name: Start API in test mode
+          command: ./api -test
+          background: true
+
+      - wait_for:
+          port: 8888
+
       - run: go test ./...
 
   build:

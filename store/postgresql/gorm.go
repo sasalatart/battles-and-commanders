@@ -12,15 +12,44 @@ import (
 	"github.com/spf13/viper"
 )
 
+// ConnectionConfig is a struct that contains database connection configuration options
+type ConnectionConfig struct {
+	Host string
+	Port string
+	Name string
+	User string
+	Pass string
+}
+
+func defaultConfig() *ConnectionConfig {
+	return &ConnectionConfig{
+		Host: viper.GetString("PSQL_HOST"),
+		Port: viper.GetString("PSQL_PORT"),
+		Name: viper.GetString("PSQL_NAME"),
+		User: viper.GetString("PSQL_USER"),
+		Pass: viper.GetString("PSQL_PASS"),
+	}
+}
+
+// TestConfig exposes a ConnectionConfig set up to work with the default test environment
+func TestConfig() *ConnectionConfig {
+	c := defaultConfig()
+	c.Name = viper.GetString("PSQL_NAME_TEST")
+	return c
+}
+
 // Connect establishes a database connection to the PostgreSQL instance
-func Connect() *gorm.DB {
+func Connect(c *ConnectionConfig) *gorm.DB {
+	if c == nil {
+		c = defaultConfig()
+	}
 	db, err := gorm.Open("postgres", fmt.Sprintf(
 		"host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
-		viper.GetString("PSQL_HOST"),
-		viper.GetString("PSQL_PORT"),
-		viper.GetString("PSQL_USER"),
-		viper.GetString("PSQL_NAME"),
-		viper.GetString("PSQL_PASS"),
+		c.Host,
+		c.Port,
+		c.User,
+		c.Name,
+		c.Pass,
 	))
 	if err != nil {
 		panic(errors.Wrap(err, "Unable to connect to database"))

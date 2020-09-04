@@ -1,4 +1,5 @@
 *.json
+!integration_tests/seeders/*.json
 
 # Binaries for programs and plugins
 *.exe
