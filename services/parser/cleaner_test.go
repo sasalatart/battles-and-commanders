@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/sasalatart/batcoms/services/parser"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCleaner(t *testing.T) {
@@ -54,11 +55,6 @@ func TestCleaner(t *testing.T) {
 	}
 	for _, c := range cc {
 		got := parser.Clean(c.input)
-		if got != c.expected {
-			t.Errorf("Expected\n%q\nto be parsed as:\n%q\nbut instead got:\n%q", c.input, c.expected, got)
-		}
-	}
-	if !t.Failed() {
-		t.Log("Cleans out unwanted sequences")
+		assert.Equalf(t, c.expected, got, "Cleaning %q", c.input)
 	}
 }

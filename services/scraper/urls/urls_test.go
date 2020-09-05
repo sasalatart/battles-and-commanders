@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/sasalatart/batcoms/services/scraper/urls"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestURLs(t *testing.T) {
@@ -29,17 +30,7 @@ func TestURLs(t *testing.T) {
 		}
 		for _, c := range cases {
 			got := urls.NotSpecific(c.url)
-			if got != c.expected {
-				t.Errorf(
-					"Expected urls.NotSpecific(%s) to be %t, but got %t",
-					c.url,
-					c.expected,
-					got,
-				)
-			}
-		}
-		if !t.Failed() {
-			t.Log("Returns true for URLs regarded as not specific enough, and false for specific ones")
+			assert.Equal(t, c.expected, got, "Expected urls.NotSpecific(%q) to be %t", c.url, c.expected)
 		}
 	})
 
@@ -101,17 +92,7 @@ func TestURLs(t *testing.T) {
 		}
 		for _, c := range cases {
 			got := urls.ShouldSkip(c.url)
-			if got != c.expected {
-				t.Errorf(
-					"Expected urls.ShouldSkip(%s) to be %t, but got %t",
-					c.url,
-					c.expected,
-					got,
-				)
-			}
-		}
-		if !t.Failed() {
-			t.Log("Returns true for URLs that should be skipped, and false for those that should not")
+			assert.Equal(t, c.expected, got, "Expected urls.ShouldSkip(%q) to be %t", c.url, c.expected)
 		}
 	})
 }

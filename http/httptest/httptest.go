@@ -37,7 +37,7 @@ func AssertJSONFaction(t *testing.T, res *http.Response, expectedFaction domain.
 	factionFromBody := new(domain.Faction)
 	err := json.NewDecoder(res.Body).Decode(factionFromBody)
 	require.NoError(t, err, "Decoding body into faction struct")
-	assert.True(t, assert.ObjectsAreEqual(expectedFaction, *factionFromBody), "Comparing body with expected faction")
+	assert.Equal(t, expectedFaction, *factionFromBody, "Comparing body with expected faction")
 }
 
 // AssertJSONCommander asserts that the given *http.Response contains the specified JSON-serialized
@@ -47,7 +47,7 @@ func AssertJSONCommander(t *testing.T, res *http.Response, expectedCommander dom
 	commanderFromBody := new(domain.Commander)
 	err := json.NewDecoder(res.Body).Decode(commanderFromBody)
 	require.NoError(t, err, "Decoding body into commander struct")
-	assert.True(t, assert.ObjectsAreEqual(expectedCommander, *commanderFromBody), "Comparing body with expected commander")
+	assert.Equal(t, expectedCommander, *commanderFromBody, "Comparing body with expected commander")
 }
 
 // AssertJSONBattle asserts that the given *http.Response contains the specified JSON-serialized
@@ -57,5 +57,5 @@ func AssertJSONBattle(t *testing.T, res *http.Response, expectedBattle domain.Ba
 	battleFromBody := new(domain.Battle)
 	err := json.NewDecoder(res.Body).Decode(battleFromBody)
 	require.NoError(t, err, "Decoding body into battle struct")
-	assert.True(t, assert.ObjectsAreEqual(expectedBattle, *battleFromBody), "Comparing body with expected battle")
+	assert.Equal(t, expectedBattle, *battleFromBody, "Comparing body with expected battle")
 }
