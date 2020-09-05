@@ -17,11 +17,8 @@ import (
 
 func TestFactionsStore(t *testing.T) {
 	t.Run("CreateOne", func(t *testing.T) {
-		mustSetupCreateOne := func(t *testing.T, mockUUID uuid.UUID, input domain.CreateFactionInput, executes bool) (*gorm.DB, sqlmock.Sqlmock) {
+		mustSetupCreateOne := func(t *testing.T, mockUUID uuid.UUID, input domain.CreateFactionInput) (*gorm.DB, sqlmock.Sqlmock) {
 			db, mock := mustSetupDB(t)
-			if !executes {
-				return db, mock
-			}
 			mock.ExpectBegin()
 			mock.ExpectQuery(`^INSERT INTO "factions" (.*)`).
 				WithArgs(input.WikiID, input.URL, input.Name, input.Summary).
@@ -35,27 +32,27 @@ func TestFactionsStore(t *testing.T) {
 		t.Run("WithValidInput", func(t *testing.T) {
 			mockUUID := uuid.NewV4()
 			input := mocks.CreateFactionInput()
-			db, mock := mustSetupCreateOne(t, mockUUID, input, true)
+			db, mock := mustSetupCreateOne(t, mockUUID, input)
 			defer db.Close()
 			fs := postgresql.NewFactionsDataStore(db)
+
 			id, err := fs.CreateOne(input)
-			require.NoError(t, err, "Creating faction")
-			assert.Equal(t, mockUUID, id, "ID of created faction")
-			assertMeetsExpectations(t, mock)
+			require.NoError(t, err, "Creating faction with valid input")
+			assert.Equal(t, mockUUID, id, "Should return the corresponding ID")
+			assert.NoError(t, mock.ExpectationsWereMet(), "Not all SQL expectations were met")
 		})
 		t.Run("WithInvalidInput", func(t *testing.T) {
-			mockUUID := uuid.NewV4()
 			input := mocks.CreateFactionInput()
 			input.URL = "not-a-url"
-			db, mock := mustSetupCreateOne(t, mockUUID, input, false)
+			db, mock := mustSetupDB(t)
 			defer db.Close()
 			fs := postgresql.NewFactionsDataStore(db)
+
 			_, err := fs.CreateOne(input)
-			require.Error(t, err, "Creating faction")
-			if _, isValidationError := errors.Cause(err).(validator.ValidationErrors); !isValidationError {
-				t.Error("Expected error to be a validation error, but it was not")
-			}
-			assertMeetsExpectations(t, mock)
+			require.Error(t, err, "Creating faction with invalid input")
+			_, isValidationError := errors.Cause(err).(validator.ValidationErrors)
+			assert.True(t, isValidationError, "Error should be a validator.ValidationErrors")
+			assert.NoError(t, mock.ExpectationsWereMet(), "Not all SQL expectations were met")
 		})
 	})
 }

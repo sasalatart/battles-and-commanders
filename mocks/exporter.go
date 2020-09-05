@@ -3,7 +3,7 @@ package mocks
 // Exporter mocks a struct that implements the io.Exporter interface, defining behaviour for
 // exporting data into a JSON file
 type Exporter struct {
-	CalledTimes   uint
+	CalledTimes   int
 	FileNamesUsed []string
 }
 

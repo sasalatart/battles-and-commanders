@@ -1,47 +1,32 @@
 package memory_test
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/sasalatart/batcoms/mocks"
 	"github.com/sasalatart/batcoms/store/memory"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSParticipantsMemStore(t *testing.T) {
 	store := memory.NewSParticipantsStore()
 
 	f := mocks.SFaction()
-	if err := store.Save(f); err != nil {
-		t.Fatalf("Expected no error when saving faction %+v, but instead got: %s", f, err)
-	} else {
-		t.Log("Saves factions")
-	}
+	require.NoError(t, store.Save(f), "Saving valid faction")
 
 	c := mocks.SCommander()
 	c.ID = f.ID
-	if err := store.Save(c); err != nil {
-		t.Fatalf("Expected no error when saving commander %+v, but instead got: %s", c, err)
-	} else {
-		t.Log("Saves commanders")
-	}
+	require.NoError(t, store.Save(c), "Saving valid commander, even with the same ID of existing faction")
 
-	if inexistentParticipant := store.Find(f.Kind, 100); inexistentParticipant != nil {
-		t.Errorf("Expected to get nil when finding an inexistent participant, but instead got %+v", *inexistentParticipant)
-	} else {
-		t.Log("Returns errors when trying to find participants that do not exist")
-	}
+	assert.Nil(t, store.Find(f.Kind, 100), "Finding inexistent faction")
+	assert.Nil(t, store.Find(c.Kind, 100), "Finding inexistent commander")
 
-	found := store.Find(f.Kind, f.ID)
-	if !reflect.DeepEqual(*found, f) {
-		t.Errorf("Expected to find participant %+v when searching via its ID, but instead got %+v", f, *found)
-	} else {
-		t.Log("Finds participants given their IDs")
-	}
-	found = store.FindByURL(f.Kind, f.URL)
-	if !reflect.DeepEqual(*found, f) {
-		t.Errorf("Expected to find participant %+v when searching via its URL, but instead got %+v", f, *found)
-	} else {
-		t.Log("Finds participants given their URLs")
-	}
+	byID := store.Find(f.Kind, f.ID)
+	require.NotNil(t, byID, "Finding existing faction by ID")
+	assert.Equal(t, f, *byID, "Finding existing faction by ID")
+
+	byURL := store.FindByURL(f.Kind, f.URL)
+	require.NotNil(t, byURL, "Finding existing faction by URL")
+	require.Equal(t, f, *byURL, "Finding existing faction by URL")
 }

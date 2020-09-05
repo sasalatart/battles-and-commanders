@@ -1,10 +1,10 @@
 package parser_test
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/sasalatart/batcoms/services/parser"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDates(t *testing.T) {
@@ -271,15 +271,7 @@ func TestDates(t *testing.T) {
 	}
 	for _, c := range cases {
 		got, err := parser.Date(c.raw)
-		if err != nil {
-			t.Errorf("Expected %q to be parsed as %q, but instead errored with %s", c.raw, c.expected, err)
-			continue
-		}
-		if !reflect.DeepEqual(got, c.expected) {
-			t.Errorf("Expected %q to be parsed as %q, but instead got %q", c.raw, c.expected, got)
-		}
-	}
-	if !t.Failed() {
-		t.Log("Parses dates and ranges written in different formats into YYYY-MM-DD format")
+		assert.NoErrorf(t, err, "Parsing date %q", c.raw)
+		assert.Equal(t, c.expected, got, "Parsing date %q", c.raw)
 	}
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/sasalatart/batcoms/services/scraper"
 	"github.com/sasalatart/batcoms/store/memory"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/sasalatart/batcoms/mocks"
 )
@@ -22,19 +23,14 @@ func TestList(t *testing.T) {
 	)
 	battlesList := scraperService.List()
 
-	gotBattles := len(battlesList)
-	expectedMinBattles := 4500
-	if gotBattles < expectedMinBattles {
-		t.Errorf("Expected to scrap more than %d battles, but only got %d", expectedMinBattles, gotBattles)
-	} else {
-		t.Logf("Scraps more than %d battles", expectedMinBattles)
-	}
+	minListLen := 4500
+	assert.GreaterOrEqualf(t, len(battlesList), minListLen, "Should obtain more than %d battles", minListLen)
 
-	indexedBattlesNames := make(map[string]string)
+	var gotBattlesNames []string
 	for _, battle := range battlesList {
-		indexedBattlesNames[battle.Name] = battle.Name
+		gotBattlesNames = append(gotBattlesNames, battle.Name)
 	}
-	nn := []string{
+	expectedBattlesNames := []string{
 		"Action at Blue Mills Landing",
 		"Ambush of Geary",
 		"Assault on Copenhagen",
@@ -91,15 +87,8 @@ func TestList(t *testing.T) {
 		"United Arab Emirates takeover of Socotra",
 		"Greater Poland Uprising",
 	}
-	allBattlesFound := true
-	for _, n := range nn {
-		if indexedBattlesNames[n] != n {
-			t.Errorf("%q was not found in the list of scraped battles", n)
-			allBattlesFound = false
-		}
-	}
-	if allBattlesFound {
-		t.Log("Contains battles found from different patterns")
+	for _, expected := range expectedBattlesNames {
+		assert.Contains(t, gotBattlesNames, expected, "Expected %q to be present in the scraped list", expected)
 	}
 
 	cc := []string{
@@ -126,19 +115,14 @@ func TestList(t *testing.T) {
 				found = true
 			}
 		}
-		if !found {
-			t.Errorf("Scraper did not log results for %s", c)
-		}
+		assert.Truef(t, found, "Scraper did not log results for %s", c)
 	}
 	gotLogsAmount := loggerMock.Logs[len(loggerMock.Logs)-1]
 	expectedLogsAmount := len(battlesList)
-	if !strings.Contains(gotLogsAmount, strconv.Itoa(expectedLogsAmount)) {
-		t.Errorf(
-			"Expected the amounts log to contain the number %d, but instead logged %q",
-			expectedLogsAmount,
-			gotLogsAmount,
-		)
-	} else {
-		t.Log("Logs for each list and with a final count of scraped battles")
-	}
+	assert.Containsf(
+		t,
+		gotLogsAmount,
+		strconv.Itoa(expectedLogsAmount),
+		"Expected the amounts log to contain the number %d", expectedLogsAmount,
+	)
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/sasalatart/batcoms/services/scraper/names"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNames(t *testing.T) {
@@ -66,15 +67,7 @@ func TestNames(t *testing.T) {
 		{"GitHub", false},
 	}
 	for _, c := range cases {
-		if names.IsBattle(c.name) != c.expected {
-			if c.expected {
-				t.Errorf("Expected %s to be considered a battle, but it was not", c.name)
-			} else {
-				t.Errorf("Expected %s to not be considered a battle, but it was", c.name)
-			}
-		}
-	}
-	if !t.Failed() {
-		t.Log("Returns true for strings that may be a battle, and false for those that don't")
+		got := names.IsBattle(c.name)
+		assert.Equal(t, c.expected, got, "Expected names.IsBattle(%q) to be %t", c.name, c.expected)
 	}
 }
