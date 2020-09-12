@@ -1,27 +1,33 @@
-package scraper_test
+package battles_test
 
 import (
 	"io/ioutil"
 	"strings"
 	"testing"
 
+	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/domain"
 	"github.com/sasalatart/batcoms/mocks"
-	"github.com/sasalatart/batcoms/services/scraper"
+	"github.com/sasalatart/batcoms/services/logger"
+	"github.com/sasalatart/batcoms/services/scraper/battles"
 	"github.com/sasalatart/batcoms/store/memory"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSBattle(t *testing.T) {
-	sbStore := memory.NewSBattlesStore()
-	spStore := memory.NewSParticipantsStore()
+	participantsStore := memory.NewSParticipantsStore()
 	exporterMock := mocks.Exporter{}
-	scraperService := scraper.New(sbStore, spStore, exporterMock.Export, ioutil.Discard)
+	scraper := battles.NewScraper(
+		memory.NewSBattlesStore(),
+		participantsStore,
+		exporterMock.Export,
+		logger.New(ioutil.Discard, ioutil.Discard),
+	)
 
 	requireBattle := func(t *testing.T, url string) domain.SBattle {
 		t.Helper()
-		battle, err := scraperService.SBattle(url)
+		battle, err := scraper.ScrapeOne(url)
 		require.NoErrorf(t, err, "When scraping %q", url)
 		return battle
 	}
@@ -188,7 +194,7 @@ func TestSBattle(t *testing.T) {
 			if strings.HasPrefix(strings.ToLower(pc.label), "commander") {
 				kind = domain.CommanderKind
 			}
-			got := spStore.Find(kind, pc.id)
+			got := participantsStore.Find(kind, pc.id)
 			require.NotNilf(t, got, "Searching for participant with id %d for %q", pc.id, pc.label)
 			assert.Equal(t, pc.expected, got.Name)
 		}
@@ -214,5 +220,19 @@ func TestSBattle(t *testing.T) {
 			AB: "5,000",
 		}
 		assert.Equal(t, expected, battle.Casualties)
+	})
+
+	t.Run("WithNoInfoBox", func(t *testing.T) {
+		t.Parallel()
+		_, err := scraper.ScrapeOne("https://en.wikipedia.org/wiki/Diplomatic_Revolution")
+		require.Errorf(t, err, "Scraping a URL with no info box")
+		assert.EqualError(t, errors.Cause(err), battles.ErrNoInfoBox.Error(), "Error should be a battles.ErrNoInfoBox")
+	})
+
+	t.Run("WithMoreThanOneInfoBox", func(t *testing.T) {
+		t.Parallel()
+		_, err := scraper.ScrapeOne("https://en.wikipedia.org/wiki/Big_Sandy_Expedition")
+		require.Errorf(t, err, "Scraping a URL with more than one info box")
+		assert.EqualError(t, errors.Cause(err), battles.ErrMoreThanOneInfoBox.Error(), "Error should be a battles.ErrMoreThanOneInfoBox")
 	})
 }

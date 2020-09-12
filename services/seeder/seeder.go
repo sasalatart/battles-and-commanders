@@ -2,10 +2,11 @@ package seeder
 
 import (
 	"fmt"
-	"io"
 
+	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/domain"
 	batcomsio "github.com/sasalatart/batcoms/services/io"
+	"github.com/sasalatart/batcoms/services/logger"
 	"github.com/sasalatart/batcoms/services/parser"
 	"github.com/sasalatart/batcoms/store"
 	uuid "github.com/satori/go.uuid"
@@ -17,7 +18,7 @@ type Service struct {
 	FactionsCreator   store.FactionsCreator
 	CommandersCreator store.CommandersCreator
 	BattlesCreator    store.BattlesCreator
-	Logger            io.Writer
+	Logger            logger.Service
 }
 
 // Seed fills factions, commanders and battles data stores with the service's available ImportedData
@@ -30,7 +31,7 @@ func (s *Service) factions() domain.IDsMap {
 	current := 0
 	total := len(s.ImportedData.SFactionsByID)
 	for _, sf := range s.ImportedData.SFactionsByID {
-		s.log(fmt.Sprintf("\rSeeding factions (%d/%d)", current, total))
+		fmt.Printf("\rSeeding factions (%d/%d)", current, total)
 		current++
 		input := domain.CreateFactionInput{
 			WikiID:  sf.ID,
@@ -39,12 +40,12 @@ func (s *Service) factions() domain.IDsMap {
 			Summary: sf.Extract,
 		}
 		if fID, err := s.FactionsCreator.CreateOne(input); err != nil {
-			s.log(err.Error())
+			s.Logger.Error(errors.Wrapf(err, "Creating faction with URL %s", input.URL))
 		} else {
 			fIDsByWikiID[sf.ID] = fID
 		}
 	}
-	s.log("\nFinished seeding factions")
+	s.Logger.Info("\nFinished seeding factions")
 	return fIDsByWikiID
 }
 
@@ -53,7 +54,7 @@ func (s *Service) commanders() domain.IDsMap {
 	current := 0
 	total := len(s.ImportedData.SCommandersByID)
 	for _, sc := range s.ImportedData.SCommandersByID {
-		s.log(fmt.Sprintf("\rSeeding commanders (%d/%d)", current, total))
+		fmt.Printf("\rSeeding commanders (%d/%d)", current, total)
 		current++
 		input := domain.CreateCommanderInput{
 			WikiID:  sc.ID,
@@ -62,12 +63,12 @@ func (s *Service) commanders() domain.IDsMap {
 			Summary: sc.Extract,
 		}
 		if cID, err := s.CommandersCreator.CreateOne(input); err != nil {
-			s.log(err.Error())
+			s.Logger.Error(errors.Wrapf(err, "Creating commander with URL %s", input.URL))
 		} else {
 			cIDsByWikiID[sc.ID] = cID
 		}
 	}
-	s.log(fmt.Sprint("\nFinished seeding commanders\n"))
+	s.Logger.Info("\nFinished seeding commanders")
 	return cIDsByWikiID
 }
 
@@ -75,11 +76,11 @@ func (s *Service) battles(cIDsByWikiID, fIDsByWikiID domain.IDsMap) {
 	current := 0
 	total := len(s.ImportedData.SBattlesByID)
 	for _, sb := range s.ImportedData.SBattlesByID {
-		s.log(fmt.Sprintf("\rSeeding battles (%d/%d)", current, total))
+		fmt.Printf("\rSeeding battles (%d/%d)", current, total)
 		current++
 		dates, err := parser.Date(sb.Date)
 		if err != nil {
-			s.log(fmt.Sprintf("\rUnable to parse date for %s (given date was %q)\n", sb.Name, sb.Date))
+			s.Logger.Error(errors.Wrapf(err, "Parsing date %q", sb.Date))
 			continue
 		}
 		input := domain.CreateBattleInput{
@@ -106,14 +107,10 @@ func (s *Service) battles(cIDsByWikiID, fIDsByWikiID domain.IDsMap) {
 			input.CommandersByFaction[fID] = s.translateWikiIDs(scWikiIDs, cIDsByWikiID)
 		}
 		if _, err := s.BattlesCreator.CreateOne(input); err != nil {
-			s.log(fmt.Sprintf("\r%s\n", err))
+			s.Logger.Error(errors.Wrapf(err, "Creating battle with URL %s", input.URL))
 		}
 	}
-	s.log("\nFinished seeding battles\n")
-}
-
-func (s *Service) log(text string) {
-	s.Logger.Write([]byte(text))
+	s.Logger.Info("\nFinished seeding battles")
 }
 
 func (s *Service) translateWikiIDs(from []int, idsMapper domain.IDsMap) []uuid.UUID {
@@ -122,7 +119,7 @@ func (s *Service) translateWikiIDs(from []int, idsMapper domain.IDsMap) []uuid.U
 		if id, ok := idsMapper[wikiID]; ok {
 			result = append(result, id)
 		} else {
-			s.log(fmt.Sprintf("\rID not found for WikiID %d\n", wikiID))
+			s.Logger.Error(fmt.Errorf("ID not found for WikiID %d", wikiID))
 		}
 	}
 	return result

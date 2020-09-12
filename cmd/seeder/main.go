@@ -2,9 +2,11 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/sasalatart/batcoms/config"
 	"github.com/sasalatart/batcoms/services/io"
+	"github.com/sasalatart/batcoms/services/logger"
 	"github.com/sasalatart/batcoms/services/seeder"
 	"github.com/sasalatart/batcoms/store/postgresql"
 	"github.com/spf13/viper"
@@ -29,7 +31,7 @@ func main() {
 		FactionsCreator:   postgresql.NewFactionsDataStore(db),
 		CommandersCreator: postgresql.NewCommandersDataStore(db),
 		BattlesCreator:    postgresql.NewBattlesDataStore(db),
-		Logger:            log.Writer(),
+		Logger:            logger.New(log.Writer(), os.Stderr),
 	}
 	postgresql.Reset(db)
 	seederService.Seed()

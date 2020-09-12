@@ -64,6 +64,7 @@ func TestURLs(t *testing.T) {
 			{"/wiki/POW", true},
 			{"/wiki/Prisoner_of_war", true},
 			{"/wiki/Surrender_(military)", true},
+			{"/wiki/Wounded_in_action", true},
 			{"/wiki/Army", true},
 			{"/wiki/Auxiliaries", true},
 			{"/wiki/Auxiliary_Division", true},

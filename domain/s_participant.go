@@ -19,5 +19,5 @@ type SParticipant struct {
 	Flag        string
 	Name        string `validate:"required"`
 	Description string
-	Extract     string
+	Extract     string `validate:"required"`
 }

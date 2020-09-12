@@ -249,11 +249,9 @@ func discardMatches(dates []string) bool {
 
 	for _, date := range dates {
 		if m := month(date); m != "" && !isValidDatePart(m, 12) {
-			fmt.Println("INVALID M", m)
 			return false
 		}
 		if d := day(date); d != "" && !isValidDatePart(d, 31) {
-			fmt.Println("INVALID D", d)
 			return false
 		}
 	}

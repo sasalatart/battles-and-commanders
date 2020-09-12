@@ -19,7 +19,7 @@ var notSpecificMatcher = regexp.MustCompile(`(?i)` + strings.Join([]string{
 // confused to be a battle or participant
 var falsePositivesMatcher = regexp.MustCompile(fmt.Sprintf(`(?i)/wiki/(%s)`, strings.Join([]string{
 	`(category|file|help|portal|talk|wikipedia):`,
-	`(flag|in_absentia|killed_in_action|pow|prisoner_of_war|surrender_\(military\))$`,
+	`(flag|in_absentia|killed_in_action|pow|prisoner_of_war|surrender_\(military\)|wia|wounded_in_action)$`,
 	`[\w-,]*(advisor|chief_of|division|force|marines|participants|politics|rangers|regiment)[\w-,]*`,
 	`(army|auxiliaries|caliphate|cia|commandery|conscription|crusades|empire|islam|islamism|jewish|jews|muslim_conquests|offensive_jihad|roman_emperor|sicherheitsdienst)$`,
 }, "|")))
