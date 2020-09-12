@@ -10,6 +10,7 @@ import (
 	"github.com/sasalatart/batcoms/config"
 	"github.com/sasalatart/batcoms/domain"
 	"github.com/sasalatart/batcoms/services/io"
+	"github.com/sasalatart/batcoms/services/logger"
 	"github.com/sasalatart/batcoms/services/seeder"
 	"github.com/sasalatart/batcoms/store/postgresql"
 	"github.com/spf13/viper"
@@ -41,7 +42,7 @@ func TestMain(m *testing.M) {
 		FactionsCreator:   factionsDataStore,
 		CommandersCreator: commandersDataStore,
 		BattlesCreator:    battlesDataStore,
-		Logger:            ioutil.Discard,
+		Logger:            logger.New(ioutil.Discard, ioutil.Discard),
 	}
 	postgresql.Reset(db)
 	seederService.Seed()

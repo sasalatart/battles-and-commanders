@@ -11,34 +11,34 @@ import (
 	"github.com/sasalatart/batcoms/services/parser"
 )
 
-// Get queries a Wikipedia URL page for its corresponding summary API endpoint, and returns a
+// Fetch queries a Wikipedia URL page for its corresponding summary API endpoint, and returns a
 // domain.Summary if successful, or an error if not
-func Get(url string) (domain.Summary, error) {
+func Fetch(url string) (domain.Summary, error) {
 	summary := domain.Summary{}
 
 	if !strings.Contains(url, "/wiki/") {
-		return summary, errors.Errorf("URL is not a wiki page: %s", url)
+		return summary, ErrNotWiki
 	}
 
 	summaryURL := strings.ReplaceAll(url, "/wiki/", "/api/rest_v1/page/summary/")
 	resp, err := http.Get(summaryURL)
 	if err != nil {
-		return summary, errors.Wrapf(err, "Fetching %s", summaryURL)
+		return summary, errors.Wrapf(err, "GET %s failed", summaryURL)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return summary, errors.Wrapf(err, "Reading response for %s", summaryURL)
+		return summary, errors.Wrapf(err, "Reading response from %s", summaryURL)
 	}
 	if err = json.Unmarshal(body, &summary); err != nil {
-		return summary, errors.Wrapf(err, "Unmarshalling response for %s", summaryURL)
+		return summary, errors.Wrapf(err, "Unmarshalling response from %s", summaryURL)
 	}
 	if strings.Contains(strings.ToLower(summary.Title), "not found") || strings.Contains(summary.Type, "not_found") {
-		return summary, errors.Errorf("No summary found in %s", summaryURL)
+		return summary, ErrNoSummary
 	}
-	for _, p := range []*string{&summary.DisplayTitle, &summary.Description, &summary.Extract} {
-		*p = parser.Clean(*p)
-	}
+	summary.Title = parser.Clean(summary.Title)
+	summary.Description = parser.Clean(summary.Description)
+	summary.Extract = parser.Clean(summary.Extract)
 	return summary, nil
 }

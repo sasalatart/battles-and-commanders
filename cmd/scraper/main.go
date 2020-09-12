@@ -3,36 +3,42 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
+	"os"
 
+	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/domain"
 	"github.com/sasalatart/batcoms/services/io/json"
-	"github.com/sasalatart/batcoms/services/scraper"
+	"github.com/sasalatart/batcoms/services/logger"
+	"github.com/sasalatart/batcoms/services/scraper/battles"
+	"github.com/sasalatart/batcoms/services/scraper/list"
 	"github.com/sasalatart/batcoms/store/memory"
 )
 
 func main() {
-	scraperService := scraper.New(
+	loggerService := logger.New(ioutil.Discard, os.Stderr)
+	battlesScraper := battles.NewScraper(
 		memory.NewSBattlesStore(),
 		memory.NewSParticipantsStore(),
 		json.Export,
-		ioutil.Discard,
+		loggerService,
 	)
 
+	var failedCount int
 	semaphore := make(chan bool, 10)
-	list := scraperService.List()
+	list := list.Scrape(loggerService)
 	for i, battle := range list {
 		semaphore <- true
-		fmt.Printf("\r%d/%d", i, len(list))
+		fmt.Printf("\r%d/%d (failed: %d)", i, len(list), failedCount)
 		go func(i int, b domain.SBattleItem) {
-			if _, err := scraperService.SBattle(b.URL); err != nil {
-				log.Printf("Failed scraping %s: %s", b.URL, err)
+			if _, err := battlesScraper.ScrapeOne(b.URL); err != nil {
+				failedCount++
+				loggerService.Error(errors.Wrapf(err, "Scraping %s", b.URL))
 			}
 			<-semaphore
 		}(i, battle)
 	}
 
-	if err := scraperService.Export("battles.json", "participants.json"); err != nil {
-		log.Printf("Error: %s", err)
+	if err := battlesScraper.ExportAll("battles.json", "participants.json"); err != nil {
+		loggerService.Error(err)
 	}
 }

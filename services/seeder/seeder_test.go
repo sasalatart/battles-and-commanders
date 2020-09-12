@@ -1,12 +1,14 @@
 package seeder_test
 
 import (
+	"io/ioutil"
 	"strconv"
 	"testing"
 
 	"github.com/sasalatart/batcoms/domain"
 	"github.com/sasalatart/batcoms/mocks"
 	"github.com/sasalatart/batcoms/services/io"
+	"github.com/sasalatart/batcoms/services/logger"
 	"github.com/sasalatart/batcoms/services/seeder"
 )
 
@@ -49,7 +51,7 @@ func TestSeeder(t *testing.T) {
 		CommandersCreator: cc,
 		BattlesCreator:    bc,
 		ImportedData:      &importedData,
-		Logger:            new(mocks.Logger),
+		Logger:            logger.New(ioutil.Discard, ioutil.Discard),
 	}
 	service.Seed()
 	fc.AssertExpectations(t)
