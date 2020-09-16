@@ -32,7 +32,8 @@ type FactionsCreator interface {
 
 // CommandersFinder is the interface through which commanders may be found
 type CommandersFinder interface {
-	FindOne(query interface{}, args ...interface{}) (domain.Commander, error)
+	FindOne(query domain.Commander) (domain.Commander, error)
+	FindMany(query CommandersQuery, page uint) ([]domain.Commander, uint, error)
 }
 
 // CommandersCreator is the interface through which commanders may be created
@@ -48,4 +49,9 @@ type BattlesFinder interface {
 // BattlesCreator is the interface through which battles may be created
 type BattlesCreator interface {
 	CreateOne(data domain.CreateBattleInput) (uuid.UUID, error)
+}
+
+// CommandersQuery is the struct through which filters for finding many commanders may be refined
+type CommandersQuery struct {
+	FactionID uuid.UUID
 }

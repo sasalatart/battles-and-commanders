@@ -10,8 +10,8 @@ import (
 )
 
 // AssertFiberGET asserts that the specified route, when handled by the given *fiber.App, renders
-// the specified status and satisfies the given assertBody function
-func AssertFiberGET(t *testing.T, app *fiber.App, route string, status int, assertBody func(*http.Response)) {
+// the specified status and satisfies the given assertResponse function
+func AssertFiberGET(t *testing.T, app *fiber.App, route string, status int, assertResponse func(*http.Response)) {
 	t.Helper()
 	req, err := http.NewRequest("GET", route, nil)
 	require.NoError(t, err, route)
@@ -19,7 +19,7 @@ func AssertFiberGET(t *testing.T, app *fiber.App, route string, status int, asse
 	require.NoError(t, err, route)
 	defer res.Body.Close()
 	assert.Equalf(t, status, res.StatusCode, "HTTP status for %q", route)
-	assertBody(res)
+	assertResponse(res)
 }
 
 // AssertFailedFiberGET asserts that the specified route, when handled by the given *fiber.App, renders

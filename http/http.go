@@ -12,14 +12,14 @@ import (
 )
 
 // Setup sets up a new fiber server, registers the route handlers, and returns a pointer to it.
-func Setup(fs store.FactionsFinder, cs store.CommandersFinder, bs store.BattlesFinder, debug bool) *fiber.App {
+func Setup(ff store.FactionsFinder, cf store.CommandersFinder, bf store.BattlesFinder, debug bool) *fiber.App {
 	app := fiber.New()
 	app.Settings.ErrorHandler = errorsHandlerFactory(debug)
 	app.Use(middleware.Recover())
 	app.Use(middleware.Logger())
-	factions.RegisterRoutes(app, fs)
-	commanders.RegisterRoutes(app, cs)
-	battles.RegisterRoutes(app, bs)
+	factions.RegisterRoutes(app, ff)
+	commanders.RegisterRoutes(app, ff, cf)
+	battles.RegisterRoutes(app, bf)
 	return app
 }
 

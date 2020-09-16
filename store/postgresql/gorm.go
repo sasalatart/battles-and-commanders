@@ -84,3 +84,5 @@ func fromJSONB(data postgres.Jsonb, storeTo interface{}) error {
 	}
 	return nil
 }
+
+const perPage = 50
