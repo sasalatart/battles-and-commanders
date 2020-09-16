@@ -57,19 +57,67 @@ func URL(route string) string {
 }
 
 func BattleOfAusterlitz(t *testing.T) domain.Battle {
-	battleOfAusterlitz, err := battlesDataStore.FindOne(domain.Battle{Name: "Battle of Austerlitz"})
-	require.NoError(t, err, "UNEXPECTED FROM SEEDER: Searching for Battle of Austerlitz")
-	return battleOfAusterlitz
+	t.Helper()
+	return requireBattle(t, "Battle of Austerlitz")
 }
 
 func FirstFrenchEmpire(t *testing.T) domain.Faction {
-	firstFrenchEmpire, err := factionsDataStore.FindOne(domain.Faction{Name: "First French Empire"})
-	require.NoError(t, err, "UNEXPECTED FROM SEEDER: Searching for First French Empire")
-	return firstFrenchEmpire
+	t.Helper()
+	return requireFaction(t, "First French Empire")
+}
+
+func AustrianEmpire(t *testing.T) domain.Faction {
+	t.Helper()
+	return requireFaction(t, "Austrian Empire")
 }
 
 func Napoleon(t *testing.T) domain.Commander {
-	napoleon, err := commandersDataStore.FindOne(domain.Commander{Name: "Napoleon"})
-	require.NoError(t, err, "UNEXPECTED FROM SEEDER: Searching for Napoleon")
-	return napoleon
+	t.Helper()
+	return requireCommander(t, "Napoleon")
+}
+
+func FrancisII(t *testing.T) domain.Commander {
+	t.Helper()
+	return requireCommander(t, "Francis II, Holy Roman Emperor")
+}
+
+func FranzVonWeyrother(t *testing.T) domain.Commander {
+	t.Helper()
+	return requireCommander(t, "Franz von Weyrother")
+}
+
+func AlexanderI(t *testing.T) domain.Commander {
+	t.Helper()
+	return requireCommander(t, "Alexander I of Russia")
+}
+
+func MikhailKutuzov(t *testing.T) domain.Commander {
+	t.Helper()
+	return requireCommander(t, "Mikhail Kutuzov")
+}
+
+func requireNoError(t *testing.T, err error, name string) {
+	t.Helper()
+	require.NoErrorf(t, err, "UNEXPECTED FROM SEEDER: Searching for %q", name)
+}
+
+func requireFaction(t *testing.T, factionName string) domain.Faction {
+	t.Helper()
+	faction, err := factionsDataStore.FindOne(domain.Faction{Name: factionName})
+	requireNoError(t, err, factionName)
+	return faction
+}
+
+func requireCommander(t *testing.T, commanderName string) domain.Commander {
+	t.Helper()
+	commander, err := commandersDataStore.FindOne(domain.Commander{Name: commanderName})
+	requireNoError(t, err, commanderName)
+	return commander
+}
+
+func requireBattle(t *testing.T, battleName string) domain.Battle {
+	t.Helper()
+	battle, err := battlesDataStore.FindOne(domain.Battle{Name: battleName})
+	requireNoError(t, err, battleName)
+	return battle
 }

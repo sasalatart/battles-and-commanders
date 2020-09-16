@@ -2,6 +2,7 @@ package httptest
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -50,6 +51,15 @@ func AssertJSONCommander(t *testing.T, res *http.Response, expectedCommander dom
 	assert.Equal(t, expectedCommander, *commanderFromBody, "Comparing body with expected commander")
 }
 
+// AssertJSONCommanders is like AssertJSONCommander, but for a slice of domain.Commander
+func AssertJSONCommanders(t *testing.T, res *http.Response, expectedCommanders []domain.Commander) {
+	t.Helper()
+	commandersFromBody := new([]domain.Commander)
+	err := json.NewDecoder(res.Body).Decode(commandersFromBody)
+	require.NoError(t, err, "Decoding body into commanders slice")
+	assert.Equal(t, expectedCommanders, *commandersFromBody, "Comparing body with expected commanders")
+}
+
 // AssertJSONBattle asserts that the given *http.Response contains the specified JSON-serialized
 // domain.Battle
 func AssertJSONBattle(t *testing.T, res *http.Response, expectedBattle domain.Battle) {
@@ -58,4 +68,12 @@ func AssertJSONBattle(t *testing.T, res *http.Response, expectedBattle domain.Ba
 	err := json.NewDecoder(res.Body).Decode(battleFromBody)
 	require.NoError(t, err, "Decoding body into battle struct")
 	assert.Equal(t, expectedBattle, *battleFromBody, "Comparing body with expected battle")
+}
+
+// AssertHeaderPages asserts that the given *http.Response has the expected "x-pages" header value
+func AssertHeaderPages(t *testing.T, res *http.Response, expectedPages uint) {
+	t.Helper()
+	expected := fmt.Sprint(expectedPages)
+	got := res.Header.Get("x-pages")
+	assert.Equal(t, expected, got, "Comparing with the expected 'x-pages' header")
 }

@@ -2,6 +2,7 @@ package mocks
 
 import (
 	"github.com/sasalatart/batcoms/domain"
+	"github.com/sasalatart/batcoms/store"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/mock"
 )
@@ -18,9 +19,15 @@ type CommandersDataStore struct {
 }
 
 // FindOne mocks finding one commander via CommandersDataStore
-func (cs *CommandersDataStore) FindOne(query interface{}, args ...interface{}) (domain.Commander, error) {
-	mockArgs := cs.Called(append([]interface{}{query}, args...)...)
+func (cs *CommandersDataStore) FindOne(query domain.Commander) (domain.Commander, error) {
+	mockArgs := cs.Called(query)
 	return mockArgs.Get(0).(domain.Commander), mockArgs.Error(1)
+}
+
+// FindMany mocks finding many commanders via CommandersDataStore
+func (cs *CommandersDataStore) FindMany(query store.CommandersQuery, page uint) ([]domain.Commander, uint, error) {
+	mockArgs := cs.Called(query, page)
+	return mockArgs.Get(0).([]domain.Commander), uint(mockArgs.Int(1)), mockArgs.Error(2)
 }
 
 // CreateOne mocks creating one commander via CommandersDataStore
