@@ -54,4 +54,6 @@ type BattlesCreator interface {
 // CommandersQuery is the struct through which filters for finding many commanders may be refined
 type CommandersQuery struct {
 	FactionID uuid.UUID
+	Name      string
+	Summary   string
 }

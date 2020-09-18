@@ -33,9 +33,9 @@ func TestCommandersRoutes(t *testing.T) {
 			}).Return(commanderMock, nil)
 
 			httptest.AssertFiberGET(t, app, "/commanders/"+commanderMock.ID.String(), http.StatusOK, func(res *http.Response) {
+				commandersStoreMock.AssertExpectations(t)
 				httptest.AssertJSONCommander(t, res, commanderMock)
 			})
-			commandersStoreMock.AssertExpectations(t)
 		})
 
 		t.Run("ValidNonPersistedUUID", func(t *testing.T) {
@@ -62,19 +62,47 @@ func TestCommandersRoutes(t *testing.T) {
 		t.Parallel()
 
 		var page uint = 2
-		var url = fmt.Sprintf("/commanders?page=%d", page)
-
+		pagesMock := 3
 		commandersMock := []domain.Commander{mocks.Commander(), mocks.Commander2()}
-		expectedPages := 3
-		app, _, commandersStoreMock := appWithStoreMocks()
-		commandersStoreMock.On("FindMany", store.CommandersQuery{}, page).
-			Return(commandersMock, expectedPages, nil)
 
-		httptest.AssertFiberGET(t, app, url, http.StatusOK, func(res *http.Response) {
-			httptest.AssertHeaderPages(t, res, uint(expectedPages))
-			httptest.AssertJSONCommanders(t, res, commandersMock)
-		})
-		commandersStoreMock.AssertExpectations(t)
+		cases := []struct {
+			description string
+			url         string
+			calledWith  store.CommandersQuery
+		}{
+			{
+				description: "With no filters",
+				url:         fmt.Sprintf("/commanders?page=%d", page),
+				calledWith:  store.CommandersQuery{},
+			},
+			{
+				description: "With name filter",
+				url:         fmt.Sprintf("/commanders?page=%d&name=napoleon", page),
+				calledWith:  store.CommandersQuery{Name: "napoleon"},
+			},
+			{
+				description: "With summary filter",
+				url:         fmt.Sprintf("/commanders?page=%d&summary=napoleonic", page),
+				calledWith:  store.CommandersQuery{Summary: "napoleonic"},
+			},
+			{
+				description: "With name and summary filters",
+				url:         fmt.Sprintf("/commanders?page=%d&name=napoleon&summary=napoleonic", page),
+				calledWith:  store.CommandersQuery{Name: "napoleon", Summary: "napoleonic"},
+			},
+		}
+		for _, c := range cases {
+			t.Run(c.description, func(t *testing.T) {
+				app, _, commandersStoreMock := appWithStoreMocks()
+				commandersStoreMock.On("FindMany", c.calledWith, page).
+					Return(commandersMock, pagesMock, nil)
+				httptest.AssertFiberGET(t, app, c.url, http.StatusOK, func(res *http.Response) {
+					commandersStoreMock.AssertExpectations(t)
+					httptest.AssertHeaderPages(t, res, uint(pagesMock))
+					httptest.AssertJSONCommanders(t, res, commandersMock)
+				})
+			})
+		}
 	})
 
 	t.Run("GET /factions/:factionID/commanders", func(t *testing.T) {
@@ -86,23 +114,52 @@ func TestCommandersRoutes(t *testing.T) {
 		}
 
 		t.Run("ValidPersistedFactionUUID", func(t *testing.T) {
+			pagesMock := 3
 			factionMock := mocks.Faction()
-			commandersMock := []domain.Commander{mocks.Commander()}
-			expectedPages := 3
-			app, factionsStoreMock, commandersStoreMock := appWithStoreMocks()
-			factionsStoreMock.On("FindOne", domain.Faction{
-				ID: factionMock.ID,
-			}).Return(factionMock, nil)
-			commandersStoreMock.On("FindMany", store.CommandersQuery{
-				FactionID: factionMock.ID,
-			}, page).Return(commandersMock, expectedPages, nil)
+			commandersMock := []domain.Commander{mocks.Commander(), mocks.Commander2()}
 
-			httptest.AssertFiberGET(t, app, buildURL(factionMock.ID.String()), http.StatusOK, func(res *http.Response) {
-				httptest.AssertHeaderPages(t, res, uint(expectedPages))
-				httptest.AssertJSONCommanders(t, res, commandersMock)
-			})
-			factionsStoreMock.AssertExpectations(t)
-			commandersStoreMock.AssertExpectations(t)
+			cases := []struct {
+				description string
+				url         string
+				calledWith  store.CommandersQuery
+			}{
+				{
+					description: "With no filters",
+					url:         buildURL(factionMock.ID.String()),
+					calledWith:  store.CommandersQuery{FactionID: factionMock.ID},
+				},
+				{
+					description: "With name filter",
+					url:         buildURL(factionMock.ID.String()) + "&name=napoleon",
+					calledWith:  store.CommandersQuery{FactionID: factionMock.ID, Name: "napoleon"},
+				},
+				{
+					description: "With summary filter",
+					url:         buildURL(factionMock.ID.String()) + "&summary=napoleonic",
+					calledWith:  store.CommandersQuery{FactionID: factionMock.ID, Summary: "napoleonic"},
+				},
+				{
+					description: "With name and summary filters",
+					url:         buildURL(factionMock.ID.String()) + "&name=napoleon&summary=napoleonic",
+					calledWith:  store.CommandersQuery{FactionID: factionMock.ID, Name: "napoleon", Summary: "napoleonic"},
+				},
+			}
+			for _, c := range cases {
+				t.Run(c.description, func(t *testing.T) {
+					app, factionsStoreMock, commandersStoreMock := appWithStoreMocks()
+					factionsStoreMock.On("FindOne", domain.Faction{
+						ID: factionMock.ID,
+					}).Return(factionMock, nil)
+					commandersStoreMock.On("FindMany", c.calledWith, page).
+						Return(commandersMock, pagesMock, nil)
+
+					httptest.AssertFiberGET(t, app, c.url, http.StatusOK, func(res *http.Response) {
+						commandersStoreMock.AssertExpectations(t)
+						httptest.AssertHeaderPages(t, res, uint(pagesMock))
+						httptest.AssertJSONCommanders(t, res, commandersMock)
+					})
+				})
+			}
 		})
 
 		t.Run("ValidNonPersistedFactionUUID", func(t *testing.T) {

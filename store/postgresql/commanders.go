@@ -65,10 +65,17 @@ func (s *CommandersDataStore) FindOne(query domain.Commander) (domain.Commander,
 func (s *CommandersDataStore) FindMany(query store.CommandersQuery, page uint) ([]domain.Commander, uint, error) {
 	var records uint
 	commanders := &[]schema.Commander{}
+
 	var db = s.db.Model(&schema.Commander{}).Order("name DESC")
 	if query.FactionID != uuid.Nil {
 		db = db.Joins("JOIN battle_commander_factions bcf ON bcf.commander_id = commanders.id").
 			Where("bcf.faction_id = ?", query.FactionID)
+	}
+	if query.Name != "" {
+		db = db.Where("to_tsvector('english', name) @@ plainto_tsquery(?)", query.Name)
+	}
+	if query.Summary != "" {
+		db = db.Where("to_tsvector('english', summary) @@ phraseto_tsquery(?)", query.Summary)
 	}
 
 	if err := db.Count(&records).Error; err != nil {

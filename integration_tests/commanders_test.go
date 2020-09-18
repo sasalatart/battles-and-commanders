@@ -42,18 +42,41 @@ func TestCommandersEndpoints(t *testing.T) {
 		t.Parallel()
 
 		var expectedPages uint = 1
-		expectedCommanders := []domain.Commander{
-			Napoleon(t),
-			MikhailKutuzov(t),
-			FranzVonWeyrother(t),
-			FrancisII(t),
-			AlexanderI(t),
+		cases := []struct {
+			description        string
+			url                string
+			expectedCommanders []domain.Commander
+		}{
+			{
+				description:        "With no filters",
+				url:                URL("/commanders"),
+				expectedCommanders: []domain.Commander{Napoleon(t), MikhailKutuzov(t), FranzVonWeyrother(t), FrancisII(t), AlexanderI(t)},
+			},
+			{
+				description:        "With name filter",
+				url:                URL("/commanders?name=napoleon"),
+				expectedCommanders: []domain.Commander{Napoleon(t)},
+			},
+			{
+				description:        "With summary filter",
+				url:                URL("/commanders?summary=emperor"),
+				expectedCommanders: []domain.Commander{Napoleon(t), FrancisII(t), AlexanderI(t)},
+			},
+			{
+				description:        "With name and summary filters",
+				url:                URL("/commanders?name=alexander&summary=emperor"),
+				expectedCommanders: []domain.Commander{AlexanderI(t)},
+			},
 		}
-		res, err := http.Get(URL("/commanders"))
-		require.NoError(t, err, "Requesting commanders")
-		defer res.Body.Close()
-		httptest.AssertHeaderPages(t, res, expectedPages)
-		httptest.AssertJSONCommanders(t, res, expectedCommanders)
+		for _, c := range cases {
+			t.Run(c.description, func(t *testing.T) {
+				res, err := http.Get(c.url)
+				require.NoError(t, err, "Requesting commanders")
+				defer res.Body.Close()
+				httptest.AssertHeaderPages(t, res, expectedPages)
+				httptest.AssertJSONCommanders(t, res, c.expectedCommanders)
+			})
+		}
 	})
 
 	t.Run("GET /factions/:factionID/commanders", func(t *testing.T) {
@@ -64,14 +87,43 @@ func TestCommandersEndpoints(t *testing.T) {
 		}
 
 		t.Run("ValidPersistedFactionUUID", func(t *testing.T) {
-			factionID := AustrianEmpire(t).ID
 			var expectedPages uint = 1
-			expectedCommanders := []domain.Commander{FranzVonWeyrother(t), FrancisII(t)}
-			res, err := http.Get(route(factionID.String()))
-			require.NoError(t, err, "Requesting commanders from Austrian Empire")
-			defer res.Body.Close()
-			httptest.AssertHeaderPages(t, res, expectedPages)
-			httptest.AssertJSONCommanders(t, res, expectedCommanders)
+			factionID := AustrianEmpire(t).ID
+			cases := []struct {
+				description        string
+				url                string
+				expectedCommanders []domain.Commander
+			}{
+				{
+					description:        "With no filters",
+					url:                route(factionID.String()),
+					expectedCommanders: []domain.Commander{FranzVonWeyrother(t), FrancisII(t)},
+				},
+				{
+					description:        "With name filter",
+					url:                route(factionID.String()) + "?name=franz",
+					expectedCommanders: []domain.Commander{FranzVonWeyrother(t)},
+				},
+				{
+					description:        "With summary filter",
+					url:                route(factionID.String()) + "?summary=emperor",
+					expectedCommanders: []domain.Commander{FrancisII(t)},
+				},
+				{
+					description:        "With name and summary filters",
+					url:                route(factionID.String()) + "?name=franz&summary=emperor",
+					expectedCommanders: []domain.Commander{},
+				},
+			}
+			for _, c := range cases {
+				t.Run(c.description, func(t *testing.T) {
+					res, err := http.Get(c.url)
+					require.NoError(t, err, "Requesting commanders")
+					defer res.Body.Close()
+					httptest.AssertHeaderPages(t, res, expectedPages)
+					httptest.AssertJSONCommanders(t, res, c.expectedCommanders)
+				})
+			}
 		})
 
 		t.Run("ValidNonPersistedFactionUUID", func(t *testing.T) {
