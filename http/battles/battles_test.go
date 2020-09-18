@@ -26,9 +26,9 @@ func TestBattlesRoutes(t *testing.T) {
 			app := batcomshttp.Setup(new(mocks.FactionsDataStore), new(mocks.CommandersDataStore), battlesStoreMock, true)
 
 			httptest.AssertFiberGET(t, app, "/battles/"+battleMock.ID.String(), http.StatusOK, func(res *http.Response) {
+				battlesStoreMock.AssertExpectations(t)
 				httptest.AssertJSONBattle(t, res, battleMock)
 			})
-			battlesStoreMock.AssertExpectations(t)
 		})
 
 		t.Run("ValidNonPersistedUUID", func(t *testing.T) {

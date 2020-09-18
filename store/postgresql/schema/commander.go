@@ -4,10 +4,10 @@ package schema
 // schema
 type Commander struct {
 	Base
-	WikiID   int    `gorm:"not null;unique_index"`
-	URL      string `gorm:"not null;unique_index"`
-	Name     string `gorm:"not null"`
-	Summary  string
+	WikiID   int       `gorm:"not null;unique_index"`
+	URL      string    `gorm:"not null;unique_index"`
+	Name     string    `gorm:"not null"`
+	Summary  string    `gorm:"not null"`
 	Battles  []Battle  `gorm:"many2many:battle_commanders;"`
 	Factions []Faction `gorm:"many2many:battle_commander_factions;"`
 }

@@ -80,7 +80,7 @@ func WithCommanders(s store.CommandersFinder) func(*fiber.Ctx) {
 		if queryPage, hasPage := ctx.Locals("page").(uint); hasPage {
 			page = queryPage
 		}
-		var query store.CommandersQuery
+		query := store.CommandersQuery{Name: ctx.Query("name"), Summary: ctx.Query("summary")}
 		if faction, hasFaction := ctx.Locals("faction").(domain.Faction); hasFaction {
 			query.FactionID = faction.ID
 		}
