@@ -8,44 +8,39 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/sasalatart/batcoms/config"
-	"github.com/sasalatart/batcoms/domain"
-	"github.com/sasalatart/batcoms/services/io"
-	"github.com/sasalatart/batcoms/services/logger"
-	"github.com/sasalatart/batcoms/services/seeder"
-	"github.com/sasalatart/batcoms/store/postgresql"
+	"github.com/sasalatart/batcoms/db/postgresql"
+	"github.com/sasalatart/batcoms/db/seeder"
+	"github.com/sasalatart/batcoms/domain/battles"
+	"github.com/sasalatart/batcoms/domain/commanders"
+	"github.com/sasalatart/batcoms/domain/factions"
+	"github.com/sasalatart/batcoms/pkg/logger"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 )
 
 var db *gorm.DB
-var battlesDataStore *postgresql.BattlesDataStore
-var factionsDataStore *postgresql.FactionsDataStore
-var commandersDataStore *postgresql.CommandersDataStore
+var battlesRepo *postgresql.BattlesRepository
+var factionsRepo *postgresql.FactionsRepository
+var commandersRepo *postgresql.CommandersRepository
 
 func init() {
 	config.Setup()
-	db = postgresql.Connect(postgresql.TestConfig())
-	battlesDataStore = postgresql.NewBattlesDataStore(db)
-	factionsDataStore = postgresql.NewFactionsDataStore(db)
-	commandersDataStore = postgresql.NewCommandersDataStore(db)
+	db = postgresql.Connect(postgresql.DefaultTestConfig())
+	battlesRepo = postgresql.NewBattlesRepository(db)
+	factionsRepo = postgresql.NewFactionsRepository(db)
+	commandersRepo = postgresql.NewCommandersRepository(db)
 }
 
 func TestMain(m *testing.M) {
+	actorsFileName := viper.GetString("TEST_SEEDERS.ACTORS")
 	battlesFileName := viper.GetString("TEST_SEEDERS.BATTLES")
-	participantsFileName := viper.GetString("TEST_SEEDERS.PARTICIPANTS")
-	importedData := new(io.ImportedData)
-	if err := seeder.JSONImport(battlesFileName, participantsFileName, importedData); err != nil {
+	importedData := new(seeder.ImportedData)
+	if err := seeder.JSONImport(importedData, actorsFileName, battlesFileName); err != nil {
 		log.Fatalf("Failed seeding: %s", err)
 	}
-	seederService := seeder.Service{
-		ImportedData:      importedData,
-		FactionsCreator:   factionsDataStore,
-		CommandersCreator: commandersDataStore,
-		BattlesCreator:    battlesDataStore,
-		Logger:            logger.New(ioutil.Discard, ioutil.Discard),
-	}
+
 	postgresql.Reset(db)
-	seederService.Seed()
+	seeder.Seed(importedData, factionsRepo, commandersRepo, battlesRepo, logger.New(ioutil.Discard, ioutil.Discard))
 
 	code := m.Run()
 	db.Close()
@@ -56,42 +51,42 @@ func URL(route string) string {
 	return "http://localhost:" + viper.GetString("PORT_TEST") + route
 }
 
-func BattleOfAusterlitz(t *testing.T) domain.Battle {
+func BattleOfAusterlitz(t *testing.T) battles.Battle {
 	t.Helper()
 	return requireBattle(t, "Battle of Austerlitz")
 }
 
-func FirstFrenchEmpire(t *testing.T) domain.Faction {
+func FirstFrenchEmpire(t *testing.T) factions.Faction {
 	t.Helper()
 	return requireFaction(t, "First French Empire")
 }
 
-func AustrianEmpire(t *testing.T) domain.Faction {
+func AustrianEmpire(t *testing.T) factions.Faction {
 	t.Helper()
 	return requireFaction(t, "Austrian Empire")
 }
 
-func Napoleon(t *testing.T) domain.Commander {
+func Napoleon(t *testing.T) commanders.Commander {
 	t.Helper()
 	return requireCommander(t, "Napoleon")
 }
 
-func FrancisII(t *testing.T) domain.Commander {
+func FrancisII(t *testing.T) commanders.Commander {
 	t.Helper()
 	return requireCommander(t, "Francis II, Holy Roman Emperor")
 }
 
-func FranzVonWeyrother(t *testing.T) domain.Commander {
+func FranzVonWeyrother(t *testing.T) commanders.Commander {
 	t.Helper()
 	return requireCommander(t, "Franz von Weyrother")
 }
 
-func AlexanderI(t *testing.T) domain.Commander {
+func AlexanderI(t *testing.T) commanders.Commander {
 	t.Helper()
 	return requireCommander(t, "Alexander I of Russia")
 }
 
-func MikhailKutuzov(t *testing.T) domain.Commander {
+func MikhailKutuzov(t *testing.T) commanders.Commander {
 	t.Helper()
 	return requireCommander(t, "Mikhail Kutuzov")
 }
@@ -101,23 +96,23 @@ func requireNoError(t *testing.T, err error, name string) {
 	require.NoErrorf(t, err, "UNEXPECTED FROM SEEDER: Searching for %q", name)
 }
 
-func requireFaction(t *testing.T, factionName string) domain.Faction {
+func requireFaction(t *testing.T, factionName string) factions.Faction {
 	t.Helper()
-	faction, err := factionsDataStore.FindOne(domain.Faction{Name: factionName})
+	faction, err := factionsRepo.FindOne(factions.Faction{Name: factionName})
 	requireNoError(t, err, factionName)
 	return faction
 }
 
-func requireCommander(t *testing.T, commanderName string) domain.Commander {
+func requireCommander(t *testing.T, commanderName string) commanders.Commander {
 	t.Helper()
-	commander, err := commandersDataStore.FindOne(domain.Commander{Name: commanderName})
+	commander, err := commandersRepo.FindOne(commanders.Commander{Name: commanderName})
 	requireNoError(t, err, commanderName)
 	return commander
 }
 
-func requireBattle(t *testing.T, battleName string) domain.Battle {
+func requireBattle(t *testing.T, battleName string) battles.Battle {
 	t.Helper()
-	battle, err := battlesDataStore.FindOne(domain.Battle{Name: battleName})
+	battle, err := battlesRepo.FindOne(battles.Battle{Name: battleName})
 	requireNoError(t, err, battleName)
 	return battle
 }

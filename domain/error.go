@@ -8,3 +8,6 @@ type Error string
 func (e Error) Error() string {
 	return string(e)
 }
+
+// ErrNotFound is used to communicate that a requested resource was not found
+const ErrNotFound = Error("Resource not Found")
