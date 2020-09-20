@@ -33,7 +33,7 @@ func (r *WikiBattlesRepo) Find(id int) *wikibattles.Battle {
 	return battle
 }
 
-// Save stores the given battle. It returns an error if the battle does not have an ID or a URL
+// Save stores the given battle. It returns an error if validations on the struct fail
 func (r *WikiBattlesRepo) Save(b wikibattles.Battle) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()

@@ -11,14 +11,14 @@ var factionUUID = uuid.NewV4()
 var factionUUID2 = uuid.NewV4()
 var factionUUID3 = uuid.NewV4()
 
-// FactionsRepository mocks datastores used to find & create factions
+// FactionsRepository mocks repositories used to read and write factions
 type FactionsRepository struct {
 	mock.Mock
 }
 
 // FindOne mocks finding one faction via FactionsRepository
-func (fs *FactionsRepository) FindOne(query interface{}, args ...interface{}) (factions.Faction, error) {
-	mockArgs := fs.Called(append([]interface{}{query}, args...)...)
+func (fs *FactionsRepository) FindOne(query factions.Faction) (factions.Faction, error) {
+	mockArgs := fs.Called(query)
 	return mockArgs.Get(0).(factions.Faction), mockArgs.Error(1)
 }
 

@@ -9,8 +9,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Parse parses text containing a potential date or range of dates, and translates them into
-// YYYY-MM-DD format, returning a slice of each found date, sorted chronologically
+// Parse receives text containing a potential date or range of dates, and translates them into
+// YYYY-MM-DD format, returning a chronologically sorted slice of each one of those dates
 func Parse(text string) ([]string, error) {
 	t := text
 
@@ -23,7 +23,6 @@ func Parse(text string) ([]string, error) {
 	for _, s := range strings.Split(t, ". ") {
 		dates = append(dates, fromPhrase(s)...)
 	}
-
 	if len(dates) == 0 {
 		return dates, errors.Errorf("Unable to parse date %q", t)
 	}
@@ -61,13 +60,11 @@ func fromPhrase(s string) []string {
 				res = append(res, subMatches...)
 			}
 		}
-
 		if !discardMatcher {
 			break
 		}
 		res = []string{}
 	}
-
 	if len(res) == 0 {
 		return []string{}
 	}

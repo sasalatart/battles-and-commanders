@@ -92,8 +92,8 @@ func (s *Scraper) actorsSide(ctx *battleCtx, e *colly.HTMLElement, kind wikiacto
 				return
 			}
 
-			if p := s.wikiActorsRepo.FindByURL(kind, pURL); p != nil {
-				onDone(p.ID, flagURL(node), nil)
+			if wikiActor := s.wikiActorsRepo.FindByURL(kind, pURL); wikiActor != nil {
+				onDone(wikiActor.ID, flagURL(node), nil)
 				return
 			}
 
@@ -109,7 +109,7 @@ func (s *Scraper) actorsSide(ctx *battleCtx, e *colly.HTMLElement, kind wikiacto
 			}
 
 			flag := flagURL(node)
-			actor := wikiactors.Actor{
+			wikiActor := wikiactors.Actor{
 				Kind:        kind,
 				ID:          int(summary.PageID),
 				URL:         pURL,
@@ -118,8 +118,8 @@ func (s *Scraper) actorsSide(ctx *battleCtx, e *colly.HTMLElement, kind wikiacto
 				Description: summary.Description,
 				Extract:     summary.Extract,
 			}
-			err = s.wikiActorsRepo.Save(actor)
-			onDone(actor.ID, flag, err)
+			err = s.wikiActorsRepo.Save(wikiActor)
+			onDone(wikiActor.ID, flag, err)
 		})
 	})
 }

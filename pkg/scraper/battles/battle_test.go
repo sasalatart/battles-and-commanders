@@ -18,10 +18,10 @@ import (
 )
 
 func TestWikiBattle(t *testing.T) {
-	actorsRepo := memory.NewWikiActorsRepo()
+	wikiActorsRepo := memory.NewWikiActorsRepo()
 	exporterMock := mocks.Exporter{}
 	scraper := battles.NewScraper(
-		actorsRepo,
+		wikiActorsRepo,
 		memory.NewWikiBattlesRepo(),
 		exporterMock.Export,
 		logger.New(ioutil.Discard, ioutil.Discard),
@@ -196,7 +196,7 @@ func TestWikiBattle(t *testing.T) {
 			if strings.HasPrefix(strings.ToLower(pc.label), "commander") {
 				kind = wikiactors.CommanderKind
 			}
-			got := actorsRepo.Find(kind, pc.id)
+			got := wikiActorsRepo.Find(kind, pc.id)
 			require.NotNilf(t, got, "Searching for participant with id %d for %q", pc.id, pc.label)
 			assert.Equal(t, pc.expected, got.Name)
 		}

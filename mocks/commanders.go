@@ -13,7 +13,7 @@ var commander3UUID = uuid.NewV4()
 var commander4UUID = uuid.NewV4()
 var commander5UUID = uuid.NewV4()
 
-// CommandersRepository mocks datastores used to find & create commanders
+// CommandersRepository mocks repositories used to read and write commanders
 type CommandersRepository struct {
 	mock.Mock
 }

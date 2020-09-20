@@ -56,13 +56,13 @@ func (r *WikiActorsRepo) FindByURL(kind wikiactors.Kind, url string) *wikiactors
 	return r.Find(kind, id)
 }
 
-// Save stores the given actor. It returns an error if the actor does not have an ID or a URL
+// Save stores the given actor. It returns an error if validations on the struct fail
 func (r *WikiActorsRepo) Save(p wikiactors.Actor) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
 	if err := r.validator.Struct(p); err != nil {
-		return errors.Wrapf(err, "Saving actor with URL %s", p.URL)
+		return errors.Wrap(err, "Saving actor")
 	}
 	r.byIDByKind[p.Kind][p.ID] = &p
 	r.byURLByKind[p.Kind][p.URL] = p.ID

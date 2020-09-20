@@ -12,21 +12,21 @@ import (
 func TestWikiActorsMemRepository(t *testing.T) {
 	repo := memory.NewWikiActorsRepo()
 
-	f := mocks.WikiFaction()
-	require.NoError(t, repo.Save(f), "Saving valid faction")
+	wikiFactionMock := mocks.WikiFaction()
+	require.NoError(t, repo.Save(wikiFactionMock), "Saving valid faction")
 
-	c := mocks.WikiCommander()
-	c.ID = f.ID
-	require.NoError(t, repo.Save(c), "Saving valid commander, even with the same ID of existing faction")
+	wikiCommanderMock := mocks.WikiCommander()
+	wikiCommanderMock.ID = wikiFactionMock.ID
+	require.NoError(t, repo.Save(wikiCommanderMock), "Saving valid commander")
 
-	assert.Nil(t, repo.Find(f.Kind, 100), "Finding inexistent faction")
-	assert.Nil(t, repo.Find(c.Kind, 100), "Finding inexistent commander")
+	assert.Nil(t, repo.Find(wikiFactionMock.Kind, 100), "Finding inexistent faction")
+	assert.Nil(t, repo.Find(wikiCommanderMock.Kind, 100), "Finding inexistent commander")
 
-	byID := repo.Find(f.Kind, f.ID)
+	byID := repo.Find(wikiFactionMock.Kind, wikiFactionMock.ID)
 	require.NotNil(t, byID, "Finding existing faction by ID")
-	assert.Equal(t, f, *byID, "Finding existing faction by ID")
+	assert.Equal(t, wikiFactionMock, *byID, "Finding existing faction by ID")
 
-	byURL := repo.FindByURL(f.Kind, f.URL)
+	byURL := repo.FindByURL(wikiFactionMock.Kind, wikiFactionMock.URL)
 	require.NotNil(t, byURL, "Finding existing faction by URL")
-	require.Equal(t, f, *byURL, "Finding existing faction by URL")
+	assert.Equal(t, wikiFactionMock, *byURL, "Finding existing faction by URL")
 }

@@ -15,14 +15,14 @@ import (
 
 var battleUUID = uuid.NewV4()
 
-// BattlesRepository mocks datastores used to find & create battles
+// BattlesRepository mocks repositories used to read and write battles
 type BattlesRepository struct {
 	mock.Mock
 }
 
 // FindOne mocks finding one battle via BattlesRepository
-func (bs *BattlesRepository) FindOne(query interface{}, args ...interface{}) (battles.Battle, error) {
-	mockArgs := bs.Called(append([]interface{}{query}, args...)...)
+func (bs *BattlesRepository) FindOne(query battles.Battle) (battles.Battle, error) {
+	mockArgs := bs.Called(query)
 	return mockArgs.Get(0).(battles.Battle), mockArgs.Error(1)
 }
 

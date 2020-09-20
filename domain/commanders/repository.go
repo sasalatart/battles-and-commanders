@@ -19,7 +19,7 @@ type Writer interface {
 	CreateOne(data CreationInput) (uuid.UUID, error)
 }
 
-// Query is the struct through which filters for finding many commanders may be refined
+// Query is used to refine the filters when finding many commanders
 type Query struct {
 	FactionID uuid.UUID
 	Name      string

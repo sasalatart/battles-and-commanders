@@ -11,11 +11,11 @@ import (
 
 func TestWikiBattlesMemRepository(t *testing.T) {
 	repo := memory.NewWikiBattlesRepo()
-	b := mocks.WikiBattle()
+	wikiBattleMock := mocks.WikiBattle()
 
-	require.NoError(t, repo.Save(b), "Saving valid battle")
+	require.NoError(t, repo.Save(wikiBattleMock), "Saving valid battle")
 	assert.Nil(t, repo.Find(999), "Finding inexistent battle")
-	found := repo.Find(b.ID)
+	found := repo.Find(wikiBattleMock.ID)
 	require.NotNil(t, found, "Finding an existing battle")
-	require.Equal(t, b, *found, "Finding an existing battle")
+	assert.Equal(t, wikiBattleMock, *found, "Finding an existing battle")
 }

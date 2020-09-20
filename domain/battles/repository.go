@@ -12,7 +12,7 @@ type Repository interface {
 
 // Reader is the interface through which battles may be read
 type Reader interface {
-	FindOne(query interface{}, args ...interface{}) (Battle, error)
+	FindOne(query Battle) (Battle, error)
 }
 
 // Writer is the interface through which battles may be written

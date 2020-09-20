@@ -30,16 +30,16 @@ func NewBattlesRepository(db *gorm.DB) *BattlesRepository {
 
 // FindOne finds the first battle in the database that matches the query, together with its related
 // factions and commanders
-func (r *BattlesRepository) FindOne(query interface{}, args ...interface{}) (battles.Battle, error) {
+func (r *BattlesRepository) FindOne(query battles.Battle) (battles.Battle, error) {
 	b := new(schema.Battle)
 	db := r.db.
 		Preload("BattleFactions.Faction").
 		Preload("BattleCommanders.Commander").
 		Preload("BattleCommanderFactions")
-	if err := db.Where(query, args...).Find(b).Error; gorm.IsRecordNotFoundError(err) {
+	if err := db.Where(query).Find(b).Error; gorm.IsRecordNotFoundError(err) {
 		return battles.Battle{}, domain.ErrNotFound
 	} else if err != nil {
-		return battles.Battle{}, errors.Wrap(err, "Executing BattlesRepository.FindOne")
+		return battles.Battle{}, errors.Wrap(err, "Finding a battle")
 	}
 	return deserializeBattle(b)
 }
@@ -49,7 +49,7 @@ func (r *BattlesRepository) FindOne(query interface{}, args ...interface{}) (bat
 // the new battle
 func (r *BattlesRepository) CreateOne(data battles.CreationInput) (uuid.UUID, error) {
 	if err := r.validator.Struct(data); err != nil {
-		return uuid.UUID{}, errors.Wrap(err, "Validating battle creation input")
+		return uuid.Nil, errors.Wrap(err, "Validating battle creation input")
 	}
 	b, err := serializeBattle(battles.Battle{
 		WikiID:             data.WikiID,
@@ -66,15 +66,8 @@ func (r *BattlesRepository) CreateOne(data battles.CreationInput) (uuid.UUID, er
 		Casualties:         data.Casualties,
 	})
 	if err != nil {
-		return uuid.UUID{}, errors.Wrap(err, "Serializing battles.CreationInput")
+		return uuid.Nil, errors.Wrap(err, "Serializing battles.CreationInput")
 	}
-	addBattleCommanders := func(cIDs []uuid.UUID, side schema.SideKind) {
-		for _, cID := range cIDs {
-			b.BattleCommanders = append(b.BattleCommanders, schema.BattleCommander{CommanderID: cID, Side: side})
-		}
-	}
-	addBattleCommanders(data.CommandersBySide.A, schema.SideA)
-	addBattleCommanders(data.CommandersBySide.B, schema.SideB)
 	addBattleFactions := func(fIDs []uuid.UUID, side schema.SideKind) {
 		for _, fID := range fIDs {
 			b.BattleFactions = append(b.BattleFactions, schema.BattleFaction{FactionID: fID, Side: side})
@@ -82,6 +75,13 @@ func (r *BattlesRepository) CreateOne(data battles.CreationInput) (uuid.UUID, er
 	}
 	addBattleFactions(data.FactionsBySide.A, schema.SideA)
 	addBattleFactions(data.FactionsBySide.B, schema.SideB)
+	addBattleCommanders := func(cIDs []uuid.UUID, side schema.SideKind) {
+		for _, cID := range cIDs {
+			b.BattleCommanders = append(b.BattleCommanders, schema.BattleCommander{CommanderID: cID, Side: side})
+		}
+	}
+	addBattleCommanders(data.CommandersBySide.A, schema.SideA)
+	addBattleCommanders(data.CommandersBySide.B, schema.SideB)
 	for fID, cIDS := range data.CommandersByFaction {
 		for _, cID := range cIDS {
 			b.BattleCommanderFactions = append(b.BattleCommanderFactions, schema.BattleCommanderFaction{
@@ -91,7 +91,7 @@ func (r *BattlesRepository) CreateOne(data battles.CreationInput) (uuid.UUID, er
 		}
 	}
 	if err := r.db.Create(b).Error; err != nil {
-		return uuid.UUID{}, errors.Wrap(err, "Creating the battle")
+		return uuid.Nil, errors.Wrap(err, "Creating the battle")
 	}
 	return b.ID, nil
 }

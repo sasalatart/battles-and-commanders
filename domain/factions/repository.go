@@ -10,7 +10,7 @@ type Repository interface {
 
 // Reader is the interface through which factions may be read
 type Reader interface {
-	FindOne(query interface{}, args ...interface{}) (Faction, error)
+	FindOne(query Faction) (Faction, error)
 }
 
 // Writer is the interface through which factions may be written

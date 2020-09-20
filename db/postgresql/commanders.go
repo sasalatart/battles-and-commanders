@@ -23,25 +23,6 @@ func NewCommandersRepository(db *gorm.DB) *CommandersRepository {
 	return &CommandersRepository{db, validator.New()}
 }
 
-func serializeCommander(c commanders.Commander) *schema.Commander {
-	return &schema.Commander{
-		WikiID:  c.WikiID,
-		URL:     c.URL,
-		Name:    c.Name,
-		Summary: c.Summary,
-	}
-}
-
-func deserializeCommander(c *schema.Commander) commanders.Commander {
-	return commanders.Commander{
-		ID:      c.ID,
-		WikiID:  c.WikiID,
-		URL:     c.URL,
-		Name:    c.Name,
-		Summary: c.Summary,
-	}
-}
-
 func deserializeCommanders(cc *[]schema.Commander) []commanders.Commander {
 	results := []commanders.Commander{}
 	for _, c := range *cc {
@@ -93,7 +74,7 @@ func (s *CommandersRepository) FindMany(query commanders.Query, page uint) ([]co
 // CreateOne creates a commander in the database. The operation returns the ID of the new commander
 func (s *CommandersRepository) CreateOne(data commanders.CreationInput) (uuid.UUID, error) {
 	if err := s.validator.Struct(data); err != nil {
-		return uuid.UUID{}, errors.Wrap(err, "Validating commander creation input")
+		return uuid.Nil, errors.Wrap(err, "Validating commander creation input")
 	}
 	c := serializeCommander(commanders.Commander{
 		WikiID:  data.WikiID,
@@ -102,7 +83,26 @@ func (s *CommandersRepository) CreateOne(data commanders.CreationInput) (uuid.UU
 		Summary: data.Summary,
 	})
 	if err := s.db.Create(c).Error; err != nil {
-		return uuid.UUID{}, errors.Wrap(err, "Creating a commander")
+		return uuid.Nil, errors.Wrap(err, "Creating a commander")
 	}
 	return c.ID, nil
+}
+
+func serializeCommander(c commanders.Commander) *schema.Commander {
+	return &schema.Commander{
+		WikiID:  c.WikiID,
+		URL:     c.URL,
+		Name:    c.Name,
+		Summary: c.Summary,
+	}
+}
+
+func deserializeCommander(c *schema.Commander) commanders.Commander {
+	return commanders.Commander{
+		ID:      c.ID,
+		WikiID:  c.WikiID,
+		URL:     c.URL,
+		Name:    c.Name,
+		Summary: c.Summary,
+	}
 }

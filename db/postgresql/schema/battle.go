@@ -34,7 +34,6 @@ const (
 	SideA SideKind = iota
 	// SideB represents one of the two possible opposing sides of a battle
 	SideB
-	// SideAB is used to represent a fallback for data that may not be assigned to a specific side
-	// of a battle
+	// SideAB represent a fallback for data that may not be assigned to a specific side of a battle
 	SideAB
 )
