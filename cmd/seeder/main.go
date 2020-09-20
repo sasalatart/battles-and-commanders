@@ -5,10 +5,9 @@ import (
 	"os"
 
 	"github.com/sasalatart/batcoms/config"
-	"github.com/sasalatart/batcoms/services/io"
-	"github.com/sasalatart/batcoms/services/logger"
-	"github.com/sasalatart/batcoms/services/seeder"
-	"github.com/sasalatart/batcoms/store/postgresql"
+	"github.com/sasalatart/batcoms/db/postgresql"
+	"github.com/sasalatart/batcoms/db/seeder"
+	"github.com/sasalatart/batcoms/pkg/logger"
 	"github.com/spf13/viper"
 )
 
@@ -20,19 +19,19 @@ func main() {
 	db := postgresql.Connect(nil)
 	defer db.Close()
 
+	actorsFileName := viper.GetString("SCRAPER_RESULTS.ACTORS")
 	battlesFileName := viper.GetString("SCRAPER_RESULTS.BATTLES")
-	participantsFileName := viper.GetString("SCRAPER_RESULTS.PARTICIPANTS")
-	importedData := new(io.ImportedData)
-	if err := seeder.JSONImport(battlesFileName, participantsFileName, importedData); err != nil {
+	importedData := new(seeder.ImportedData)
+	if err := seeder.JSONImport(importedData, actorsFileName, battlesFileName); err != nil {
 		log.Fatalf("Failed seeding: %s", err)
 	}
-	seederService := seeder.Service{
-		ImportedData:      importedData,
-		FactionsCreator:   postgresql.NewFactionsDataStore(db),
-		CommandersCreator: postgresql.NewCommandersDataStore(db),
-		BattlesCreator:    postgresql.NewBattlesDataStore(db),
-		Logger:            logger.New(log.Writer(), os.Stderr),
-	}
+
 	postgresql.Reset(db)
-	seederService.Seed()
+	seeder.Seed(
+		importedData,
+		postgresql.NewFactionsRepository(db),
+		postgresql.NewCommandersRepository(db),
+		postgresql.NewBattlesRepository(db),
+		logger.New(log.Writer(), os.Stderr),
+	)
 }

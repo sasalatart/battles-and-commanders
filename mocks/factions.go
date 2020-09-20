@@ -1,7 +1,8 @@
 package mocks
 
 import (
-	"github.com/sasalatart/batcoms/domain"
+	"github.com/sasalatart/batcoms/domain/factions"
+	"github.com/sasalatart/batcoms/domain/wikiactors"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/mock"
 )
@@ -10,68 +11,68 @@ var factionUUID = uuid.NewV4()
 var factionUUID2 = uuid.NewV4()
 var factionUUID3 = uuid.NewV4()
 
-// FactionsDataStore mocks datastores used to find & create factions
-type FactionsDataStore struct {
+// FactionsRepository mocks repositories used to read and write factions
+type FactionsRepository struct {
 	mock.Mock
 }
 
-// FindOne mocks finding one faction via FactionsDataStore
-func (fs *FactionsDataStore) FindOne(query interface{}, args ...interface{}) (domain.Faction, error) {
-	mockArgs := fs.Called(append([]interface{}{query}, args...)...)
-	return mockArgs.Get(0).(domain.Faction), mockArgs.Error(1)
+// FindOne mocks finding one faction via FactionsRepository
+func (fs *FactionsRepository) FindOne(query factions.Faction) (factions.Faction, error) {
+	mockArgs := fs.Called(query)
+	return mockArgs.Get(0).(factions.Faction), mockArgs.Error(1)
 }
 
-// CreateOne mocks creating one faction via FactionsDataStore
-func (fs *FactionsDataStore) CreateOne(data domain.CreateFactionInput) (uuid.UUID, error) {
+// CreateOne mocks creating one faction via FactionsRepository
+func (fs *FactionsRepository) CreateOne(data factions.CreationInput) (uuid.UUID, error) {
 	mockArgs := fs.Called(data)
 	return mockArgs.Get(0).(uuid.UUID), mockArgs.Error(1)
 }
 
-// Faction returns an instance of domain.Faction that may be used for mocking purposes
-func Faction() domain.Faction {
-	return factionFromScraped(SFaction(), factionUUID)
+// Faction returns an instance of factions.Faction that may be used for mocking purposes
+func Faction() factions.Faction {
+	return factionFromScraped(WikiFaction(), factionUUID)
 }
 
-// Faction2 returns an instance of domain.Faction that may be used for mocking purposes
-func Faction2() domain.Faction {
-	return factionFromScraped(SFaction2(), factionUUID2)
+// Faction2 returns an instance of factions.Faction that may be used for mocking purposes
+func Faction2() factions.Faction {
+	return factionFromScraped(WikiFaction2(), factionUUID2)
 }
 
-// Faction3 returns an instance of domain.Faction that may be used for mocking purposes
-func Faction3() domain.Faction {
-	return factionFromScraped(SFaction3(), factionUUID3)
+// Faction3 returns an instance of factions.Faction that may be used for mocking purposes
+func Faction3() factions.Faction {
+	return factionFromScraped(WikiFaction3(), factionUUID3)
 }
 
-// CreateFactionInput returns an instance of domain.CreateFactionInput that may be used for mocking
+// FactionCreationInput returns an instance of factions.CreationInput that may be used for mocking
 // inputs to create factions
-func CreateFactionInput() domain.CreateFactionInput {
+func FactionCreationInput() factions.CreationInput {
 	return createFactionInputFromFaction(Faction())
 }
 
-// CreateFactionInput2 returns an instance of domain.CreateFactionInput that may be used for mocking
+// FactionCreationInput2 returns an instance of factions.CreationInput that may be used for mocking
 // inputs to create factions
-func CreateFactionInput2() domain.CreateFactionInput {
+func FactionCreationInput2() factions.CreationInput {
 	return createFactionInputFromFaction(Faction2())
 }
 
-// CreateFactionInput3 returns an instance of domain.CreateFactionInput that may be used for mocking
+// FactionCreationInput3 returns an instance of factions.CreationInput that may be used for mocking
 // inputs to create factions
-func CreateFactionInput3() domain.CreateFactionInput {
+func FactionCreationInput3() factions.CreationInput {
 	return createFactionInputFromFaction(Faction3())
 }
 
-func factionFromScraped(sf domain.SParticipant, uuid uuid.UUID) domain.Faction {
-	return domain.Faction{
+func factionFromScraped(wf wikiactors.Actor, uuid uuid.UUID) factions.Faction {
+	return factions.Faction{
 		ID:      uuid,
-		WikiID:  sf.ID,
-		URL:     sf.URL,
-		Name:    sf.Name,
-		Summary: sf.Extract,
+		WikiID:  wf.ID,
+		URL:     wf.URL,
+		Name:    wf.Name,
+		Summary: wf.Extract,
 	}
 }
 
-func createFactionInputFromFaction(f domain.Faction) domain.CreateFactionInput {
-	return domain.CreateFactionInput{
+func createFactionInputFromFaction(f factions.Faction) factions.CreationInput {
+	return factions.CreationInput{
 		WikiID:  f.WikiID,
 		URL:     f.URL,
 		Name:    f.Name,

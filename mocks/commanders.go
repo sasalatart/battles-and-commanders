@@ -1,8 +1,8 @@
 package mocks
 
 import (
-	"github.com/sasalatart/batcoms/domain"
-	"github.com/sasalatart/batcoms/store"
+	"github.com/sasalatart/batcoms/domain/commanders"
+	"github.com/sasalatart/batcoms/domain/wikiactors"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/mock"
 )
@@ -13,96 +13,96 @@ var commander3UUID = uuid.NewV4()
 var commander4UUID = uuid.NewV4()
 var commander5UUID = uuid.NewV4()
 
-// CommandersDataStore mocks datastores used to find & create commanders
-type CommandersDataStore struct {
+// CommandersRepository mocks repositories used to read and write commanders
+type CommandersRepository struct {
 	mock.Mock
 }
 
-// FindOne mocks finding one commander via CommandersDataStore
-func (cs *CommandersDataStore) FindOne(query domain.Commander) (domain.Commander, error) {
+// FindOne mocks finding one commander via CommandersRepository
+func (cs *CommandersRepository) FindOne(query commanders.Commander) (commanders.Commander, error) {
 	mockArgs := cs.Called(query)
-	return mockArgs.Get(0).(domain.Commander), mockArgs.Error(1)
+	return mockArgs.Get(0).(commanders.Commander), mockArgs.Error(1)
 }
 
-// FindMany mocks finding many commanders via CommandersDataStore
-func (cs *CommandersDataStore) FindMany(query store.CommandersQuery, page uint) ([]domain.Commander, uint, error) {
+// FindMany mocks finding many commanders via CommandersRepository
+func (cs *CommandersRepository) FindMany(query commanders.Query, page uint) ([]commanders.Commander, uint, error) {
 	mockArgs := cs.Called(query, page)
-	return mockArgs.Get(0).([]domain.Commander), uint(mockArgs.Int(1)), mockArgs.Error(2)
+	return mockArgs.Get(0).([]commanders.Commander), uint(mockArgs.Int(1)), mockArgs.Error(2)
 }
 
-// CreateOne mocks creating one commander via CommandersDataStore
-func (cs *CommandersDataStore) CreateOne(data domain.CreateCommanderInput) (uuid.UUID, error) {
+// CreateOne mocks creating one commander via CommandersRepository
+func (cs *CommandersRepository) CreateOne(data commanders.CreationInput) (uuid.UUID, error) {
 	mockArgs := cs.Called(data)
 	return mockArgs.Get(0).(uuid.UUID), mockArgs.Error(1)
 }
 
-// Commander returns an instance of domain.Commander that may be used for mocking purposes
-func Commander() domain.Commander {
-	return commanderFromScraped(SCommander(), commanderUUID)
+// Commander returns an instance of commanders.Commander that may be used for mocking purposes
+func Commander() commanders.Commander {
+	return commanderFromScraped(WikiCommander(), commanderUUID)
 }
 
-// Commander2 returns an instance of domain.Commander that may be used for mocking purposes
-func Commander2() domain.Commander {
-	return commanderFromScraped(SCommander2(), commander2UUID)
+// Commander2 returns an instance of commanders.Commander that may be used for mocking purposes
+func Commander2() commanders.Commander {
+	return commanderFromScraped(WikiCommander2(), commander2UUID)
 }
 
-// Commander3 returns an instance of domain.Commander that may be used for mocking purposes
-func Commander3() domain.Commander {
-	return commanderFromScraped(SCommander3(), commander3UUID)
+// Commander3 returns an instance of commanders.Commander that may be used for mocking purposes
+func Commander3() commanders.Commander {
+	return commanderFromScraped(WikiCommander3(), commander3UUID)
 }
 
-// Commander4 returns an instance of domain.Commander that may be used for mocking purposes
-func Commander4() domain.Commander {
-	return commanderFromScraped(SCommander4(), commander4UUID)
+// Commander4 returns an instance of commanders.Commander that may be used for mocking purposes
+func Commander4() commanders.Commander {
+	return commanderFromScraped(WikiCommander4(), commander4UUID)
 }
 
-// Commander5 returns an instance of domain.Commander that may be used for mocking purposes
-func Commander5() domain.Commander {
-	return commanderFromScraped(SCommander5(), commander5UUID)
+// Commander5 returns an instance of commanders.Commander that may be used for mocking purposes
+func Commander5() commanders.Commander {
+	return commanderFromScraped(WikiCommander5(), commander5UUID)
 }
 
-// CreateCommanderInput returns an instance of domain.CreateCommanderInput that may be used for
+// CommanderCreationInput returns an instance of commanders.CreationInput that may be used for
 // mocking inputs to create commanders
-func CreateCommanderInput() domain.CreateCommanderInput {
+func CommanderCreationInput() commanders.CreationInput {
 	return createCommanderInputFromCommander(Commander())
 }
 
-// CreateCommanderInput2 returns an instance of domain.CreateCommanderInput that may be used for
+// CommanderCreationInput2 returns an instance of commanders.CreationInput that may be used for
 // mocking inputs to create commanders
-func CreateCommanderInput2() domain.CreateCommanderInput {
+func CommanderCreationInput2() commanders.CreationInput {
 	return createCommanderInputFromCommander(Commander2())
 }
 
-// CreateCommanderInput3 returns an instance of domain.CreateCommanderInput that may be used for
+// CommanderCreationInput3 returns an instance of commanders.CreationInput that may be used for
 // mocking inputs to create commanders
-func CreateCommanderInput3() domain.CreateCommanderInput {
+func CommanderCreationInput3() commanders.CreationInput {
 	return createCommanderInputFromCommander(Commander3())
 }
 
-// CreateCommanderInput4 returns an instance of domain.CreateCommanderInput that may be used for
+// CommanderCreationInput4 returns an instance of commanders.CreationInput that may be used for
 // mocking inputs to create commanders
-func CreateCommanderInput4() domain.CreateCommanderInput {
+func CommanderCreationInput4() commanders.CreationInput {
 	return createCommanderInputFromCommander(Commander4())
 }
 
-// CreateCommanderInput5 returns an instance of domain.CreateCommanderInput that may be used for
+// CommanderCreationInput5 returns an instance of commanders.CreationInput that may be used for
 // mocking inputs to create commanders
-func CreateCommanderInput5() domain.CreateCommanderInput {
+func CommanderCreationInput5() commanders.CreationInput {
 	return createCommanderInputFromCommander(Commander5())
 }
 
-func commanderFromScraped(sc domain.SParticipant, uuid uuid.UUID) domain.Commander {
-	return domain.Commander{
+func commanderFromScraped(wc wikiactors.Actor, uuid uuid.UUID) commanders.Commander {
+	return commanders.Commander{
 		ID:      uuid,
-		WikiID:  sc.ID,
-		URL:     sc.URL,
-		Name:    sc.Name,
-		Summary: sc.Extract,
+		WikiID:  wc.ID,
+		URL:     wc.URL,
+		Name:    wc.Name,
+		Summary: wc.Extract,
 	}
 }
 
-func createCommanderInputFromCommander(c domain.Commander) domain.CreateCommanderInput {
-	return domain.CreateCommanderInput{
+func createCommanderInputFromCommander(c commanders.Commander) commanders.CreationInput {
+	return commanders.CreationInput{
 		WikiID:  c.WikiID,
 		URL:     c.URL,
 		Name:    c.Name,

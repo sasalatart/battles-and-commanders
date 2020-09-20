@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/sasalatart/batcoms/domain"
+	"github.com/sasalatart/batcoms/domain/commanders"
 	"github.com/sasalatart/batcoms/http/httptest"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/require"
@@ -45,27 +45,27 @@ func TestCommandersEndpoints(t *testing.T) {
 		cases := []struct {
 			description        string
 			url                string
-			expectedCommanders []domain.Commander
+			expectedCommanders []commanders.Commander
 		}{
 			{
 				description:        "With no filters",
 				url:                URL("/commanders"),
-				expectedCommanders: []domain.Commander{Napoleon(t), MikhailKutuzov(t), FranzVonWeyrother(t), FrancisII(t), AlexanderI(t)},
+				expectedCommanders: []commanders.Commander{Napoleon(t), MikhailKutuzov(t), FranzVonWeyrother(t), FrancisII(t), AlexanderI(t)},
 			},
 			{
 				description:        "With name filter",
 				url:                URL("/commanders?name=napoleon"),
-				expectedCommanders: []domain.Commander{Napoleon(t)},
+				expectedCommanders: []commanders.Commander{Napoleon(t)},
 			},
 			{
 				description:        "With summary filter",
 				url:                URL("/commanders?summary=emperor"),
-				expectedCommanders: []domain.Commander{Napoleon(t), FrancisII(t), AlexanderI(t)},
+				expectedCommanders: []commanders.Commander{Napoleon(t), FrancisII(t), AlexanderI(t)},
 			},
 			{
 				description:        "With name and summary filters",
 				url:                URL("/commanders?name=alexander&summary=emperor"),
-				expectedCommanders: []domain.Commander{AlexanderI(t)},
+				expectedCommanders: []commanders.Commander{AlexanderI(t)},
 			},
 		}
 		for _, c := range cases {
@@ -92,27 +92,27 @@ func TestCommandersEndpoints(t *testing.T) {
 			cases := []struct {
 				description        string
 				url                string
-				expectedCommanders []domain.Commander
+				expectedCommanders []commanders.Commander
 			}{
 				{
 					description:        "With no filters",
 					url:                route(factionID.String()),
-					expectedCommanders: []domain.Commander{FranzVonWeyrother(t), FrancisII(t)},
+					expectedCommanders: []commanders.Commander{FranzVonWeyrother(t), FrancisII(t)},
 				},
 				{
 					description:        "With name filter",
 					url:                route(factionID.String()) + "?name=franz",
-					expectedCommanders: []domain.Commander{FranzVonWeyrother(t)},
+					expectedCommanders: []commanders.Commander{FranzVonWeyrother(t)},
 				},
 				{
 					description:        "With summary filter",
 					url:                route(factionID.String()) + "?summary=emperor",
-					expectedCommanders: []domain.Commander{FrancisII(t)},
+					expectedCommanders: []commanders.Commander{FrancisII(t)},
 				},
 				{
 					description:        "With name and summary filters",
 					url:                route(factionID.String()) + "?name=franz&summary=emperor",
-					expectedCommanders: []domain.Commander{},
+					expectedCommanders: []commanders.Commander{},
 				},
 			}
 			for _, c := range cases {

@@ -5,8 +5,9 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber"
-	"github.com/sasalatart/batcoms/domain"
-	"github.com/sasalatart/batcoms/store"
+	"github.com/sasalatart/batcoms/domain/battles"
+	"github.com/sasalatart/batcoms/domain/commanders"
+	"github.com/sasalatart/batcoms/domain/factions"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -35,14 +36,14 @@ func JSONFrom(key string) func(ctx *fiber.Ctx) {
 
 // WithFaction middleware sets the faction corresponding to the :factionID URL parameter into
 // ctx.Locals under the key "faction"
-func WithFaction(s store.FactionsFinder) func(*fiber.Ctx) {
+func WithFaction(r factions.Reader) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
 		id, err := uuid.FromString(ctx.Params("factionID"))
 		if err != nil {
 			ctx.Next(fiber.ErrBadRequest)
 			return
 		}
-		faction, err := s.FindOne(domain.Faction{ID: id})
+		faction, err := r.FindOne(factions.Faction{ID: id})
 		if err != nil {
 			ctx.Next(err)
 			return
@@ -54,14 +55,14 @@ func WithFaction(s store.FactionsFinder) func(*fiber.Ctx) {
 
 // WithCommander middleware sets the commander corresponding to the :commanderID URL parameter into
 // ctx.Locals under the key "commander"
-func WithCommander(s store.CommandersFinder) func(*fiber.Ctx) {
+func WithCommander(r commanders.Reader) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
 		id, err := uuid.FromString(ctx.Params("commanderID"))
 		if err != nil {
 			ctx.Next(fiber.ErrBadRequest)
 			return
 		}
-		commander, err := s.FindOne(domain.Commander{ID: id})
+		commander, err := r.FindOne(commanders.Commander{ID: id})
 		if err != nil {
 			ctx.Next(err)
 			return
@@ -74,17 +75,17 @@ func WithCommander(s store.CommandersFinder) func(*fiber.Ctx) {
 // WithCommanders middleware finds commanders according to the optional :factionID URL parameter and
 // the optional "page" query parameter (falling back to 1), and sets them into ctx.Locals under the
 // key "commanders"
-func WithCommanders(s store.CommandersFinder) func(*fiber.Ctx) {
+func WithCommanders(r commanders.Reader) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
 		var page uint = 1
 		if queryPage, hasPage := ctx.Locals("page").(uint); hasPage {
 			page = queryPage
 		}
-		query := store.CommandersQuery{Name: ctx.Query("name"), Summary: ctx.Query("summary")}
-		if faction, hasFaction := ctx.Locals("faction").(domain.Faction); hasFaction {
+		query := commanders.Query{Name: ctx.Query("name"), Summary: ctx.Query("summary")}
+		if faction, haWikiFaction := ctx.Locals("faction").(factions.Faction); haWikiFaction {
 			query.FactionID = faction.ID
 		}
-		commanders, pages, err := s.FindMany(query, page)
+		commanders, pages, err := r.FindMany(query, page)
 		if err != nil {
 			ctx.Next(err)
 			return
@@ -97,14 +98,14 @@ func WithCommanders(s store.CommandersFinder) func(*fiber.Ctx) {
 
 // WithBattle middleware sets the battle corresponding to the :battleID URL parameter into
 // ctx.Locals under the key "battle"
-func WithBattle(s store.BattlesFinder) func(*fiber.Ctx) {
+func WithBattle(r battles.Reader) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
 		id, err := uuid.FromString(ctx.Params("battleID"))
 		if err != nil {
 			ctx.Next(fiber.ErrBadRequest)
 			return
 		}
-		battle, err := s.FindOne(domain.Battle{ID: id})
+		battle, err := r.FindOne(battles.Battle{ID: id})
 		if err != nil {
 			ctx.Next(err)
 			return

@@ -6,8 +6,8 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/sasalatart/batcoms/config"
+	"github.com/sasalatart/batcoms/db/postgresql"
 	"github.com/sasalatart/batcoms/http"
-	"github.com/sasalatart/batcoms/store/postgresql"
 	"github.com/spf13/viper"
 )
 
@@ -22,7 +22,7 @@ func main() {
 	var db *gorm.DB
 	var port int
 	if *testModeFlag {
-		db = postgresql.Connect(postgresql.TestConfig())
+		db = postgresql.Connect(postgresql.DefaultTestConfig())
 		port = viper.GetInt("PORT_TEST")
 	} else {
 		db = postgresql.Connect(nil)
@@ -30,9 +30,11 @@ func main() {
 	}
 	defer db.Close()
 
-	fs := postgresql.NewFactionsDataStore(db)
-	cs := postgresql.NewCommandersDataStore(db)
-	bs := postgresql.NewBattlesDataStore(db)
-	server := http.Setup(fs, cs, bs, false)
+	server := http.Setup(
+		postgresql.NewFactionsRepository(db),
+		postgresql.NewCommandersRepository(db),
+		postgresql.NewBattlesRepository(db),
+		false,
+	)
 	log.Fatal(server.Listen(port))
 }

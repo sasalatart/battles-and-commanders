@@ -7,8 +7,8 @@ PSQL_NAME: batcoms
 PSQL_NAME_TEST: batcoms_test
 PSQL_PASS: password
 SCRAPER_RESULTS:
+  ACTORS: actors.json
   BATTLES: battles.json
-  PARTICIPANTS: participants.json
 TEST_SEEDERS:
+  ACTORS: seeders/actors.json
   BATTLES: seeders/battles.json
-  PARTICIPANTS: seeders/participants.json

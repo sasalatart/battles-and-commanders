@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/sasalatart/batcoms/domain"
+	"github.com/sasalatart/batcoms/domain/battles"
+	"github.com/sasalatart/batcoms/domain/commanders"
+	"github.com/sasalatart/batcoms/domain/factions"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -32,39 +34,39 @@ func AssertErrorMessage(t *testing.T, res *http.Response, expectedMessage string
 }
 
 // AssertJSONFaction asserts that the given *http.Response contains the specified JSON-serialized
-// domain.Faction
-func AssertJSONFaction(t *testing.T, res *http.Response, expectedFaction domain.Faction) {
+// factions.Faction
+func AssertJSONFaction(t *testing.T, res *http.Response, expectedFaction factions.Faction) {
 	t.Helper()
-	factionFromBody := new(domain.Faction)
+	factionFromBody := new(factions.Faction)
 	err := json.NewDecoder(res.Body).Decode(factionFromBody)
 	require.NoError(t, err, "Decoding body into faction struct")
 	assert.Equal(t, expectedFaction, *factionFromBody, "Comparing body with expected faction")
 }
 
 // AssertJSONCommander asserts that the given *http.Response contains the specified JSON-serialized
-// domain.Commander
-func AssertJSONCommander(t *testing.T, res *http.Response, expectedCommander domain.Commander) {
+// commanders.Commander
+func AssertJSONCommander(t *testing.T, res *http.Response, expectedCommander commanders.Commander) {
 	t.Helper()
-	commanderFromBody := new(domain.Commander)
+	commanderFromBody := new(commanders.Commander)
 	err := json.NewDecoder(res.Body).Decode(commanderFromBody)
 	require.NoError(t, err, "Decoding body into commander struct")
 	assert.Equal(t, expectedCommander, *commanderFromBody, "Comparing body with expected commander")
 }
 
-// AssertJSONCommanders is like AssertJSONCommander, but for a slice of domain.Commander
-func AssertJSONCommanders(t *testing.T, res *http.Response, expectedCommanders []domain.Commander) {
+// AssertJSONCommanders is like AssertJSONCommander, but for a slice of commanders.Commander
+func AssertJSONCommanders(t *testing.T, res *http.Response, expectedCommanders []commanders.Commander) {
 	t.Helper()
-	commandersFromBody := new([]domain.Commander)
+	commandersFromBody := new([]commanders.Commander)
 	err := json.NewDecoder(res.Body).Decode(commandersFromBody)
 	require.NoError(t, err, "Decoding body into commanders slice")
 	assert.Equal(t, expectedCommanders, *commandersFromBody, "Comparing body with expected commanders")
 }
 
 // AssertJSONBattle asserts that the given *http.Response contains the specified JSON-serialized
-// domain.Battle
-func AssertJSONBattle(t *testing.T, res *http.Response, expectedBattle domain.Battle) {
+// battles.Battle
+func AssertJSONBattle(t *testing.T, res *http.Response, expectedBattle battles.Battle) {
 	t.Helper()
-	battleFromBody := new(domain.Battle)
+	battleFromBody := new(battles.Battle)
 	err := json.NewDecoder(res.Body).Decode(battleFromBody)
 	require.NoError(t, err, "Decoding body into battle struct")
 	assert.Equal(t, expectedBattle, *battleFromBody, "Comparing body with expected battle")
