@@ -41,16 +41,23 @@ func TestCommandersEndpoints(t *testing.T) {
 	t.Run("GET /commanders", func(t *testing.T) {
 		t.Parallel()
 
-		var expectedPages uint = 1
+		const expectedPages uint = 1
 		cases := []struct {
 			description        string
 			url                string
 			expectedCommanders []commanders.Commander
 		}{
 			{
-				description:        "With no filters",
-				url:                URL("/commanders"),
-				expectedCommanders: []commanders.Commander{Napoleon(t), MikhailKutuzov(t), FranzVonWeyrother(t), FrancisII(t), AlexanderI(t)},
+				description: "With no filters",
+				url:         URL("/commanders"),
+				expectedCommanders: []commanders.Commander{
+					Napoleon(t),
+					MikhailKutuzov(t),
+					JozsefAlvinczi(t),
+					FranzVonWeyrother(t),
+					FrancisII(t),
+					AlexanderI(t),
+				},
 			},
 			{
 				description:        "With name filter",
@@ -87,7 +94,7 @@ func TestCommandersEndpoints(t *testing.T) {
 		}
 
 		t.Run("ValidPersistedFactionUUID", func(t *testing.T) {
-			var expectedPages uint = 1
+			const expectedPages uint = 1
 			factionID := AustrianEmpire(t).ID
 			cases := []struct {
 				description        string

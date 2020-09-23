@@ -17,14 +17,20 @@ type FactionsRepository struct {
 }
 
 // FindOne mocks finding one faction via FactionsRepository
-func (fs *FactionsRepository) FindOne(query factions.Faction) (factions.Faction, error) {
-	mockArgs := fs.Called(query)
+func (r *FactionsRepository) FindOne(query factions.Faction) (factions.Faction, error) {
+	mockArgs := r.Called(query)
 	return mockArgs.Get(0).(factions.Faction), mockArgs.Error(1)
 }
 
+// FindMany mocks finding many commanders via FactionsRepository
+func (r *FactionsRepository) FindMany(query factions.Query, page uint) ([]factions.Faction, uint, error) {
+	mockArgs := r.Called(query, page)
+	return mockArgs.Get(0).([]factions.Faction), uint(mockArgs.Int(1)), mockArgs.Error(2)
+}
+
 // CreateOne mocks creating one faction via FactionsRepository
-func (fs *FactionsRepository) CreateOne(data factions.CreationInput) (uuid.UUID, error) {
-	mockArgs := fs.Called(data)
+func (r *FactionsRepository) CreateOne(data factions.CreationInput) (uuid.UUID, error) {
+	mockArgs := r.Called(data)
 	return mockArgs.Get(0).(uuid.UUID), mockArgs.Error(1)
 }
 

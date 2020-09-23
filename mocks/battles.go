@@ -21,14 +21,14 @@ type BattlesRepository struct {
 }
 
 // FindOne mocks finding one battle via BattlesRepository
-func (bs *BattlesRepository) FindOne(query battles.Battle) (battles.Battle, error) {
-	mockArgs := bs.Called(query)
+func (r *BattlesRepository) FindOne(query battles.Battle) (battles.Battle, error) {
+	mockArgs := r.Called(query)
 	return mockArgs.Get(0).(battles.Battle), mockArgs.Error(1)
 }
 
 // CreateOne mocks creating one battle via BattlesRepository
-func (bs *BattlesRepository) CreateOne(data battles.CreationInput) (uuid.UUID, error) {
-	mockArgs := bs.Called(data)
+func (r *BattlesRepository) CreateOne(data battles.CreationInput) (uuid.UUID, error) {
+	mockArgs := r.Called(data)
 	return mockArgs.Get(0).(uuid.UUID), mockArgs.Error(1)
 }
 

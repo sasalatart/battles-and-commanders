@@ -34,6 +34,35 @@ func (r *FactionsRepository) FindOne(query factions.Faction) (factions.Faction, 
 	return deserializeFaction(f), nil
 }
 
+// FindMany does a paginated search of all factions matching the given query
+func (r *FactionsRepository) FindMany(query factions.Query, page uint) ([]factions.Faction, uint, error) {
+	var records uint
+	result := &[]schema.Faction{}
+
+	var db = r.db.Model(&schema.Faction{}).Order("name DESC")
+	if query.CommanderID != uuid.Nil {
+		db = db.Joins("JOIN battle_commander_factions bcf ON bcf.faction_id = factions.id").
+			Where("bcf.commander_id = ?", query.CommanderID)
+	}
+	if query.Name != "" {
+		db = db.Where("to_tsvector('english', name) @@ plainto_tsquery(?)", query.Name)
+	}
+	if query.Summary != "" {
+		db = db.Where("to_tsvector('english', summary) @@ phraseto_tsquery(?)", query.Summary)
+	}
+
+	if err := db.Count(&records).Error; err != nil {
+		return []factions.Faction{}, records, err
+	}
+
+	db = db.Offset((page - 1) * perPage).Limit(perPage)
+	if err := db.Find(result).Error; err != nil {
+		return []factions.Faction{}, records, err
+	}
+
+	return deserializeFactions(result), (records / perPage) + 1, nil
+}
+
 // CreateOne creates a faction in the database. The operation returns the ID of the new faction
 func (r *FactionsRepository) CreateOne(data factions.CreationInput) (uuid.UUID, error) {
 	if err := r.validator.Struct(data); err != nil {
@@ -68,4 +97,12 @@ func deserializeFaction(f *schema.Faction) factions.Faction {
 		Name:    f.Name,
 		Summary: f.Summary,
 	}
+}
+
+func deserializeFactions(ff *[]schema.Faction) []factions.Faction {
+	results := []factions.Faction{}
+	for _, f := range *ff {
+		results = append(results, deserializeFaction(&f))
+	}
+	return results
 }

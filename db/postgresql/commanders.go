@@ -23,18 +23,10 @@ func NewCommandersRepository(db *gorm.DB) *CommandersRepository {
 	return &CommandersRepository{db, validator.New()}
 }
 
-func deserializeCommanders(cc *[]schema.Commander) []commanders.Commander {
-	results := []commanders.Commander{}
-	for _, c := range *cc {
-		results = append(results, deserializeCommander(&c))
-	}
-	return results
-}
-
 // FindOne finds the first commander in the database that matches the query
-func (s *CommandersRepository) FindOne(query commanders.Commander) (commanders.Commander, error) {
+func (r *CommandersRepository) FindOne(query commanders.Commander) (commanders.Commander, error) {
 	c := &schema.Commander{}
-	if err := s.db.Where(query).Find(c).Error; gorm.IsRecordNotFoundError(err) {
+	if err := r.db.Where(query).Find(c).Error; gorm.IsRecordNotFoundError(err) {
 		return commanders.Commander{}, domain.ErrNotFound
 	} else if err != nil {
 		return commanders.Commander{}, errors.Wrap(err, "Executing CommandersRepository.FindOne")
@@ -43,11 +35,11 @@ func (s *CommandersRepository) FindOne(query commanders.Commander) (commanders.C
 }
 
 // FindMany does a paginated search of all commanders matching the given query
-func (s *CommandersRepository) FindMany(query commanders.Query, page uint) ([]commanders.Commander, uint, error) {
+func (r *CommandersRepository) FindMany(query commanders.Query, page uint) ([]commanders.Commander, uint, error) {
 	var records uint
 	result := &[]schema.Commander{}
 
-	var db = s.db.Model(&schema.Commander{}).Order("name DESC")
+	var db = r.db.Model(&schema.Commander{}).Order("name DESC")
 	if query.FactionID != uuid.Nil {
 		db = db.Joins("JOIN battle_commander_factions bcf ON bcf.commander_id = commanders.id").
 			Where("bcf.faction_id = ?", query.FactionID)
@@ -72,8 +64,8 @@ func (s *CommandersRepository) FindMany(query commanders.Query, page uint) ([]co
 }
 
 // CreateOne creates a commander in the database. The operation returns the ID of the new commander
-func (s *CommandersRepository) CreateOne(data commanders.CreationInput) (uuid.UUID, error) {
-	if err := s.validator.Struct(data); err != nil {
+func (r *CommandersRepository) CreateOne(data commanders.CreationInput) (uuid.UUID, error) {
+	if err := r.validator.Struct(data); err != nil {
 		return uuid.Nil, errors.Wrap(err, "Validating commander creation input")
 	}
 	c := serializeCommander(commanders.Commander{
@@ -82,7 +74,7 @@ func (s *CommandersRepository) CreateOne(data commanders.CreationInput) (uuid.UU
 		Name:    data.Name,
 		Summary: data.Summary,
 	})
-	if err := s.db.Create(c).Error; err != nil {
+	if err := r.db.Create(c).Error; err != nil {
 		return uuid.Nil, errors.Wrap(err, "Creating a commander")
 	}
 	return c.ID, nil
@@ -105,4 +97,12 @@ func deserializeCommander(c *schema.Commander) commanders.Commander {
 		Name:    c.Name,
 		Summary: c.Summary,
 	}
+}
+
+func deserializeCommanders(cc *[]schema.Commander) []commanders.Commander {
+	results := []commanders.Commander{}
+	for _, c := range *cc {
+		results = append(results, deserializeCommander(&c))
+	}
+	return results
 }

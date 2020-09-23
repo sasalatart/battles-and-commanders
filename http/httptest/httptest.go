@@ -43,6 +43,15 @@ func AssertJSONFaction(t *testing.T, res *http.Response, expectedFaction faction
 	assert.Equal(t, expectedFaction, *factionFromBody, "Comparing body with expected faction")
 }
 
+// AssertJSONFactions is like AssertJSONFaction, but for a slice of factions.Faction
+func AssertJSONFactions(t *testing.T, res *http.Response, expectedFactions []factions.Faction) {
+	t.Helper()
+	factionsFromBody := new([]factions.Faction)
+	err := json.NewDecoder(res.Body).Decode(factionsFromBody)
+	require.NoError(t, err, "Decoding body into factions slice")
+	assert.Equal(t, expectedFactions, *factionsFromBody, "Comparing body with expected factions")
+}
+
 // AssertJSONCommander asserts that the given *http.Response contains the specified JSON-serialized
 // commanders.Commander
 func AssertJSONCommander(t *testing.T, res *http.Response, expectedCommander commanders.Commander) {
