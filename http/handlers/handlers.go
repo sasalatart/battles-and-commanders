@@ -19,6 +19,19 @@ func Register(app *fiber.App, fr factions.Reader, cr commanders.Reader, br battl
 		middleware.JSONFrom("faction"),
 	)
 
+	app.Get("/factions",
+		middleware.WithPage(),
+		middleware.WithFactions(fr),
+		middleware.JSONFrom("factions"),
+	)
+
+	app.Get("/commanders/:commanderID/factions",
+		middleware.WithPage(),
+		middleware.WithCommander(cr),
+		middleware.WithFactions(fr),
+		middleware.JSONFrom("factions"),
+	)
+
 	app.Get("/commanders/:commanderID",
 		middleware.WithCommander(cr),
 		middleware.JSONFrom("commander"),

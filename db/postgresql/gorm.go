@@ -73,6 +73,8 @@ func Reset(db *gorm.DB) {
 	db.Model(&schema.BattleCommanderFaction{}).AddForeignKey("commander_id", "commanders(id)", "CASCADE", "CASCADE")
 	db.Model(&schema.BattleCommanderFaction{}).AddForeignKey("faction_id", "factions(id)", "CASCADE", "CASCADE")
 
+	db.Exec(`CREATE INDEX ts_factions_name_idx ON factions USING GIST(to_tsvector('english', name));`)
+	db.Exec(`CREATE INDEX ts_factions_summary_idx ON factions USING GIST(to_tsvector('english', summary));`)
 	db.Exec(`CREATE INDEX ts_commanders_name_idx ON commanders USING GIST(to_tsvector('english', name));`)
 	db.Exec(`CREATE INDEX ts_commanders_summary_idx ON commanders USING GIST(to_tsvector('english', summary));`)
 }

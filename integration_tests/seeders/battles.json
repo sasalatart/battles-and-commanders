@@ -27,5 +27,30 @@
       "21418258": [69880],
       "266894": [11551, 14092123]
     }
+  },
+  "386922": {
+    "ID": 386922,
+    "URL": "https://en.wikipedia.org/wiki/Battle_of_the_Bridge_of_Arcole",
+    "Name": "Battle of Arcole",
+    "PartOf": "Part of the War of the First Coalition",
+    "Description": "battle",
+    "Extract": "The Battle of Arcole or Battle of Arcola was a battle fought between French and Austrian forces 25 kilometres (16 mi) southeast of Verona during the War of the First Coalition, a part of the French Revolutionary Wars. The battle saw a bold maneuver by Napoleon Bonaparte's French Army of Italy to outflank the Austrian army led by József Alvinczi and cut off its line of retreat. The French victory proved to be a highly significant event during the third Austrian attempt to lift the Siege of Mantua. Alvinczi planned to execute a two-pronged offensive against Bonaparte's army. The Austrian commander ordered Paul Davidovich to advance south along the Adige River valley with one corps while Alvinczi led the main army in an advance from the east. The Austrians hoped to raise the siege of Mantua where Dagobert Sigmund von Wurmser was trapped with a large garrison. If the two Austrian columns linked up and if Wurmser's troops were released, French prospects were grim.",
+    "Date": "15–17 November 1796",
+    "Location": {
+      "Place": "Arcole, Republic of Venice",
+      "Latitude": "",
+      "Longitude": ""
+    },
+    "Result": "French victory",
+    "TerritorialChanges": "",
+    "Strength": { "A": "20,000", "B": "24,000", "AB": "" },
+    "Casualties": {
+      "A": "3,500 killed or wounded 1,300 captured",
+      "B": "2,200 killed or wounded 4,000 captured",
+      "AB": ""
+    },
+    "Factions": { "A": [62243], "B": [1041515] },
+    "Commanders": { "A": [69880], "B": [2408835] },
+    "CommandersByFaction": { "1041515": [2408835], "62243": [69880] }
   }
 }

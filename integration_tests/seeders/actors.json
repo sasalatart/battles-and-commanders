@@ -4,16 +4,22 @@
       "Kind": 1,
       "ID": 21418258,
       "URL": "https://en.wikipedia.org/wiki/French_First_Empire",
-      "Flag": "//upload.wikimedia.org/wikipedia/en/thumb/c/c3/Flag_of_France.svg/23px-Flag_of_France.svg.png",
       "Name": "First French Empire",
       "Description": "Empire of Napoleon I of France between 1804–1815",
       "Extract": "The First French Empire, officially the French Empire, was the empire ruled by Napoleon Bonaparte, who established French hegemony over much of continental Europe at the beginning of the 19th century. Although France had already established a colonial empire overseas since the early 17th century, the French state had remained a kingdom under the Bourbons and a republic after the French Revolution. Historians refer to Napoleon's regime as the First Empire to distinguish it from the restorationist Second Empire (1852–1870) ruled by his nephew Napoleon III."
+    },
+    "62243": {
+      "Kind": 1,
+      "ID": 62243,
+      "URL": "https://en.wikipedia.org/wiki/First_French_Republic",
+      "Name": "French First Republic",
+      "Description": "Republic governing France, 1792–1804",
+      "Extract": "In the history of France, the First Republic, officially the French Republic, was founded on 22 September 1792 during the French Revolution. The First Republic lasted until the declaration of the First Empire in 1804 under Napoleon, although the form of the government changed several times. This period was characterized by the fall of the monarchy, the establishment of the National Convention and the Reign of Terror, the Thermidorian Reaction and the founding of the Directory, and, finally, the creation of the Consulate and Napoleon's rise to power."
     },
     "20611504": {
       "Kind": 1,
       "ID": 20611504,
       "URL": "https://en.wikipedia.org/wiki/Imperial_Russia",
-      "Flag": "",
       "Name": "Russian Empire",
       "Description": "Empire in Eurasia and North America",
       "Extract": "The Russian Empire was an empire that extended across Eurasia and North America from 1721, following the end of the Great Northern War, until the Republic was proclaimed by the Provisional Government that took power after the February Revolution of 1917. The third-largest empire in history, at its greatest extent stretching over three continents, Europe, Asia, and North America, the Russian Empire was surpassed in size only by the British and Mongol empires. The rise of the Russian Empire coincided with the decline of neighboring rival powers: the Swedish Empire, the Polish–Lithuanian Commonwealth, Persia and the Ottoman Empire. It played a major role in 1812–1814 in defeating Napoleon's ambitions to control Europe and expanded to the west and south."
@@ -22,10 +28,17 @@
       "Kind": 1,
       "ID": 266894,
       "URL": "https://en.wikipedia.org/wiki/Austrian_Empire",
-      "Flag": "/thumb/7/7a/Flag_of_the_Habsburg_Monarchy.svg/23px-Flag_of_the_Habsburg_Monarchy.svg.png",
       "Name": "Austrian Empire",
       "Description": "monarchy in Central Europe between 1804 and 1867",
       "Extract": "The Austrian Empire was a Central European multinational great power from 1804 to 1867, created by proclamation out of the realms of the Habsburgs. During its existence, it was the third most populous empire after the Russian Empire and the United Kingdom in Europe. Along with Prussia, it was one of the two major powers of the German Confederation. Geographically, it was the third largest empire in Europe after the Russian Empire and the First French Empire. Proclaimed in response to the First French Empire, it partially overlapped with the Holy Roman Empire until the latter's dissolution in 1806."
+    },
+    "1041515": {
+      "Kind": 1,
+      "ID": 1041515,
+      "URL": "https://en.wikipedia.org/wiki/Habsburg_Empire",
+      "Name": "Habsburg Monarchy",
+      "Description": "Former monarchy in Europe from 1282 to 1918",
+      "Extract": "Habsburg Monarchy is an umbrella term used by historians for the numerous lands and kingdoms of the Habsburg dynasty, especially for those of the Austrian line. Although from 1438 to 1806, a member of the House of Habsburg was also Holy Roman Emperor, the Holy Roman Empire itself, over which the emperor exercised only very limited authority, was not considered to be part of the Habsburg Monarchy."
     }
   },
   "CommandersByID": {
@@ -33,7 +46,6 @@
       "Kind": 2,
       "ID": 69880,
       "URL": "https://en.wikipedia.org/wiki/Napoleon_I",
-      "Flag": "/thumb/3/3a/Flag_of_France_%281794%E2%80%931815%2C_1830%E2%80%931958%29.svg/23px-Flag_of_France_%281794%E2%80%931815%2C_1830%E2%80%931958%29.svg.png",
       "Name": "Napoleon",
       "Description": "French statesman, military leader, and Emperor of the French",
       "Extract": "Napoleon Bonaparte, born Napoleone di Buonaparte, byname \"Le Corse\" or \"Le Petit Caporal\", was a French statesman and military leader who became notorious as an artillery commander during the French Revolution. He led many successful campaigns during the French Revolutionary Wars and was Emperor of the French as Napoleon I from 1804 until 1814 and again briefly in 1815 during the Hundred Days. Napoleon dominated European and global affairs for more than a decade while leading France against a series of coalitions during the Napoleonic Wars. He won many of these wars and a vast majority of his battles, building a large empire that ruled over much of continental Europe before its final collapse in 1815. He is regarded as one of the greatest military commanders in history, and his wars and campaigns are studied at military schools worldwide. Napoleon's political and cultural legacy has made him one of the most celebrated and controversial leaders in human history."
@@ -42,7 +54,6 @@
       "Kind": 2,
       "ID": 27126603,
       "URL": "https://en.wikipedia.org/wiki/Alexander_I_of_Russia",
-      "Flag": "",
       "Name": "Alexander I of Russia",
       "Description": "Emperor of Russia",
       "Extract": "Alexander I was the Emperor of Russia (Tsar) between 1801 and 1825. He was the eldest son of Paul I and Sophie Dorothea of Württemberg. Alexander was the first king of Congress Poland, reigning from 1815 to 1825, as well as the first Russian Grand Duke of Finland, reigning from 1809 to 1825."
@@ -51,7 +62,6 @@
       "Kind": 2,
       "ID": 251000,
       "URL": "https://en.wikipedia.org/wiki/Mikhail_Illarionovich_Kutuzov",
-      "Flag": "/thumb/f/f3/Flag_of_Russia.svg/23px-Flag_of_Russia.svg.png",
       "Name": "Mikhail Kutuzov",
       "Description": "Field Marshal of the Russian Empire",
       "Extract": "Prince Mikhail Illarionovich Golenishchev-Kutuzov was a Field Marshal of the Russian Empire. He served as one of the finest military officers and diplomats of Russia under the reign of three Romanov Tsars: Catherine II, Paul I and Alexander I. His military career was closely associated with the rising period of Russia from the end of the 18th century to the beginning of the 19th century. Kutuzov is considered to have been one of the best Russian generals."
@@ -60,7 +70,6 @@
       "Kind": 2,
       "ID": 11551,
       "URL": "https://en.wikipedia.org/wiki/Francis_II,_Holy_Roman_Emperor",
-      "Flag": "/thumb/3/3f/Banner_of_the_Holy_Roman_Emperor_%28after_1400%29.svg/23px-Banner_of_the_Holy_Roman_Emperor_%28after_1400%29.svg.png",
       "Name": "Francis II, Holy Roman Emperor",
       "Description": "The last Holy Roman Emperor and first Emperor of Austria",
       "Extract": "Francis II was the last Holy Roman Emperor, ruling from 1792 until 6 August 1806, when he dissolved the Holy Roman Empire after the decisive defeat at the hands of the First French Empire led by Napoleon at the Battle of Austerlitz. In 1804, he had founded the Austrian Empire and became Francis I, the first Emperor of Austria, ruling from 1804 to 1835, so later he was named the first Doppelkaiser in history.. For the two years between 1804 and 1806, Francis used the title and style by the Grace of God elected Roman Emperor, ever Augustus, hereditary Emperor of Austria and he was called the Emperor of both the Holy Roman Empire and Austria. He was also Apostolic King of Hungary, Croatia and Bohemia as Francis I. He also served as the first president of the German Confederation following its establishment in 1815."
@@ -69,10 +78,17 @@
       "Kind": 2,
       "ID": 14092123,
       "URL": "https://en.wikipedia.org/wiki/Franz_von_Weyrother",
-      "Flag": "/thumb/3/3f/Banner_of_the_Holy_Roman_Emperor_%28after_1400%29.svg/23px-Banner_of_the_Holy_Roman_Emperor_%28after_1400%29.svg.png",
       "Name": "Franz von Weyrother",
       "Description": "Austrian general",
       "Extract": "Franz von Weyrother was an Austrian staff officer and general who fought during the French Revolutionary Wars and the Napoleonic Wars. He drew up the plans for the disastrous defeats at the Battle of Rivoli, Battle of Hohenlinden and the Battle of Austerlitz, in which the Austrian army was defeated by Napoleon Bonaparte twice and Jean Moreau once."
+    },
+    "2408835": {
+      "Kind": 2,
+      "ID": 2408835,
+      "URL": "https://en.wikipedia.org/wiki/J%C3%B3zsef_Alvinczi",
+      "Name": "József Alvinczi",
+      "Description": "Soldier in the Habsburg Army and a Field Marshal of the Austrian Empire",
+      "Extract": "Freiherr Joseph Alvinczi von Borberek a.k.a. Baron József Alvinczi de Borberek was a soldier in the Habsburg Army and a Field Marshal of the Austrian Empire."
     }
   }
 }

@@ -72,9 +72,35 @@ func WithCommander(r commanders.Reader) func(*fiber.Ctx) {
 	}
 }
 
+// WithFactions middleware finds factions according to the optional :commanderID URL parameter and
+// the optional "page" query parameter (falling back to 1), and sets them into ctx.Locals under the
+// key "factions". When present, it will also use the "name" and "summary" query parameters to
+// refine this search
+func WithFactions(r factions.Reader) func(*fiber.Ctx) {
+	return func(ctx *fiber.Ctx) {
+		var page uint = 1
+		if queryPage, hasPage := ctx.Locals("page").(uint); hasPage {
+			page = queryPage
+		}
+		query := factions.Query{Name: ctx.Query("name"), Summary: ctx.Query("summary")}
+		if commander, hasCommander := ctx.Locals("commander").(commanders.Commander); hasCommander {
+			query.CommanderID = commander.ID
+		}
+		factions, pages, err := r.FindMany(query, page)
+		if err != nil {
+			ctx.Next(err)
+			return
+		}
+		ctx.Set("x-pages", fmt.Sprint(pages))
+		ctx.Locals("factions", factions)
+		ctx.Next()
+	}
+}
+
 // WithCommanders middleware finds commanders according to the optional :factionID URL parameter and
 // the optional "page" query parameter (falling back to 1), and sets them into ctx.Locals under the
-// key "commanders"
+// key "commanders". When present, it will also use the "name" and "summary" query parameters to
+// refine this search
 func WithCommanders(r commanders.Reader) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
 		var page uint = 1
@@ -82,7 +108,7 @@ func WithCommanders(r commanders.Reader) func(*fiber.Ctx) {
 			page = queryPage
 		}
 		query := commanders.Query{Name: ctx.Query("name"), Summary: ctx.Query("summary")}
-		if faction, haWikiFaction := ctx.Locals("faction").(factions.Faction); haWikiFaction {
+		if faction, hasFaction := ctx.Locals("faction").(factions.Faction); hasFaction {
 			query.FactionID = faction.ID
 		}
 		commanders, pages, err := r.FindMany(query, page)

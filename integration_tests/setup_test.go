@@ -61,9 +61,24 @@ func FirstFrenchEmpire(t *testing.T) factions.Faction {
 	return requireFaction(t, "First French Empire")
 }
 
+func FrenchFirstRepublic(t *testing.T) factions.Faction {
+	t.Helper()
+	return requireFaction(t, "French First Republic")
+}
+
 func AustrianEmpire(t *testing.T) factions.Faction {
 	t.Helper()
 	return requireFaction(t, "Austrian Empire")
+}
+
+func HabsburgMonarchy(t *testing.T) factions.Faction {
+	t.Helper()
+	return requireFaction(t, "Habsburg Monarchy")
+}
+
+func RussianEmpire(t *testing.T) factions.Faction {
+	t.Helper()
+	return requireFaction(t, "Russian Empire")
 }
 
 func Napoleon(t *testing.T) commanders.Commander {
@@ -79,6 +94,11 @@ func FrancisII(t *testing.T) commanders.Commander {
 func FranzVonWeyrother(t *testing.T) commanders.Commander {
 	t.Helper()
 	return requireCommander(t, "Franz von Weyrother")
+}
+
+func JozsefAlvinczi(t *testing.T) commanders.Commander {
+	t.Helper()
+	return requireCommander(t, "József Alvinczi")
 }
 
 func AlexanderI(t *testing.T) commanders.Commander {

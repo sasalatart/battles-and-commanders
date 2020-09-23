@@ -19,20 +19,20 @@ type CommandersRepository struct {
 }
 
 // FindOne mocks finding one commander via CommandersRepository
-func (cs *CommandersRepository) FindOne(query commanders.Commander) (commanders.Commander, error) {
-	mockArgs := cs.Called(query)
+func (r *CommandersRepository) FindOne(query commanders.Commander) (commanders.Commander, error) {
+	mockArgs := r.Called(query)
 	return mockArgs.Get(0).(commanders.Commander), mockArgs.Error(1)
 }
 
 // FindMany mocks finding many commanders via CommandersRepository
-func (cs *CommandersRepository) FindMany(query commanders.Query, page uint) ([]commanders.Commander, uint, error) {
-	mockArgs := cs.Called(query, page)
+func (r *CommandersRepository) FindMany(query commanders.Query, page uint) ([]commanders.Commander, uint, error) {
+	mockArgs := r.Called(query, page)
 	return mockArgs.Get(0).([]commanders.Commander), uint(mockArgs.Int(1)), mockArgs.Error(2)
 }
 
 // CreateOne mocks creating one commander via CommandersRepository
-func (cs *CommandersRepository) CreateOne(data commanders.CreationInput) (uuid.UUID, error) {
-	mockArgs := cs.Called(data)
+func (r *CommandersRepository) CreateOne(data commanders.CreationInput) (uuid.UUID, error) {
+	mockArgs := r.Called(data)
 	return mockArgs.Get(0).(uuid.UUID), mockArgs.Error(1)
 }
 

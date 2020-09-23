@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/gofiber/fiber"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,7 +17,7 @@ func AssertFiberGET(t *testing.T, app *fiber.App, route string, status int, asse
 	res, err := app.Test(req, -1)
 	require.NoError(t, err, route)
 	defer res.Body.Close()
-	assert.Equalf(t, status, res.StatusCode, "HTTP status for %q", route)
+	require.Equalf(t, status, res.StatusCode, "HTTP status for %q", route)
 	assertResponse(res)
 }
 

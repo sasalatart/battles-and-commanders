@@ -9,20 +9,12 @@ import (
 	"github.com/sasalatart/batcoms/domain"
 	"github.com/sasalatart/batcoms/domain/commanders"
 	"github.com/sasalatart/batcoms/domain/factions"
-	batcomshttp "github.com/sasalatart/batcoms/http"
 	"github.com/sasalatart/batcoms/http/httptest"
 	"github.com/sasalatart/batcoms/mocks"
 	uuid "github.com/satori/go.uuid"
 )
 
 func TestCommandersHandlers(t *testing.T) {
-	appWithReposMocks := func() (*fiber.App, *mocks.FactionsRepository, *mocks.CommandersRepository) {
-		factionsRepoMock := new(mocks.FactionsRepository)
-		commandersRepoMock := new(mocks.CommandersRepository)
-		app := batcomshttp.Setup(factionsRepoMock, commandersRepoMock, new(mocks.BattlesRepository), true)
-		return app, factionsRepoMock, commandersRepoMock
-	}
-
 	t.Run("GET /commanders/:commanderID", func(t *testing.T) {
 		t.Parallel()
 
@@ -62,8 +54,8 @@ func TestCommandersHandlers(t *testing.T) {
 	t.Run("GET /commanders", func(t *testing.T) {
 		t.Parallel()
 
-		var page uint = 2
-		pagesMock := 3
+		const page uint = 2
+		const pagesMock = 3
 		commandersMock := []commanders.Commander{mocks.Commander(), mocks.Commander2()}
 
 		cases := []struct {
@@ -109,13 +101,13 @@ func TestCommandersHandlers(t *testing.T) {
 	t.Run("GET /factions/:factionID/commanders", func(t *testing.T) {
 		t.Parallel()
 
-		var page uint = 2
+		const page uint = 2
 		buildURL := func(factionID string) string {
 			return fmt.Sprintf("/factions/%s/commanders?page=%d", factionID, page)
 		}
 
 		t.Run("ValidPersistedFactionUUID", func(t *testing.T) {
-			pagesMock := 3
+			const pagesMock = 3
 			factionMock := mocks.Faction()
 			commandersMock := []commanders.Commander{mocks.Commander(), mocks.Commander2()}
 
