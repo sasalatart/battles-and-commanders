@@ -20,8 +20,8 @@ func TestFactionsHandlers(t *testing.T) {
 
 		t.Run("ValidPersistedUUID", func(t *testing.T) {
 			factionMock := mocks.Faction()
-			app, factionsRepoMock, _ := appWithReposMocks()
-			factionsRepoMock.On("FindOne", factions.Faction{
+			app, factionsRepoMock, _, _ := appWithReposMocks()
+			factionsRepoMock.On("FindOne", factions.FindOneQuery{
 				ID: factionMock.ID,
 			}).Return(factionMock, nil)
 
@@ -33,8 +33,8 @@ func TestFactionsHandlers(t *testing.T) {
 
 		t.Run("ValidNonPersistedUUID", func(t *testing.T) {
 			uuid := uuid.NewV4()
-			app, factionsRepoMock, _ := appWithReposMocks()
-			factionsRepoMock.On("FindOne", factions.Faction{
+			app, factionsRepoMock, _, _ := appWithReposMocks()
+			factionsRepoMock.On("FindOne", factions.FindOneQuery{
 				ID: uuid,
 			}).Return(factions.Faction{}, domain.ErrNotFound)
 
@@ -43,10 +43,8 @@ func TestFactionsHandlers(t *testing.T) {
 		})
 
 		t.Run("InvalidUUID", func(t *testing.T) {
-			invalidUUID := "invalid-uuid"
-			app, factionsRepoMock, _ := appWithReposMocks()
-
-			httptest.AssertFailedFiberGET(t, app, "/factions/"+invalidUUID, *fiber.ErrBadRequest)
+			app, factionsRepoMock, _, _ := appWithReposMocks()
+			httptest.AssertFailedFiberGET(t, app, "/factions/invalid-uuid", *fiber.ErrBadRequest)
 			factionsRepoMock.AssertNotCalled(t, "FindOne")
 		})
 	})
@@ -54,44 +52,22 @@ func TestFactionsHandlers(t *testing.T) {
 	t.Run("GET /factions", func(t *testing.T) {
 		t.Parallel()
 
-		const page uint = 2
+		const page = 2
 		const pagesMock = 3
+		baseURL := fmt.Sprintf("/factions?page=%d", page)
 		factionsMock := []factions.Faction{mocks.Faction(), mocks.Faction2()}
 
-		cases := []struct {
-			description string
-			url         string
-			calledWith  factions.Query
-		}{
-			{
-				description: "With no filters",
-				url:         fmt.Sprintf("/factions?page=%d", page),
-				calledWith:  factions.Query{},
-			},
-			{
-				description: "With name filter",
-				url:         fmt.Sprintf("/factions?page=%d&name=First+French+Empire", page),
-				calledWith:  factions.Query{Name: "First French Empire"},
-			},
-			{
-				description: "With summary filter",
-				url:         fmt.Sprintf("/factions?page=%d&summary=continental+Europe", page),
-				calledWith:  factions.Query{Summary: "continental Europe"},
-			},
-			{
-				description: "With name and summary filters",
-				url:         fmt.Sprintf("/factions?page=%d&name=First+French+Empire&summary=continental+Europe", page),
-				calledWith:  factions.Query{Name: "First French Empire", Summary: "continental Europe"},
-			},
-		}
+		cases := buildFactionsCases(baseURL, func(q factions.FindManyQuery) factions.FindManyQuery {
+			return q
+		})
 		for _, c := range cases {
 			t.Run(c.description, func(t *testing.T) {
-				app, factionsRepoMock, _ := appWithReposMocks()
+				app, factionsRepoMock, _, _ := appWithReposMocks()
 				factionsRepoMock.On("FindMany", c.calledWith, page).
 					Return(factionsMock, pagesMock, nil)
 				httptest.AssertFiberGET(t, app, c.url, http.StatusOK, func(res *http.Response) {
 					factionsRepoMock.AssertExpectations(t)
-					httptest.AssertHeaderPages(t, res, uint(pagesMock))
+					httptest.AssertHeaderPages(t, res, pagesMock)
 					httptest.AssertJSONFactions(t, res, factionsMock)
 				})
 			})
@@ -101,7 +77,7 @@ func TestFactionsHandlers(t *testing.T) {
 	t.Run("GET /commanders/:commanderID/factions", func(t *testing.T) {
 		t.Parallel()
 
-		const page uint = 2
+		const page = 2
 		buildURL := func(commanderID string) string {
 			return fmt.Sprintf("/commanders/%s/factions?page=%d", commanderID, page)
 		}
@@ -111,36 +87,14 @@ func TestFactionsHandlers(t *testing.T) {
 			commanderMock := mocks.Commander()
 			factionsMock := []factions.Faction{mocks.Faction(), mocks.Faction2()}
 
-			cases := []struct {
-				description string
-				url         string
-				calledWith  factions.Query
-			}{
-				{
-					description: "With no filters",
-					url:         buildURL(commanderMock.ID.String()),
-					calledWith:  factions.Query{CommanderID: commanderMock.ID},
-				},
-				{
-					description: "With name filter",
-					url:         buildURL(commanderMock.ID.String()) + "&name=First+French+Empire",
-					calledWith:  factions.Query{CommanderID: commanderMock.ID, Name: "First French Empire"},
-				},
-				{
-					description: "With summary filter",
-					url:         buildURL(commanderMock.ID.String()) + "&summary=continental+Europe",
-					calledWith:  factions.Query{CommanderID: commanderMock.ID, Summary: "continental Europe"},
-				},
-				{
-					description: "With name and summary filters",
-					url:         buildURL(commanderMock.ID.String()) + "&name=First+French+Empire&summary=continental+Europe",
-					calledWith:  factions.Query{CommanderID: commanderMock.ID, Name: "First French Empire", Summary: "continental Europe"},
-				},
-			}
+			cases := buildFactionsCases(buildURL(commanderMock.ID.String()), func(q factions.FindManyQuery) factions.FindManyQuery {
+				q.CommanderID = commanderMock.ID
+				return q
+			})
 			for _, c := range cases {
 				t.Run(c.description, func(t *testing.T) {
-					app, factionsRepoMock, commandersRepoMock := appWithReposMocks()
-					commandersRepoMock.On("FindOne", commanders.Commander{
+					app, factionsRepoMock, commandersRepoMock, _ := appWithReposMocks()
+					commandersRepoMock.On("FindOne", commanders.FindOneQuery{
 						ID: commanderMock.ID,
 					}).Return(commanderMock, nil)
 					factionsRepoMock.On("FindMany", c.calledWith, page).
@@ -148,7 +102,7 @@ func TestFactionsHandlers(t *testing.T) {
 
 					httptest.AssertFiberGET(t, app, c.url, http.StatusOK, func(res *http.Response) {
 						factionsRepoMock.AssertExpectations(t)
-						httptest.AssertHeaderPages(t, res, uint(pagesMock))
+						httptest.AssertHeaderPages(t, res, pagesMock)
 						httptest.AssertJSONFactions(t, res, factionsMock)
 					})
 				})
@@ -157,8 +111,8 @@ func TestFactionsHandlers(t *testing.T) {
 
 		t.Run("ValidNonPersistedCommanderUUID", func(t *testing.T) {
 			uuid := uuid.NewV4()
-			app, factionsRepoMock, commandersRepoMock := appWithReposMocks()
-			commandersRepoMock.On("FindOne", commanders.Commander{
+			app, factionsRepoMock, commandersRepoMock, _ := appWithReposMocks()
+			commandersRepoMock.On("FindOne", commanders.FindOneQuery{
 				ID: uuid,
 			}).Return(commanders.Commander{}, domain.ErrNotFound)
 
@@ -168,12 +122,41 @@ func TestFactionsHandlers(t *testing.T) {
 		})
 
 		t.Run("InvalidCommanderUUID", func(t *testing.T) {
-			invalidUUID := "invalid-uuid"
-			app, factionsRepoMock, commandersRepoMock := appWithReposMocks()
-
-			httptest.AssertFailedFiberGET(t, app, buildURL(invalidUUID), *fiber.ErrBadRequest)
+			app, factionsRepoMock, commandersRepoMock, _ := appWithReposMocks()
+			httptest.AssertFailedFiberGET(t, app, buildURL("invalid-uuid"), *fiber.ErrBadRequest)
 			commandersRepoMock.AssertNotCalled(t, "FindMany")
 			factionsRepoMock.AssertNotCalled(t, "FindOne")
 		})
 	})
+}
+
+type factionsTableCase struct {
+	description string
+	url         string
+	calledWith  factions.FindManyQuery
+}
+
+func buildFactionsCases(baseURL string, decorateQuery func(factions.FindManyQuery) factions.FindManyQuery) []factionsTableCase {
+	return []factionsTableCase{
+		{
+			description: "With no filters",
+			url:         baseURL,
+			calledWith:  decorateQuery(factions.FindManyQuery{}),
+		},
+		{
+			description: "With name filter",
+			url:         baseURL + "&name=First+French+Empire",
+			calledWith:  decorateQuery(factions.FindManyQuery{Name: "First French Empire"}),
+		},
+		{
+			description: "With summary filter",
+			url:         baseURL + "&summary=continental+Europe",
+			calledWith:  decorateQuery(factions.FindManyQuery{Summary: "continental Europe"}),
+		},
+		{
+			description: "With name and summary filters",
+			url:         baseURL + "&name=First+French+Empire&summary=continental+Europe",
+			calledWith:  decorateQuery(factions.FindManyQuery{Name: "First French Empire", Summary: "continental Europe"}),
+		},
+	}
 }

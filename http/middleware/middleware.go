@@ -20,7 +20,7 @@ func WithPage() func(*fiber.Ctx) {
 			ctx.Next(fiber.ErrBadRequest)
 			return
 		}
-		ctx.Locals("page", uint(page))
+		ctx.Locals("page", page)
 		ctx.Next()
 	}
 }
@@ -43,12 +43,34 @@ func WithFaction(r factions.Reader) func(*fiber.Ctx) {
 			ctx.Next(fiber.ErrBadRequest)
 			return
 		}
-		faction, err := r.FindOne(factions.Faction{ID: id})
+		faction, err := r.FindOne(factions.FindOneQuery{ID: id})
 		if err != nil {
 			ctx.Next(err)
 			return
 		}
 		ctx.Locals("faction", faction)
+		ctx.Next()
+	}
+}
+
+// WithFactions middleware finds factions according to the optional :commanderID URL parameter and
+// the optional "page" query parameter (falling back to 1), and sets them into ctx.Locals under the
+// key "factions". When present, it will also use the "name" and "summary" query parameters to
+// refine this search
+func WithFactions(r factions.Reader) func(*fiber.Ctx) {
+	return func(ctx *fiber.Ctx) {
+		query := factions.FindManyQuery{
+			Name:        ctx.Query("name"),
+			Summary:     ctx.Query("summary"),
+			CommanderID: commanderIDFromLocals(ctx),
+		}
+		factions, pages, err := r.FindMany(query, pageFromLocals(ctx))
+		if err != nil {
+			ctx.Next(err)
+			return
+		}
+		ctx.Set("x-pages", fmt.Sprint(pages))
+		ctx.Locals("factions", factions)
 		ctx.Next()
 	}
 }
@@ -62,37 +84,12 @@ func WithCommander(r commanders.Reader) func(*fiber.Ctx) {
 			ctx.Next(fiber.ErrBadRequest)
 			return
 		}
-		commander, err := r.FindOne(commanders.Commander{ID: id})
+		commander, err := r.FindOne(commanders.FindOneQuery{ID: id})
 		if err != nil {
 			ctx.Next(err)
 			return
 		}
 		ctx.Locals("commander", commander)
-		ctx.Next()
-	}
-}
-
-// WithFactions middleware finds factions according to the optional :commanderID URL parameter and
-// the optional "page" query parameter (falling back to 1), and sets them into ctx.Locals under the
-// key "factions". When present, it will also use the "name" and "summary" query parameters to
-// refine this search
-func WithFactions(r factions.Reader) func(*fiber.Ctx) {
-	return func(ctx *fiber.Ctx) {
-		var page uint = 1
-		if queryPage, hasPage := ctx.Locals("page").(uint); hasPage {
-			page = queryPage
-		}
-		query := factions.Query{Name: ctx.Query("name"), Summary: ctx.Query("summary")}
-		if commander, hasCommander := ctx.Locals("commander").(commanders.Commander); hasCommander {
-			query.CommanderID = commander.ID
-		}
-		factions, pages, err := r.FindMany(query, page)
-		if err != nil {
-			ctx.Next(err)
-			return
-		}
-		ctx.Set("x-pages", fmt.Sprint(pages))
-		ctx.Locals("factions", factions)
 		ctx.Next()
 	}
 }
@@ -103,21 +100,43 @@ func WithFactions(r factions.Reader) func(*fiber.Ctx) {
 // refine this search
 func WithCommanders(r commanders.Reader) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
-		var page uint = 1
-		if queryPage, hasPage := ctx.Locals("page").(uint); hasPage {
-			page = queryPage
+		query := commanders.FindManyQuery{
+			Name:      ctx.Query("name"),
+			Summary:   ctx.Query("summary"),
+			FactionID: factionIDFromLocals(ctx),
 		}
-		query := commanders.Query{Name: ctx.Query("name"), Summary: ctx.Query("summary")}
-		if faction, hasFaction := ctx.Locals("faction").(factions.Faction); hasFaction {
-			query.FactionID = faction.ID
-		}
-		commanders, pages, err := r.FindMany(query, page)
+		commanders, pages, err := r.FindMany(query, pageFromLocals(ctx))
 		if err != nil {
 			ctx.Next(err)
 			return
 		}
 		ctx.Set("x-pages", fmt.Sprint(pages))
 		ctx.Locals("commanders", commanders)
+		ctx.Next()
+	}
+}
+
+// WithBattles middleware finds battles according to the optional :factionID or :commanderID URL
+// parameters and the optional "page" query parameter (falling back to 1), and sets them into
+// ctx.Locals under the key "battles". When present, it will also use the "name", "summary", "place"
+// and "result" query parameters to refine this search
+func WithBattles(r battles.Reader) func(*fiber.Ctx) {
+	return func(ctx *fiber.Ctx) {
+		query := battles.FindManyQuery{
+			Name:        ctx.Query("name"),
+			Summary:     ctx.Query("summary"),
+			Place:       ctx.Query("place"),
+			Result:      ctx.Query("result"),
+			FactionID:   factionIDFromLocals(ctx),
+			CommanderID: commanderIDFromLocals(ctx),
+		}
+		battles, pages, err := r.FindMany(query, pageFromLocals(ctx))
+		if err != nil {
+			ctx.Next(err)
+			return
+		}
+		ctx.Set("x-pages", fmt.Sprint(pages))
+		ctx.Locals("battles", battles)
 		ctx.Next()
 	}
 }
@@ -131,7 +150,7 @@ func WithBattle(r battles.Reader) func(*fiber.Ctx) {
 			ctx.Next(fiber.ErrBadRequest)
 			return
 		}
-		battle, err := r.FindOne(battles.Battle{ID: id})
+		battle, err := r.FindOne(battles.FindOneQuery{ID: id})
 		if err != nil {
 			ctx.Next(err)
 			return
@@ -139,4 +158,26 @@ func WithBattle(r battles.Reader) func(*fiber.Ctx) {
 		ctx.Locals("battle", battle)
 		ctx.Next()
 	}
+}
+
+func pageFromLocals(ctx *fiber.Ctx) int {
+	page := 1
+	if queryPage, hasPage := ctx.Locals("page").(int); hasPage {
+		page = queryPage
+	}
+	return page
+}
+
+func factionIDFromLocals(ctx *fiber.Ctx) uuid.UUID {
+	if faction, hasFaction := ctx.Locals("faction").(factions.Faction); hasFaction {
+		return faction.ID
+	}
+	return uuid.Nil
+}
+
+func commanderIDFromLocals(ctx *fiber.Ctx) uuid.UUID {
+	if commander, hasCommander := ctx.Locals("commander").(commanders.Commander); hasCommander {
+		return commander.ID
+	}
+	return uuid.Nil
 }

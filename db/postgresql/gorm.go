@@ -1,15 +1,16 @@
 package postgresql
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 
-	"github.com/jinzhu/gorm"
-	"github.com/jinzhu/gorm/dialects/postgres"
-	_ "github.com/jinzhu/gorm/dialects/postgres" // postgres drivers
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/db/postgresql/schema"
 	"github.com/spf13/viper"
+	"gorm.io/datatypes"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 // ConnectionConfig is a struct that contains database connection configuration options
@@ -39,11 +40,17 @@ func DefaultTestConfig() *ConnectionConfig {
 }
 
 // Connect establishes a database connection to the PostgreSQL instance
-func Connect(c *ConnectionConfig) *gorm.DB {
+func Connect(c *ConnectionConfig) (*gorm.DB, *sql.DB) {
 	if c == nil {
 		c = defaultConfig()
 	}
-	db, err := gorm.Open("postgres", fmt.Sprintf(
+
+	handleError := func(err error) {
+		if err != nil {
+			panic(errors.Wrap(err, "Unable to connect to database"))
+		}
+	}
+	dsn := postgres.Open(fmt.Sprintf(
 		"host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
 		c.Host,
 		c.Port,
@@ -51,35 +58,40 @@ func Connect(c *ConnectionConfig) *gorm.DB {
 		c.Name,
 		c.Pass,
 	))
-	if err != nil {
-		panic(errors.Wrap(err, "Unable to connect to database"))
-	}
-	return db
+	db, err := gorm.Open(dsn, &gorm.Config{})
+	handleError(err)
+	sqlDB, err := db.DB()
+	handleError(err)
+	return db, sqlDB
 }
 
 // Reset drops all existing tables, and automigrates them again
 func Reset(db *gorm.DB) {
 	db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;`)
-	schemas := []interface{}{&schema.BattleCommanderFaction{}, &schema.BattleFaction{}, &schema.BattleCommander{}, &schema.Faction{}, &schema.Commander{}, &schema.Battle{}}
-	for _, s := range schemas {
-		db.DropTableIfExists(s)
-		db.AutoMigrate(s)
+	schemas := []interface{}{
+		&schema.BattleCommanderFaction{},
+		&schema.BattleFaction{},
+		&schema.BattleCommander{},
+		&schema.Faction{},
+		&schema.Commander{},
+		&schema.Battle{},
 	}
-	db.Model(&schema.BattleFaction{}).AddForeignKey("battle_id", "battles(id)", "CASCADE", "CASCADE")
-	db.Model(&schema.BattleFaction{}).AddForeignKey("faction_id", "factions(id)", "CASCADE", "CASCADE")
-	db.Model(&schema.BattleCommander{}).AddForeignKey("battle_id", "battles(id)", "CASCADE", "CASCADE")
-	db.Model(&schema.BattleCommander{}).AddForeignKey("commander_id", "commanders(id)", "CASCADE", "CASCADE")
-	db.Model(&schema.BattleCommanderFaction{}).AddForeignKey("battle_id", "battles(id)", "CASCADE", "CASCADE")
-	db.Model(&schema.BattleCommanderFaction{}).AddForeignKey("commander_id", "commanders(id)", "CASCADE", "CASCADE")
-	db.Model(&schema.BattleCommanderFaction{}).AddForeignKey("faction_id", "factions(id)", "CASCADE", "CASCADE")
+	db.Migrator().DropTable(schemas...)
+	db.AutoMigrate(schemas...)
 
 	db.Exec(`CREATE INDEX ts_factions_name_idx ON factions USING GIST(to_tsvector('english', name));`)
 	db.Exec(`CREATE INDEX ts_factions_summary_idx ON factions USING GIST(to_tsvector('english', summary));`)
+
 	db.Exec(`CREATE INDEX ts_commanders_name_idx ON commanders USING GIST(to_tsvector('english', name));`)
 	db.Exec(`CREATE INDEX ts_commanders_summary_idx ON commanders USING GIST(to_tsvector('english', summary));`)
+
+	db.Exec(`CREATE INDEX ts_battles_name_idx ON battles USING GIST(to_tsvector('english', name));`)
+	db.Exec(`CREATE INDEX ts_battles_summary_idx ON battles USING GIST(to_tsvector('english', summary));`)
+	db.Exec(`CREATE INDEX ts_battles_place_idx ON battles USING GIST(to_tsvector('english', place));`)
+	db.Exec(`CREATE INDEX ts_battles_result_idx ON battles USING GIST(to_tsvector('english', result));`)
 }
 
-func fromJSONB(data postgres.Jsonb, storeTo interface{}) error {
+func fromJSON(data datatypes.JSON, storeTo interface{}) error {
 	parsed, err := data.MarshalJSON()
 	if err != nil {
 		return err
@@ -88,6 +100,17 @@ func fromJSONB(data postgres.Jsonb, storeTo interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func paginate(db *gorm.DB, page, perPage int) *gorm.DB {
+	return db.Offset((page - 1) * perPage).Limit(perPage)
+}
+
+func ts(db *gorm.DB, attribute, value string) *gorm.DB {
+	if value == "" {
+		return db
+	}
+	return db.Where(fmt.Sprintf("to_tsvector('english', %s) @@ phraseto_tsquery(?)", attribute), value)
 }
 
 const perPage = 50

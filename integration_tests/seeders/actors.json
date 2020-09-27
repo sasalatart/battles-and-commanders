@@ -39,6 +39,22 @@
       "Name": "Habsburg Monarchy",
       "Description": "Former monarchy in Europe from 1282 to 1918",
       "Extract": "Habsburg Monarchy is an umbrella term used by historians for the numerous lands and kingdoms of the Habsburg dynasty, especially for those of the Austrian line. Although from 1438 to 1806, a member of the House of Habsburg was also Holy Roman Emperor, the Holy Roman Empire itself, over which the emperor exercised only very limited authority, was not considered to be part of the Habsburg Monarchy."
+    },
+    "585058": {
+      "Kind": 1,
+      "ID": 585058,
+      "URL": "https://en.wikipedia.org/wiki/New_Kingdom_of_Egypt",
+      "Name": "New Kingdom of Egypt",
+      "Description": "Period 1550 to 1077 BC in ancient Egypt",
+      "Extract": "The New Kingdom, also referred to as the Egyptian Empire, is the period in ancient Egyptian history between the sixteenth century BC and the eleventh century BC, covering the Eighteenth, Nineteenth, and Twentieth dynasties of Egypt. Radiocarbon dating places the exact beginning of the New Kingdom between 1570 BC and 1544 BC.. The New Kingdom followed the Second Intermediate Period and was succeeded by the Third Intermediate Period. It was Egypt's most prosperous time and marked the peak of its power."
+    },
+    "50250": {
+      "Kind": 1,
+      "ID": 50250,
+      "URL": "https://en.wikipedia.org/wiki/Canaanites",
+      "Name": "Canaan",
+      "Description": "Semitic-speaking region in the Ancient Near East",
+      "Extract": "Canaan was a Semitic-speaking civilization and region in the Ancient Near East during the late 2nd millennium BC. The name Canaan appears throughout the Bible, where it corresponds to the Levant, in particular to the areas of the Southern Levant that provide the main setting of the narrative of the Bible: Phoenicia, Philistia, Israel, and other nations."
     }
   },
   "CommandersByID": {
@@ -89,6 +105,30 @@
       "Name": "József Alvinczi",
       "Description": "Soldier in the Habsburg Army and a Field Marshal of the Austrian Empire",
       "Extract": "Freiherr Joseph Alvinczi von Borberek a.k.a. Baron József Alvinczi de Borberek was a soldier in the Habsburg Army and a Field Marshal of the Austrian Empire."
+    },
+    "21631305": {
+      "Kind": 2,
+      "ID": 21631305,
+      "URL": "https://en.wikipedia.org/wiki/Johann_Peter_Beaulieu",
+      "Name": "Johann Peter Beaulieu",
+      "Description": "Austrian general",
+      "Extract": "Johann Peter de Beaulieu, also Jean Pierre de Beaulieu, was a Walloon military officer. He joined the Habsburg army and fought against the Prussians during the Seven Years' War. A cultured man, he later battled Belgian rebels and earned promotion to general officer. During the French Revolutionary Wars he fought against the First French Republic and attained high command. In 1796, a young Napoleon Bonaparte won some of his first victories against an army led by Beaulieu. He retired and was the Proprietor (Inhaber) of an Austrian infantry regiment until his death."
+    },
+    "25553719": {
+      "Kind": 2,
+      "ID": 25553719,
+      "URL": "https://en.wikipedia.org/wiki/Karl_Philipp_Sebottendorf",
+      "Name": "Karl Philipp Sebottendorf",
+      "Description": "Austrian general",
+      "Extract": "Karl Philipp Sebottendorf van der Rose enrolled in the Austrian army at the age of 18, became a general officer during the French Revolutionary Wars, and commanded a division against Napoleon Bonaparte in several notable battles during the Italian campaign of 1796."
+    },
+    "155730": {
+      "Kind": 2,
+      "ID": 155730,
+      "URL": "https://en.wikipedia.org/wiki/Thutmose_III",
+      "Name": "Thutmose III",
+      "Description": "Sixth Egyptian Pharaoh of the Eighteenth Dynasty",
+      "Extract": "Thutmose III was the sixth pharaoh of the Eighteenth Dynasty. Officially, Thutmose III ruled Egypt for almost 54 years and his reign is usually dated from 28 April 1479 BC to 11 March 1425 BC, from the age of two and until his death at age fifty-six; however, during the first 22 years of his reign, he was coregent with his stepmother and aunt, Hatshepsut, who was named the pharaoh. While he was shown first on surviving monuments, both were assigned the usual royal names and insignia and neither is given any obvious seniority over the other. Thutmose served as the head of Hatshepsut's armies. During the final two years of his reign, he appointed his son and successor, Amenhotep II, as his junior co-regent. His firstborn son and heir to the throne, Amenemhat, predeceased Thutmose III."
     }
   }
 }

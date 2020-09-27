@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/go-playground/validator"
-	"github.com/jinzhu/gorm"
-	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/db/postgresql/schema"
 	"github.com/sasalatart/batcoms/domain"
@@ -13,6 +11,8 @@ import (
 	"github.com/sasalatart/batcoms/domain/locations"
 	"github.com/sasalatart/batcoms/domain/statistics"
 	uuid "github.com/satori/go.uuid"
+	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 // BattlesRepository is the repository that abstracts access to the underlying database operations
@@ -30,18 +30,55 @@ func NewBattlesRepository(db *gorm.DB) *BattlesRepository {
 
 // FindOne finds the first battle in the database that matches the query, together with its related
 // factions and commanders
-func (r *BattlesRepository) FindOne(query battles.Battle) (battles.Battle, error) {
+func (r *BattlesRepository) FindOne(query battles.FindOneQuery) (battles.Battle, error) {
 	b := new(schema.Battle)
 	db := r.db.
 		Preload("BattleFactions.Faction").
 		Preload("BattleCommanders.Commander").
 		Preload("BattleCommanderFactions")
-	if err := db.Where(query).Find(b).Error; gorm.IsRecordNotFoundError(err) {
+	if err := db.Where(query).First(b).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		return battles.Battle{}, domain.ErrNotFound
 	} else if err != nil {
 		return battles.Battle{}, errors.Wrap(err, "Finding a battle")
 	}
 	return deserializeBattle(b)
+}
+
+// FindMany does a paginated search of all battles matching the given query
+func (r *BattlesRepository) FindMany(query battles.FindManyQuery, page int) ([]battles.Battle, int, error) {
+	var records int64
+	result := &[]schema.Battle{}
+
+	var db = r.db.
+		Model(&schema.Battle{}).
+		Preload("BattleFactions.Faction").
+		Preload("BattleCommanders.Commander").
+		Preload("BattleCommanderFactions")
+
+	if query.FactionID != uuid.Nil {
+		db = db.Joins("JOIN battle_factions bf ON bf.battle_id = battles.id").
+			Where("bf.faction_id = ?", query.FactionID)
+	}
+	if query.CommanderID != uuid.Nil {
+		db = db.Joins("JOIN battle_commanders bc ON bc.battle_id = battles.id").
+			Where("bc.commander_id = ?", query.CommanderID)
+	}
+	db = ts(db, "name", query.Name)
+	db = ts(db, "summary", query.Summary)
+	db = ts(db, "place", query.Place)
+	db = ts(db, "result", query.Result)
+
+	if err := db.Count(&records).Error; err != nil {
+		return []battles.Battle{}, 0, err
+	}
+	pages := int((records / perPage) + 1)
+
+	if err := paginate(db.Order("name DESC"), page, perPage).Find(result).Error; err != nil {
+		return []battles.Battle{}, pages, err
+	}
+
+	battles, err := deserializeBattles(result)
+	return battles, pages, err
 }
 
 // CreateOne creates a battle in the database, together with entries in the corresponding tables
@@ -118,8 +155,8 @@ func serializeBattle(b battles.Battle) (*schema.Battle, error) {
 		Longitude:          b.Location.Longitude,
 		Result:             b.Result,
 		TerritorialChanges: b.TerritorialChanges,
-		Strength:           postgres.Jsonb{RawMessage: strength},
-		Casualties:         postgres.Jsonb{RawMessage: casualties},
+		Strength:           datatypes.JSON(strength),
+		Casualties:         datatypes.JSON(casualties),
 	}
 	return res, nil
 }
@@ -129,16 +166,16 @@ func deserializeBattle(b *schema.Battle) (battles.Battle, error) {
 		return battles.Battle{}, errors.New("Empty battle to deserialize")
 	}
 	strength := statistics.SideNumbers{}
-	if err := fromJSONB(b.Strength, &strength); err != nil {
+	if err := fromJSON(b.Strength, &strength); err != nil {
 		return battles.Battle{}, errors.Wrapf(err, "Deserializing strength")
 	}
 	casualties := statistics.SideNumbers{}
-	if err := fromJSONB(b.Casualties, &casualties); err != nil {
+	if err := fromJSON(b.Casualties, &casualties); err != nil {
 		return battles.Battle{}, errors.Wrapf(err, "Deserializing casualties")
 	}
 	commanders := battles.CommandersBySide{}
 	for _, bc := range b.BattleCommanders {
-		commander := deserializeCommander(bc.Commander)
+		commander := deserializeCommander(&bc.Commander)
 		if bc.Side == schema.SideA {
 			commanders.A = append(commanders.A, commander)
 		} else {
@@ -147,7 +184,7 @@ func deserializeBattle(b *schema.Battle) (battles.Battle, error) {
 	}
 	factions := battles.FactionsBySide{}
 	for _, bf := range b.BattleFactions {
-		faction := deserializeFaction(bf.Faction)
+		faction := deserializeFaction(&bf.Faction)
 		if bf.Side == schema.SideA {
 			factions.A = append(factions.A, faction)
 		} else {
@@ -181,4 +218,16 @@ func deserializeBattle(b *schema.Battle) (battles.Battle, error) {
 		CommandersByFaction: commandersByFaction,
 	}
 	return res, nil
+}
+
+func deserializeBattles(bb *[]schema.Battle) ([]battles.Battle, error) {
+	results := []battles.Battle{}
+	for _, b := range *bb {
+		battle, err := deserializeBattle(&b)
+		if err != nil {
+			return results, err
+		}
+		results = append(results, battle)
+	}
+	return results, nil
 }

@@ -2,12 +2,12 @@ package postgresql
 
 import (
 	"github.com/go-playground/validator"
-	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/db/postgresql/schema"
 	"github.com/sasalatart/batcoms/domain"
 	"github.com/sasalatart/batcoms/domain/commanders"
 	uuid "github.com/satori/go.uuid"
+	"gorm.io/gorm"
 )
 
 // CommandersRepository is the repository that abstracts access to the underlying database operations
@@ -24,9 +24,9 @@ func NewCommandersRepository(db *gorm.DB) *CommandersRepository {
 }
 
 // FindOne finds the first commander in the database that matches the query
-func (r *CommandersRepository) FindOne(query commanders.Commander) (commanders.Commander, error) {
+func (r *CommandersRepository) FindOne(query commanders.FindOneQuery) (commanders.Commander, error) {
 	c := &schema.Commander{}
-	if err := r.db.Where(query).Find(c).Error; gorm.IsRecordNotFoundError(err) {
+	if err := r.db.Where(query).First(c).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		return commanders.Commander{}, domain.ErrNotFound
 	} else if err != nil {
 		return commanders.Commander{}, errors.Wrap(err, "Executing CommandersRepository.FindOne")
@@ -35,32 +35,36 @@ func (r *CommandersRepository) FindOne(query commanders.Commander) (commanders.C
 }
 
 // FindMany does a paginated search of all commanders matching the given query
-func (r *CommandersRepository) FindMany(query commanders.Query, page uint) ([]commanders.Commander, uint, error) {
-	var records uint
+func (r *CommandersRepository) FindMany(query commanders.FindManyQuery, page int) ([]commanders.Commander, int, error) {
+	var records int64
 	result := &[]schema.Commander{}
 
-	var db = r.db.Model(&schema.Commander{}).Order("name DESC")
+	var db = r.db.Model(&schema.Commander{})
 	if query.FactionID != uuid.Nil {
-		db = db.Joins("JOIN battle_commander_factions bcf ON bcf.commander_id = commanders.id").
-			Where("bcf.faction_id = ?", query.FactionID)
+		var cIDs []uuid.UUID
+		err := r.db.
+			Model(&schema.BattleCommanderFaction{}).
+			Where(schema.BattleCommanderFaction{FactionID: query.FactionID}).
+			Pluck("commander_id", &cIDs).
+			Error
+		if err != nil {
+			return []commanders.Commander{}, 0, err
+		}
+		db = db.Where("id IN ?", cIDs)
 	}
-	if query.Name != "" {
-		db = db.Where("to_tsvector('english', name) @@ plainto_tsquery(?)", query.Name)
-	}
-	if query.Summary != "" {
-		db = db.Where("to_tsvector('english', summary) @@ phraseto_tsquery(?)", query.Summary)
-	}
+	db = ts(db, "name", query.Name)
+	db = ts(db, "summary", query.Summary)
 
 	if err := db.Count(&records).Error; err != nil {
-		return []commanders.Commander{}, records, err
+		return []commanders.Commander{}, 0, err
+	}
+	pages := int((records / perPage) + 1)
+
+	if err := paginate(db.Order("name DESC"), page, perPage).Find(result).Error; err != nil {
+		return []commanders.Commander{}, pages, err
 	}
 
-	db = db.Offset((page - 1) * perPage).Limit(perPage)
-	if err := db.Find(result).Error; err != nil {
-		return []commanders.Commander{}, records, err
-	}
-
-	return deserializeCommanders(result), (records / perPage) + 1, nil
+	return deserializeCommanders(result), pages, nil
 }
 
 // CreateOne creates a commander in the database. The operation returns the ID of the new commander

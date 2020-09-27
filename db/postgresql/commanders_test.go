@@ -1,11 +1,11 @@
 package postgresql_test
 
 import (
+	"database/sql"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/go-playground/validator"
-	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/db/postgresql"
 	"github.com/sasalatart/batcoms/domain/commanders"
@@ -13,27 +13,25 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 )
 
 func TestCommandersRepository(t *testing.T) {
 	t.Run("CreateOne", func(t *testing.T) {
-		mustSetupCreateOne := func(t *testing.T, mockUUID uuid.UUID, input commanders.CreationInput) (*gorm.DB, sqlmock.Sqlmock) {
-			db, mock := mustSetupDB(t)
+		mustSetupCreateOne := func(t *testing.T, mockUUID uuid.UUID, input commanders.CreationInput) (*gorm.DB, *sql.DB, sqlmock.Sqlmock) {
+			db, sqlDB, mock := mustSetupDB(t)
 			mock.ExpectBegin()
 			mock.ExpectQuery(`^INSERT INTO "commanders" (.*)`).
 				WithArgs(input.WikiID, input.URL, input.Name, input.Summary).
 				WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(mockUUID))
-			mock.ExpectQuery(`^SELECT "id" FROM "commanders"`).
-				WithArgs(mockUUID).
-				WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(mockUUID))
 			mock.ExpectCommit()
-			return db, mock
+			return db, sqlDB, mock
 		}
 		t.Run("WithValidInput", func(t *testing.T) {
 			mockUUID := uuid.NewV4()
 			input := mocks.CommanderCreationInput()
-			db, mock := mustSetupCreateOne(t, mockUUID, input)
-			defer db.Close()
+			db, sqlDB, mock := mustSetupCreateOne(t, mockUUID, input)
+			defer sqlDB.Close()
 			repo := postgresql.NewCommandersRepository(db)
 
 			id, err := repo.CreateOne(input)
@@ -44,8 +42,8 @@ func TestCommandersRepository(t *testing.T) {
 		t.Run("WithInvalidInput", func(t *testing.T) {
 			input := mocks.CommanderCreationInput()
 			input.URL = "not-a-url"
-			db, mock := mustSetupDB(t)
-			defer db.Close()
+			db, sqlDB, mock := mustSetupDB(t)
+			defer sqlDB.Close()
 			repo := postgresql.NewCommandersRepository(db)
 
 			_, err := repo.CreateOne(input)
