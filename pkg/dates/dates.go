@@ -3,7 +3,6 @@ package dates
 import (
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -79,20 +78,8 @@ func fromPhrase(s string) []string {
 // shouldDiscard runs a series of heuristics to check if a set of potential dates should be
 // discarded or not. Sometimes a regex may give a false positive
 func shouldDiscard(dates []string) bool {
-	isValidDatePart := func(s string, max int) bool {
-		n := strings.TrimLeft(s, "0")
-		nInt, err := strconv.Atoi(n)
-		if err != nil || nInt > max || nInt < 1 {
-			return false
-		}
-		return true
-	}
-
 	for _, date := range dates {
-		if m := extractMonth(date); m != "" && !isValidDatePart(m, 12) {
-			return false
-		}
-		if d := extractDay(date); d != "" && !isValidDatePart(d, 31) {
+		if !IsValid(date) {
 			return false
 		}
 	}
