@@ -41,7 +41,7 @@ func TestCommandersEndpoints(t *testing.T) {
 	t.Run("GET /commanders", func(t *testing.T) {
 		t.Parallel()
 
-		const expectedPages uint = 1
+		const expectedPages = 1
 		cases := []struct {
 			description        string
 			url                string
@@ -51,9 +51,12 @@ func TestCommandersEndpoints(t *testing.T) {
 				description: "With no filters",
 				url:         URL("/commanders"),
 				expectedCommanders: []commanders.Commander{
+					ThutmoseIII(t),
 					Napoleon(t),
 					MikhailKutuzov(t),
+					KarlPhilippSebottendorf(t),
 					JozsefAlvinczi(t),
+					JohannPeterBeaulieu(t),
 					FranzVonWeyrother(t),
 					FrancisII(t),
 					AlexanderI(t),
@@ -94,7 +97,7 @@ func TestCommandersEndpoints(t *testing.T) {
 		}
 
 		t.Run("ValidPersistedFactionUUID", func(t *testing.T) {
-			const expectedPages uint = 1
+			const expectedPages = 1
 			factionID := AustrianEmpire(t).ID
 			cases := []struct {
 				description        string

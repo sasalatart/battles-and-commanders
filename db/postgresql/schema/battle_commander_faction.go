@@ -8,7 +8,10 @@ import uuid "github.com/satori/go.uuid"
 // may result in some commanders being present in battles, but not being assigned a faction. This
 // struct defines the SQL schema
 type BattleCommanderFaction struct {
-	BattleID    uuid.UUID `gorm:"type:uuid;not null;primary_key"`
-	CommanderID uuid.UUID `gorm:"type:uuid;not null;primary_key"`
-	FactionID   uuid.UUID `gorm:"type:uuid;not null;primary_key"`
+	BattleID    uuid.UUID `gorm:"type:uuid;primaryKey;not null"`
+	CommanderID uuid.UUID `gorm:"type:uuid;primaryKey;not null"`
+	FactionID   uuid.UUID `gorm:"type:uuid;primaryKey;not null"`
+	Battle      Battle
+	Commander   Commander
+	Faction     Faction
 }

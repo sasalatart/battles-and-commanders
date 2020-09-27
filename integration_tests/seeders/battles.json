@@ -52,5 +52,59 @@
     "Factions": { "A": [62243], "B": [1041515] },
     "Commanders": { "A": [69880], "B": [2408835] },
     "CommandersByFaction": { "1041515": [2408835], "62243": [69880] }
+  },
+  "312696": {
+    "ID": 312696,
+    "URL": "https://en.wikipedia.org/wiki/Battle_of_Lodi",
+    "Name": "Battle of Lodi",
+    "PartOf": "Part of the French Revolutionary Wars",
+    "Description": "battle of the Napoleonic Wars",
+    "Extract": "The Battle of Lodi was fought on 10 May 1796 between French forces under Napoleon Bonaparte and an Austrian rear guard led by Karl Philipp Sebottendorf at Lodi, Lombardy. The rear guard was defeated, but the main body of Johann Peter Beaulieu's Austrian Army had time to retreat.",
+    "Date": "10 May 1796",
+    "Location": {
+      "Place": "Lodi, present-day Italy",
+      "Latitude": "45°19′00″N",
+      "Longitude": "9°30′00″E"
+    },
+    "Result": "French victory",
+    "TerritorialChanges": "",
+    "Strength": {
+      "A": "15,500 infantry 2,000 cavalry 30 guns",
+      "B": "9,500. 14 guns",
+      "AB": ""
+    },
+    "Casualties": {
+      "A": "At least 350",
+      "B": "153 killed or wounded 1,700 captured 16 guns",
+      "AB": ""
+    },
+    "Factions": { "A": [62243], "B": [1041515] },
+    "Commanders": { "A": [69880], "B": [21631305, 25553719] },
+    "CommandersByFaction": { "1041515": [21631305, 25553719], "62243": [69880] }
+  },
+  "636026": {
+    "ID": 636026,
+    "URL": "https://en.wikipedia.org/wiki/Battle_of_Megiddo_(15th_century_BC)",
+    "Name": "Battle of Megiddo (15th century BC)",
+    "PartOf": "",
+    "Description": "Ancient battle between the Egyptian Empire and Canaanite rebels",
+    "Extract": "The Battle of Megiddo was fought between Egyptian forces under the command of Pharaoh Thutmose III and a large rebellious coalition of Canaanite vassal states led by the king of Kadesh. It is the first battle to have been recorded in what is accepted as relatively reliable detail. Megiddo is also the first recorded use of the composite bow and the first body count. All details of the battle come from Egyptian sources—primarily the hieroglyphic writings on the Hall of Annals in the Temple of Amun-Re at Karnak, Thebes, by the military scribe Tjaneni.",
+    "Date": "April 16, 1457 BC",
+    "Location": {
+      "Place": "Megiddo, Canaan",
+      "Latitude": "32°34′59.38″N",
+      "Longitude": "35°10′55.51″E"
+    },
+    "Result": "Egyptian victory. Territorial expansion of the Egyptian Empire",
+    "TerritorialChanges": "",
+    "Strength": { "A": "10,000–20,000", "B": "10,000–15,000", "AB": "" },
+    "Casualties": {
+      "A": "4,000 killed 1,000 wounded",
+      "B": "8,300 killed 3,400 captured",
+      "AB": ""
+    },
+    "Factions": { "A": [585058], "B": [50250] },
+    "Commanders": { "A": [155730], "B": [] },
+    "CommandersByFaction": { "585058": [155730] }
   }
 }

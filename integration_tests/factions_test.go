@@ -41,7 +41,7 @@ func TestFactionsEndpoints(t *testing.T) {
 	t.Run("GET /factions", func(t *testing.T) {
 		t.Parallel()
 
-		const expectedPages uint = 1
+		const expectedPages = 1
 		cases := []struct {
 			description      string
 			url              string
@@ -52,9 +52,11 @@ func TestFactionsEndpoints(t *testing.T) {
 				url:         URL("/factions"),
 				expectedFactions: []factions.Faction{
 					RussianEmpire(t),
+					NewKingdomOfEgypt(t),
 					HabsburgMonarchy(t),
 					FrenchFirstRepublic(t),
 					FirstFrenchEmpire(t),
+					Canaan(t),
 					AustrianEmpire(t),
 				},
 			},
@@ -93,7 +95,7 @@ func TestFactionsEndpoints(t *testing.T) {
 		}
 
 		t.Run("ValidPersistedCommanderUUID", func(t *testing.T) {
-			const expectedPages uint = 1
+			const expectedPages = 1
 			commanderID := Napoleon(t).ID
 			cases := []struct {
 				description      string

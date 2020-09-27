@@ -6,9 +6,10 @@ import (
 	"github.com/sasalatart/batcoms/mocks"
 )
 
-func appWithReposMocks() (*fiber.App, *mocks.FactionsRepository, *mocks.CommandersRepository) {
+func appWithReposMocks() (*fiber.App, *mocks.FactionsRepository, *mocks.CommandersRepository, *mocks.BattlesRepository) {
 	factionsRepoMock := new(mocks.FactionsRepository)
 	commandersRepoMock := new(mocks.CommandersRepository)
-	app := http.Setup(factionsRepoMock, commandersRepoMock, new(mocks.BattlesRepository), true)
-	return app, factionsRepoMock, commandersRepoMock
+	battlesRepoMock := new(mocks.BattlesRepository)
+	app := http.Setup(factionsRepoMock, commandersRepoMock, battlesRepoMock, true)
+	return app, factionsRepoMock, commandersRepoMock, battlesRepoMock
 }

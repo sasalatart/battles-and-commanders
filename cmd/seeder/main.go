@@ -16,8 +16,8 @@ func init() {
 }
 
 func main() {
-	db := postgresql.Connect(nil)
-	defer db.Close()
+	db, sqlDB := postgresql.Connect(nil)
+	defer sqlDB.Close()
 
 	actorsFileName := viper.GetString("SCRAPER_RESULTS.ACTORS")
 	battlesFileName := viper.GetString("SCRAPER_RESULTS.BATTLES")

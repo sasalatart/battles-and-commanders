@@ -81,8 +81,17 @@ func AssertJSONBattle(t *testing.T, res *http.Response, expectedBattle battles.B
 	assert.Equal(t, expectedBattle, *battleFromBody, "Comparing body with expected battle")
 }
 
+// AssertJSONBattles is like AssertJSONBattle, but for a slice of battles.Battle
+func AssertJSONBattles(t *testing.T, res *http.Response, expectedBattles []battles.Battle) {
+	t.Helper()
+	battlesFromBody := new([]battles.Battle)
+	err := json.NewDecoder(res.Body).Decode(battlesFromBody)
+	require.NoError(t, err, "Decoding body into battles slice")
+	assert.Equal(t, expectedBattles, *battlesFromBody, "Comparing body with expected battles")
+}
+
 // AssertHeaderPages asserts that the given *http.Response has the expected "x-pages" header value
-func AssertHeaderPages(t *testing.T, res *http.Response, expectedPages uint) {
+func AssertHeaderPages(t *testing.T, res *http.Response, expectedPages int) {
 	t.Helper()
 	expected := fmt.Sprint(expectedPages)
 	got := res.Header.Get("x-pages")

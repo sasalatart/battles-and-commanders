@@ -1,20 +1,23 @@
 package postgresql_test
 
 import (
+	"database/sql"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jinzhu/gorm"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-func mustSetupDB(t *testing.T) (*gorm.DB, sqlmock.Sqlmock) {
+func mustSetupDB(t *testing.T) (*gorm.DB, *sql.DB, sqlmock.Sqlmock) {
 	t.Helper()
-	db, mock, err := sqlmock.New()
+	sqlDB, mock, err := sqlmock.New()
 	handleStubDBError(t, err)
-	gormDB, err := gorm.Open("postgres", db)
-	gormDB.LogMode(true)
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{
+		Conn: sqlDB,
+	}), &gorm.Config{})
 	handleStubDBError(t, err)
-	return gormDB, mock
+	return gormDB, sqlDB, mock
 }
 
 func handleStubDBError(t *testing.T, err error) {

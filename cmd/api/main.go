@@ -1,14 +1,15 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"log"
 
-	"github.com/jinzhu/gorm"
 	"github.com/sasalatart/batcoms/config"
 	"github.com/sasalatart/batcoms/db/postgresql"
 	"github.com/sasalatart/batcoms/http"
 	"github.com/spf13/viper"
+	"gorm.io/gorm"
 )
 
 var testModeFlag = flag.Bool("test", false, "Whether the API should run in test mode or not")
@@ -20,15 +21,16 @@ func init() {
 
 func main() {
 	var db *gorm.DB
+	var sqlDB *sql.DB
 	var port int
 	if *testModeFlag {
-		db = postgresql.Connect(postgresql.DefaultTestConfig())
+		db, sqlDB = postgresql.Connect(postgresql.DefaultTestConfig())
 		port = viper.GetInt("PORT_TEST")
 	} else {
-		db = postgresql.Connect(nil)
+		db, sqlDB = postgresql.Connect(nil)
 		port = viper.GetInt("PORT")
 	}
-	defer db.Close()
+	defer sqlDB.Close()
 
 	server := http.Setup(
 		postgresql.NewFactionsRepository(db),

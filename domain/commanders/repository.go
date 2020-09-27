@@ -10,8 +10,8 @@ type Repository interface {
 
 // Reader is the interface through which commanders may be read
 type Reader interface {
-	FindOne(query Commander) (Commander, error)
-	FindMany(query Query, page uint) ([]Commander, uint, error)
+	FindOne(query FindOneQuery) (Commander, error)
+	FindMany(query FindManyQuery, page int) ([]Commander, int, error)
 }
 
 // Writer is the interface through which commanders may be written
@@ -19,8 +19,15 @@ type Writer interface {
 	CreateOne(data CreationInput) (uuid.UUID, error)
 }
 
-// Query is used to refine the filters when finding many commanders
-type Query struct {
+// FindOneQuery is used to refine the filters when finding one commander
+type FindOneQuery struct {
+	ID   uuid.UUID
+	Name string
+	URL  string
+}
+
+// FindManyQuery is used to refine the filters when finding many commanders
+type FindManyQuery struct {
 	FactionID uuid.UUID
 	Name      string
 	Summary   string

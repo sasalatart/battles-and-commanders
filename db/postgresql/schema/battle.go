@@ -1,13 +1,13 @@
 package schema
 
-import "github.com/jinzhu/gorm/dialects/postgres"
+import "gorm.io/datatypes"
 
 // Battle is used to store data that defines a specific battle. This struct defines the SQL schema
 type Battle struct {
 	Base
-	WikiID                  int    `gorm:"not null;unique_index"`
-	URL                     string `gorm:"not null;unique_index"`
-	Name                    string `gorm:"not null;unique_index"`
+	WikiID                  int    `gorm:"not null;uniqueIndex"`
+	URL                     string `gorm:"not null;uniqueIndex"`
+	Name                    string `gorm:"not null;uniqueIndex"`
 	PartOf                  string
 	Summary                 string `gorm:"not null"`
 	StartDate               string `gorm:"not null;index"`
@@ -17,8 +17,8 @@ type Battle struct {
 	Longitude               string
 	Result                  string `gorm:"not null"`
 	TerritorialChanges      string
-	Strength                postgres.Jsonb
-	Casualties              postgres.Jsonb
+	Strength                datatypes.JSON
+	Casualties              datatypes.JSON
 	BattleCommanders        []BattleCommander
 	BattleFactions          []BattleFaction
 	BattleCommanderFactions []BattleCommanderFaction

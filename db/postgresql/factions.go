@@ -2,12 +2,12 @@ package postgresql
 
 import (
 	"github.com/go-playground/validator"
-	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/db/postgresql/schema"
 	"github.com/sasalatart/batcoms/domain"
 	"github.com/sasalatart/batcoms/domain/factions"
 	uuid "github.com/satori/go.uuid"
+	"gorm.io/gorm"
 )
 
 // FactionsRepository is the repository that abstracts access to the underlying database operations
@@ -24,9 +24,9 @@ func NewFactionsRepository(db *gorm.DB) *FactionsRepository {
 }
 
 // FindOne finds the first faction in the database that matches the query
-func (r *FactionsRepository) FindOne(query factions.Faction) (factions.Faction, error) {
+func (r *FactionsRepository) FindOne(query factions.FindOneQuery) (factions.Faction, error) {
 	f := &schema.Faction{}
-	if err := r.db.Where(query).Find(f).Error; gorm.IsRecordNotFoundError(err) {
+	if err := r.db.Where(query).First(f).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		return factions.Faction{}, domain.ErrNotFound
 	} else if err != nil {
 		return factions.Faction{}, errors.Wrap(err, "Executing FactionsRepository.FindOne")
@@ -35,32 +35,36 @@ func (r *FactionsRepository) FindOne(query factions.Faction) (factions.Faction, 
 }
 
 // FindMany does a paginated search of all factions matching the given query
-func (r *FactionsRepository) FindMany(query factions.Query, page uint) ([]factions.Faction, uint, error) {
-	var records uint
+func (r *FactionsRepository) FindMany(query factions.FindManyQuery, page int) ([]factions.Faction, int, error) {
+	var records int64
 	result := &[]schema.Faction{}
 
-	var db = r.db.Model(&schema.Faction{}).Order("name DESC")
+	var db = r.db.Model(&schema.Faction{})
 	if query.CommanderID != uuid.Nil {
-		db = db.Joins("JOIN battle_commander_factions bcf ON bcf.faction_id = factions.id").
-			Where("bcf.commander_id = ?", query.CommanderID)
+		var fIDs []uuid.UUID
+		err := r.db.
+			Model(&schema.BattleCommanderFaction{}).
+			Where(schema.BattleCommanderFaction{CommanderID: query.CommanderID}).
+			Pluck("faction_id", &fIDs).
+			Error
+		if err != nil {
+			return []factions.Faction{}, 0, err
+		}
+		db = db.Where("id IN ?", fIDs)
 	}
-	if query.Name != "" {
-		db = db.Where("to_tsvector('english', name) @@ plainto_tsquery(?)", query.Name)
-	}
-	if query.Summary != "" {
-		db = db.Where("to_tsvector('english', summary) @@ phraseto_tsquery(?)", query.Summary)
-	}
+	db = ts(db, "name", query.Name)
+	db = ts(db, "summary", query.Summary)
 
 	if err := db.Count(&records).Error; err != nil {
-		return []factions.Faction{}, records, err
+		return []factions.Faction{}, 0, err
+	}
+	pages := int((records / perPage) + 1)
+
+	if err := paginate(db.Order("name DESC"), page, perPage).Find(result).Error; err != nil {
+		return []factions.Faction{}, pages, err
 	}
 
-	db = db.Offset((page - 1) * perPage).Limit(perPage)
-	if err := db.Find(result).Error; err != nil {
-		return []factions.Faction{}, records, err
-	}
-
-	return deserializeFactions(result), (records / perPage) + 1, nil
+	return deserializeFactions(result), pages, nil
 }
 
 // CreateOne creates a faction in the database. The operation returns the ID of the new faction

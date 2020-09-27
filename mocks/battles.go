@@ -21,9 +21,15 @@ type BattlesRepository struct {
 }
 
 // FindOne mocks finding one battle via BattlesRepository
-func (r *BattlesRepository) FindOne(query battles.Battle) (battles.Battle, error) {
+func (r *BattlesRepository) FindOne(query battles.FindOneQuery) (battles.Battle, error) {
 	mockArgs := r.Called(query)
 	return mockArgs.Get(0).(battles.Battle), mockArgs.Error(1)
+}
+
+// FindMany mocks finding many battles via BattlesRepository
+func (r *BattlesRepository) FindMany(query battles.FindManyQuery, page int) ([]battles.Battle, int, error) {
+	mockArgs := r.Called(query, page)
+	return mockArgs.Get(0).([]battles.Battle), mockArgs.Int(1), mockArgs.Error(2)
 }
 
 // CreateOne mocks creating one battle via BattlesRepository

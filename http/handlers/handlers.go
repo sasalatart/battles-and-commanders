@@ -50,7 +50,30 @@ func Register(app *fiber.App, fr factions.Reader, cr commanders.Reader, br battl
 		middleware.JSONFrom("commanders"),
 	)
 
-	app.Get("/battles/:battleID", middleware.WithBattle(br), middleware.JSONFrom("battle"))
+	app.Get("/battles/:battleID",
+		middleware.WithBattle(br),
+		middleware.JSONFrom("battle"),
+	)
+
+	app.Get("/battles",
+		middleware.WithPage(),
+		middleware.WithBattles(br),
+		middleware.JSONFrom("battles"),
+	)
+
+	app.Get("/factions/:factionID/battles",
+		middleware.WithPage(),
+		middleware.WithFaction(fr),
+		middleware.WithBattles(br),
+		middleware.JSONFrom("battles"),
+	)
+
+	app.Get("/commanders/:commanderID/battles",
+		middleware.WithPage(),
+		middleware.WithCommander(cr),
+		middleware.WithBattles(br),
+		middleware.JSONFrom("battles"),
+	)
 }
 
 // ErrorsHandlerFactory creates a *fiber.App ErrorHandler, used to fine-tune responses when a

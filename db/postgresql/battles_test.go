@@ -1,13 +1,13 @@
 package postgresql_test
 
 import (
+	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/go-playground/validator"
-	"github.com/jinzhu/gorm"
-	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/db/postgresql"
 	"github.com/sasalatart/batcoms/domain/battles"
@@ -15,13 +15,15 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 func TestBattlesRepository(t *testing.T) {
 	t.Run("CreateOne", func(t *testing.T) {
-		mustSetupCreateOne := func(t *testing.T, mockUUID uuid.UUID, input battles.CreationInput) (*gorm.DB, sqlmock.Sqlmock) {
+		mustSetupCreateOne := func(t *testing.T, mockUUID uuid.UUID, input battles.CreationInput) (*gorm.DB, *sql.DB, sqlmock.Sqlmock) {
 			t.Helper()
-			db, mock := mustSetupDB(t)
+			db, sqlDB, mock := mustSetupDB(t)
 
 			strength, err := json.Marshal(input.Strength)
 			require.NoError(t, err, "Stringifying strength")
@@ -29,7 +31,7 @@ func TestBattlesRepository(t *testing.T) {
 			require.NoError(t, err, "Stringifying casualties")
 
 			mock.ExpectBegin()
-			mock.ExpectQuery(`^INSERT INTO "battles" (.*)`).
+			mock.ExpectQuery(`^INSERT INTO "battles"`).
 				WithArgs(
 					input.WikiID,
 					input.URL,
@@ -43,39 +45,46 @@ func TestBattlesRepository(t *testing.T) {
 					input.Location.Longitude,
 					input.Result,
 					input.TerritorialChanges,
-					postgres.Jsonb{RawMessage: strength},
-					postgres.Jsonb{RawMessage: casualties},
+					datatypes.JSON(strength),
+					datatypes.JSON(casualties),
 				).
 				WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(mockUUID))
-			mock.ExpectQuery(`^SELECT "id" FROM "battles"`).
-				WithArgs(mockUUID).
-				WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(mockUUID))
+
+			battleCommandersArgs := []driver.Value{}
 			for i := 0; i < len(input.CommandersBySide.A)+len(input.CommandersBySide.B); i++ {
-				mock.ExpectExec(`^UPDATE "battle_commanders"`).
-					WithArgs(sqlmock.AnyArg(), mockUUID, sqlmock.AnyArg()).
-					WillReturnResult(sqlmock.NewResult(1, 1))
+				battleCommandersArgs = append(battleCommandersArgs, mockUUID, sqlmock.AnyArg(), sqlmock.AnyArg())
 			}
+			mock.ExpectExec(`^INSERT INTO "battle_commanders"`).
+				WithArgs(battleCommandersArgs...).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			battleFactionsArgs := []driver.Value{}
 			for i := 0; i < len(input.FactionsBySide.A)+len(input.FactionsBySide.B); i++ {
-				mock.ExpectExec(`^UPDATE "battle_factions"`).
-					WithArgs(sqlmock.AnyArg(), mockUUID, sqlmock.AnyArg()).
-					WillReturnResult(sqlmock.NewResult(1, 1))
+				battleFactionsArgs = append(battleFactionsArgs, mockUUID, sqlmock.AnyArg(), sqlmock.AnyArg())
 			}
-			for fID, cIDs := range input.CommandersByFaction {
-				for _, cID := range cIDs {
-					mock.ExpectQuery(`^SELECT \* FROM "battle_commander_factions"`).
-						WithArgs(mockUUID, sqlmock.AnyArg(), sqlmock.AnyArg()).
-						WillReturnRows(sqlmock.NewRows([]string{"battle_id", "commander_id", "faction_id"}).AddRow(mockUUID, cID, fID))
+			mock.ExpectExec(`^INSERT INTO "battle_factions"`).
+				WithArgs(battleFactionsArgs...).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			battleCommanderFactionsArgs := []driver.Value{}
+			for _, cIDs := range input.CommandersByFaction {
+				for range cIDs {
+					battleCommanderFactionsArgs = append(battleCommanderFactionsArgs, mockUUID, sqlmock.AnyArg(), sqlmock.AnyArg())
 				}
 			}
+			mock.ExpectExec(`^INSERT INTO "battle_commander_factions"`).
+				WithArgs(battleCommanderFactionsArgs...).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
 			mock.ExpectCommit()
-			return db, mock
+			return db, sqlDB, mock
 		}
 
 		t.Run("WithValidInput", func(t *testing.T) {
 			mockUUID := uuid.NewV4()
 			input := mocks.BattleCreationInput()
-			db, mock := mustSetupCreateOne(t, mockUUID, input)
-			defer db.Close()
+			db, sqlDB, mock := mustSetupCreateOne(t, mockUUID, input)
+			defer sqlDB.Close()
 			repo := postgresql.NewBattlesRepository(db)
 
 			id, err := repo.CreateOne(input)
@@ -87,8 +96,8 @@ func TestBattlesRepository(t *testing.T) {
 		t.Run("WithInvalidInput", func(t *testing.T) {
 			input := mocks.BattleCreationInput()
 			input.URL = "not-a-url"
-			db, mock := mustSetupDB(t)
-			defer db.Close()
+			db, sqlDB, mock := mustSetupDB(t)
+			defer sqlDB.Close()
 			repo := postgresql.NewBattlesRepository(db)
 
 			_, err := repo.CreateOne(input)
