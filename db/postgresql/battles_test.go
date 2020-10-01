@@ -12,6 +12,7 @@ import (
 	"github.com/sasalatart/batcoms/db/postgresql"
 	"github.com/sasalatart/batcoms/domain/battles"
 	"github.com/sasalatart/batcoms/mocks"
+	"github.com/sasalatart/batcoms/pkg/dates"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -29,6 +30,10 @@ func TestBattlesRepository(t *testing.T) {
 			require.NoError(t, err, "Stringifying strength")
 			casualties, err := json.Marshal(input.Casualties)
 			require.NoError(t, err, "Stringifying casualties")
+			startDateNum, err := dates.ToNum(input.StartDate)
+			require.NoError(t, err, "Converting StartDate to number")
+			endDateNum, err := dates.ToNum(input.EndDate)
+			require.NoError(t, err, "Converting EndDate to number")
 
 			mock.ExpectBegin()
 			mock.ExpectQuery(`^INSERT INTO "battles"`).
@@ -39,7 +44,9 @@ func TestBattlesRepository(t *testing.T) {
 					input.PartOf,
 					input.Summary,
 					input.StartDate,
+					startDateNum,
 					input.EndDate,
+					endDateNum,
 					input.Location.Place,
 					input.Location.Latitude,
 					input.Location.Longitude,

@@ -20,18 +20,18 @@ func TestDateToNum(t *testing.T) {
 		t.Parallel()
 		assertNumerical := func(date1, date2 string) (float32, float32) {
 			value1, err := dates.ToNum(date1)
-			assert.NoError(t, err, "Converting %q to number", date1)
+			assert.NoErrorf(t, err, "Converting %q to number", date1)
 			value2, err := dates.ToNum(date2)
-			assert.NoError(t, err, "Converting %q to number", date2)
+			assert.NoErrorf(t, err, "Converting %q to number", date2)
 			return value1, value2
 		}
 		assertGreaterThan := func(date1, date2 string) {
 			value1, value2 := assertNumerical(date1, date2)
-			assert.Greater(t, value1, value2, "Comparing date %q with %q", date1, date2)
+			assert.Greaterf(t, value1, value2, "Comparing date %q with %q", date1, date2)
 		}
 		assertEqual := func(date1, date2 string) {
 			value1, value2 := assertNumerical(date1, date2)
-			assert.Equal(t, value1, value2, "Comparing date %q with %q", date1, date2)
+			assert.Equalf(t, value1, value2, "Comparing date %q with %q", date1, date2)
 		}
 		assertGreaterThan("1821-05-05", "1769-08-15")
 		assertGreaterThan("1821-05-05", "1821-05-04")
@@ -47,6 +47,9 @@ func TestDateToNum(t *testing.T) {
 		assertGreaterThan("31-09-02 BC", "31-09 BC")
 		assertGreaterThan("31-09-02 BC", "31 BC")
 		assertGreaterThan("31-09 BC", "31 BC")
+		assertGreaterThan("1769", "1768-12-31")
+		assertGreaterThan("1768-01-01 BC", "1769 BC")
+		assertGreaterThan("1768-01-01 BC", "1769-12-31 BC")
 		assertEqual("1821-05-05", "1821-5-5")
 		assertEqual("31-09-02 BC", "31-09-2 BC")
 		assertEqual("31-09-02 BC", "31-9-02 BC")

@@ -9,10 +9,12 @@ type Battle struct {
 	URL                     string `gorm:"not null;uniqueIndex"`
 	Name                    string `gorm:"not null;uniqueIndex"`
 	PartOf                  string
-	Summary                 string `gorm:"not null"`
-	StartDate               string `gorm:"not null;index"`
-	EndDate                 string `gorm:"not null;index"`
-	Place                   string `gorm:"not null"`
+	Summary                 string  `gorm:"not null"`
+	StartDate               string  `gorm:"not null;index"`
+	StartDateNum            float32 `gorm:"not null;index"`
+	EndDate                 string  `gorm:"not null;index"`
+	EndDateNum              float32 `gorm:"not null;index"`
+	Place                   string  `gorm:"not null"`
 	Latitude                string
 	Longitude               string
 	Result                  string `gorm:"not null"`
