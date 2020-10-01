@@ -10,6 +10,7 @@ import (
 	"github.com/sasalatart/batcoms/domain/battles"
 	"github.com/sasalatart/batcoms/domain/locations"
 	"github.com/sasalatart/batcoms/domain/statistics"
+	"github.com/sasalatart/batcoms/pkg/dates"
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -136,11 +137,19 @@ func (r *BattlesRepository) CreateOne(data battles.CreationInput) (uuid.UUID, er
 func serializeBattle(b battles.Battle) (*schema.Battle, error) {
 	strength, err := json.Marshal(b.Strength)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Unable to stringify strength for %s", b.Name)
+		return nil, errors.Wrap(err, "Stringifying strength")
 	}
 	casualties, err := json.Marshal(b.Casualties)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Unable to stringify casualties for %s", b.Name)
+		return nil, errors.Wrap(err, "Stringifying casualties")
+	}
+	startDateNum, err := dates.ToNum(b.StartDate)
+	if err != nil {
+		return nil, errors.Wrap(err, "Converting StartDate to number")
+	}
+	endDateNum, err := dates.ToNum(b.EndDate)
+	if err != nil {
+		return nil, errors.Wrap(err, "Converting EndDate to number")
 	}
 	res := &schema.Battle{
 		WikiID:             b.WikiID,
@@ -149,7 +158,9 @@ func serializeBattle(b battles.Battle) (*schema.Battle, error) {
 		PartOf:             b.PartOf,
 		Summary:            b.Summary,
 		StartDate:          b.StartDate,
+		StartDateNum:       startDateNum,
 		EndDate:            b.EndDate,
+		EndDateNum:         endDateNum,
 		Place:              b.Location.Place,
 		Latitude:           b.Location.Latitude,
 		Longitude:          b.Location.Longitude,

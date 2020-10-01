@@ -40,7 +40,9 @@ func ToNum(date string) (float32, error) {
 		return 0, fmtErr("day")
 	}
 
-	decimalPart := (float32(month) / 13) + (float32(day) / 32)
+	monthFraction := (float32(month) / (monthsInYear + 1))
+	dayFraction := (float32(day) / ((monthsInYear + 1) * (maxDaysInMonth + 1)))
+	decimalPart := monthFraction + dayFraction
 	if isBC {
 		return float32((-1 * year)) + decimalPart, nil
 	}

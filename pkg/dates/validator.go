@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-const maxMonths = 12
-const maxDays = 31
+const monthsInYear = 12
+const maxDaysInMonth = 31
 
 // IsValid checks whether or not the input date is in "YYYY-MM-DD [BC]" format or not. For example,
 // the following dates are all valid: 1769-08-15, 1769-8-15, 1769-8, 1769, 1769-08-15 BC, etc.
@@ -27,10 +27,10 @@ func IsValid(date string) bool {
 	if y == "" {
 		return false
 	}
-	if m != "" && !isValidDatePart(m, maxMonths) {
+	if m != "" && !isValidDatePart(m, monthsInYear) {
 		return false
 	}
-	if d != "" && !isValidDatePart(d, maxDays) {
+	if d != "" && !isValidDatePart(d, maxDaysInMonth) {
 		return false
 	}
 
