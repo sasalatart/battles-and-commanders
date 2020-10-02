@@ -29,12 +29,12 @@ func TestBattlesEndpoints(t *testing.T) {
 
 		t.Run("ValidNonPersistedUUID", func(t *testing.T) {
 			url := route(uuid.NewV4().String())
-			httptest.AssertFailedGET(t, url, http.StatusNotFound, "Not Found")
+			httptest.AssertFailedGET(t, url, http.StatusNotFound, "Battle not found")
 		})
 
 		t.Run("InvalidUUID", func(t *testing.T) {
 			url := route("invalid-uuid")
-			httptest.AssertFailedGET(t, url, http.StatusBadRequest, "Bad Request")
+			httptest.AssertFailedGET(t, url, http.StatusBadRequest, "Invalid BattleID")
 		})
 	})
 
@@ -155,12 +155,12 @@ func TestBattlesEndpoints(t *testing.T) {
 
 		t.Run("ValidNonPersistedFactionUUID", func(t *testing.T) {
 			url := route(uuid.NewV4().String())
-			httptest.AssertFailedGET(t, url, http.StatusNotFound, "Not Found")
+			httptest.AssertFailedGET(t, url, http.StatusNotFound, "Faction not found")
 		})
 
 		t.Run("InvalidFactionUUID", func(t *testing.T) {
 			url := route("invalid-uuid")
-			httptest.AssertFailedGET(t, url, http.StatusBadRequest, "Bad Request")
+			httptest.AssertFailedGET(t, url, http.StatusBadRequest, "Invalid FactionID")
 		})
 	})
 
@@ -223,12 +223,12 @@ func TestBattlesEndpoints(t *testing.T) {
 
 		t.Run("ValidNonPersistedCommanderUUID", func(t *testing.T) {
 			url := route(uuid.NewV4().String())
-			httptest.AssertFailedGET(t, url, http.StatusNotFound, "Not Found")
+			httptest.AssertFailedGET(t, url, http.StatusNotFound, "Commander not found")
 		})
 
 		t.Run("InvalidCommanderUUID", func(t *testing.T) {
 			url := route("invalid-uuid")
-			httptest.AssertFailedGET(t, url, http.StatusBadRequest, "Bad Request")
+			httptest.AssertFailedGET(t, url, http.StatusBadRequest, "Invalid CommanderID")
 		})
 	})
 }

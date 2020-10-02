@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber"
+	"github.com/sasalatart/batcoms/domain"
 	"github.com/sasalatart/batcoms/domain/battles"
 	"github.com/sasalatart/batcoms/domain/commanders"
 	"github.com/sasalatart/batcoms/domain/factions"
@@ -17,7 +18,7 @@ func WithPage() func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
 		page, err := strconv.Atoi(ctx.Query("page", "1"))
 		if err != nil || page <= 0 {
-			ctx.Next(fiber.ErrBadRequest)
+			ctx.Next(newErrBadRequest("Invalid page"))
 			return
 		}
 		ctx.Locals("page", page)
@@ -40,12 +41,12 @@ func WithFaction(r factions.Reader) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
 		id, err := uuid.FromString(ctx.Params("factionID"))
 		if err != nil {
-			ctx.Next(fiber.ErrBadRequest)
+			ctx.Next(newErrBadRequest("Invalid FactionID"))
 			return
 		}
 		faction, err := r.FindOne(factions.FindOneQuery{ID: id})
 		if err != nil {
-			ctx.Next(err)
+			ctx.Next(handleFindOneError(err, "Faction"))
 			return
 		}
 		ctx.Locals("faction", faction)
@@ -81,12 +82,12 @@ func WithCommander(r commanders.Reader) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
 		id, err := uuid.FromString(ctx.Params("commanderID"))
 		if err != nil {
-			ctx.Next(fiber.ErrBadRequest)
+			ctx.Next(newErrBadRequest("Invalid CommanderID"))
 			return
 		}
 		commander, err := r.FindOne(commanders.FindOneQuery{ID: id})
 		if err != nil {
-			ctx.Next(err)
+			ctx.Next(handleFindOneError(err, "Commander"))
 			return
 		}
 		ctx.Locals("commander", commander)
@@ -147,12 +148,12 @@ func WithBattle(r battles.Reader) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
 		id, err := uuid.FromString(ctx.Params("battleID"))
 		if err != nil {
-			ctx.Next(fiber.ErrBadRequest)
+			ctx.Next(newErrBadRequest("Invalid BattleID"))
 			return
 		}
 		battle, err := r.FindOne(battles.FindOneQuery{ID: id})
 		if err != nil {
-			ctx.Next(err)
+			ctx.Next(handleFindOneError(err, "Battle"))
 			return
 		}
 		ctx.Locals("battle", battle)
@@ -180,4 +181,11 @@ func commanderIDFromLocals(ctx *fiber.Ctx) uuid.UUID {
 		return commander.ID
 	}
 	return uuid.Nil
+}
+
+func handleFindOneError(err error, resourceName string) error {
+	if err != domain.ErrNotFound {
+		return err
+	}
+	return newErrNotFound(resourceName)
 }

@@ -23,9 +23,9 @@ func AssertFiberGET(t *testing.T, app *fiber.App, route string, status int, asse
 
 // AssertFailedFiberGET asserts that the specified route, when handled by the given *fiber.App, renders
 // the specified fiber.Error
-func AssertFailedFiberGET(t *testing.T, app *fiber.App, route string, httperr fiber.Error) {
+func AssertFailedFiberGET(t *testing.T, app *fiber.App, route string, status int, message string) {
 	t.Helper()
-	AssertFiberGET(t, app, route, httperr.Code, func(res *http.Response) {
-		AssertErrorMessage(t, res, httperr.Message)
+	AssertFiberGET(t, app, route, status, func(res *http.Response) {
+		AssertErrorMessage(t, res, message)
 	})
 }
