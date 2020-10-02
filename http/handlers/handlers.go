@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber"
-	"github.com/sasalatart/batcoms/domain"
 	"github.com/sasalatart/batcoms/domain/battles"
 	"github.com/sasalatart/batcoms/domain/commanders"
 	"github.com/sasalatart/batcoms/domain/factions"
@@ -80,18 +79,15 @@ func Register(app *fiber.App, fr factions.Reader, cr commanders.Reader, br battl
 // request is not successful. This can be in debug or non-debug mode
 func ErrorsHandlerFactory(debug bool) func(ctx *fiber.Ctx, err error) {
 	return func(ctx *fiber.Ctx, err error) {
-		code := fiber.StatusInternalServerError
-		message := "Internal server error"
+		var fiberError *fiber.Error
+		if isFiberError := errors.As(err, &fiberError); isFiberError {
+			ctx.Status(fiberError.Code).SendString(fiberError.Message)
+			return
+		}
+		message := fiber.ErrInternalServerError.Message
 		if debug {
 			message = err.Error()
 		}
-		if errors.Is(err, domain.ErrNotFound) {
-			err = fiber.ErrNotFound
-		}
-		if e, ok := err.(*fiber.Error); ok {
-			code = e.Code
-			message = e.Message
-		}
-		ctx.Status(code).SendString(message)
+		ctx.Status(fiber.StatusInternalServerError).SendString(message)
 	}
 }

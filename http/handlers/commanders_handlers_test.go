@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/gofiber/fiber"
 	"github.com/sasalatart/batcoms/domain"
 	"github.com/sasalatart/batcoms/domain/commanders"
 	"github.com/sasalatart/batcoms/domain/factions"
@@ -38,13 +37,13 @@ func TestCommandersHandlers(t *testing.T) {
 				ID: uuid,
 			}).Return(commanders.Commander{}, domain.ErrNotFound)
 
-			httptest.AssertFailedFiberGET(t, app, "/commanders/"+uuid.String(), *fiber.ErrNotFound)
+			httptest.AssertFailedFiberGET(t, app, "/commanders/"+uuid.String(), http.StatusNotFound, "Commander not found")
 			commandersRepoMock.AssertExpectations(t)
 		})
 
 		t.Run("InvalidUUID", func(t *testing.T) {
 			app, _, commandersRepoMock, _ := appWithReposMocks()
-			httptest.AssertFailedFiberGET(t, app, "/commanders/invalid-uuid", *fiber.ErrBadRequest)
+			httptest.AssertFailedFiberGET(t, app, "/commanders/invalid-uuid", http.StatusBadRequest, "Invalid CommanderID")
 			commandersRepoMock.AssertNotCalled(t, "FindOne")
 		})
 	})
@@ -116,14 +115,14 @@ func TestCommandersHandlers(t *testing.T) {
 				ID: uuid,
 			}).Return(factions.Faction{}, domain.ErrNotFound)
 
-			httptest.AssertFailedFiberGET(t, app, baseURL(uuid.String()), *fiber.ErrNotFound)
+			httptest.AssertFailedFiberGET(t, app, baseURL(uuid.String()), http.StatusNotFound, "Faction not found")
 			factionsRepoMock.AssertExpectations(t)
 			commandersRepoMock.AssertNotCalled(t, "FindMany")
 		})
 
 		t.Run("InvalidFactionUUID", func(t *testing.T) {
 			app, factionsRepoMock, commandersRepoMock, _ := appWithReposMocks()
-			httptest.AssertFailedFiberGET(t, app, baseURL("invalid-uuid"), *fiber.ErrBadRequest)
+			httptest.AssertFailedFiberGET(t, app, baseURL("invalid-uuid"), http.StatusBadRequest, "Invalid FactionID")
 			factionsRepoMock.AssertNotCalled(t, "FindOne")
 			commandersRepoMock.AssertNotCalled(t, "FindMany")
 		})
