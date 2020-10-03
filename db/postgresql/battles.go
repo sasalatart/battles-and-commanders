@@ -87,7 +87,7 @@ func (r *BattlesRepository) FindMany(query battles.FindManyQuery, page int) ([]b
 	}
 	pages := int((records / perPage) + 1)
 
-	if err := paginate(db.Order("name DESC"), page, perPage).Find(result).Error; err != nil {
+	if err := paginate(db.Order("start_date_num ASC"), page, perPage).Find(result).Error; err != nil {
 		return []battles.Battle{}, pages, err
 	}
 
