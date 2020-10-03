@@ -74,8 +74,8 @@ func TestBattlesEndpoints(t *testing.T) {
 				expectedBattles: []battles.Battle{
 					BattleOfMegiddo(t),
 					BattleOfLodi(t),
-					BattleOfAusterlitz(t),
 					BattleOfArcole(t),
+					BattleOfAusterlitz(t),
 				},
 			},
 			{
@@ -96,12 +96,12 @@ func TestBattlesEndpoints(t *testing.T) {
 			{
 				description:     "With result filter",
 				url:             baseURL + "?result=French+Victory",
-				expectedBattles: []battles.Battle{BattleOfLodi(t), BattleOfAusterlitz(t), BattleOfArcole(t)},
+				expectedBattles: []battles.Battle{BattleOfLodi(t), BattleOfArcole(t), BattleOfAusterlitz(t)},
 			},
 			{
 				description:     "With fromDate filter",
 				url:             baseURL + "?fromDate=1700",
-				expectedBattles: []battles.Battle{BattleOfLodi(t), BattleOfAusterlitz(t), BattleOfArcole(t)},
+				expectedBattles: []battles.Battle{BattleOfLodi(t), BattleOfArcole(t), BattleOfAusterlitz(t)},
 			},
 			{
 				description:     "With toDate filter",
@@ -263,7 +263,7 @@ func TestBattlesEndpoints(t *testing.T) {
 			{
 				description:     "With no filters",
 				url:             napoleonURL,
-				expectedBattles: []battles.Battle{BattleOfLodi(t), BattleOfAusterlitz(t), BattleOfArcole(t)},
+				expectedBattles: []battles.Battle{BattleOfLodi(t), BattleOfArcole(t), BattleOfAusterlitz(t)},
 			},
 			{
 				description:     "With name filter",
@@ -283,12 +283,12 @@ func TestBattlesEndpoints(t *testing.T) {
 			{
 				description:     "With result filter",
 				url:             napoleonURL + "?result=French+Victory",
-				expectedBattles: []battles.Battle{BattleOfLodi(t), BattleOfAusterlitz(t), BattleOfArcole(t)},
+				expectedBattles: []battles.Battle{BattleOfLodi(t), BattleOfArcole(t), BattleOfAusterlitz(t)},
 			},
 			{
 				description:     "With fromDate filter",
 				url:             napoleonURL + "?fromDate=1796-11",
-				expectedBattles: []battles.Battle{BattleOfAusterlitz(t), BattleOfArcole(t)},
+				expectedBattles: []battles.Battle{BattleOfArcole(t), BattleOfAusterlitz(t)},
 			},
 			{
 				description:     "With toDate filter",
@@ -298,7 +298,7 @@ func TestBattlesEndpoints(t *testing.T) {
 			{
 				description:     "With fromDate and toDate filter",
 				url:             napoleonURL + "?fromDate=1796-11&toDate=1805",
-				expectedBattles: []battles.Battle{BattleOfAusterlitz(t), BattleOfArcole(t)},
+				expectedBattles: []battles.Battle{BattleOfArcole(t), BattleOfAusterlitz(t)},
 			},
 			{
 				description: "With name, summary, place, result, fromDate and toDate filters",
