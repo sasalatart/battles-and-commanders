@@ -9,7 +9,6 @@ import (
 	"github.com/sasalatart/batcoms/domain/battles"
 	"github.com/sasalatart/batcoms/domain/commanders"
 	"github.com/sasalatart/batcoms/domain/factions"
-	batcomshttp "github.com/sasalatart/batcoms/http"
 	"github.com/sasalatart/batcoms/http/httptest"
 	"github.com/sasalatart/batcoms/mocks"
 	uuid "github.com/satori/go.uuid"
@@ -21,11 +20,10 @@ func TestBattlesHandlers(t *testing.T) {
 
 		t.Run("ValidPersistedUUID", func(t *testing.T) {
 			battleMock := mocks.Battle()
-			battlesRepoMock := new(mocks.BattlesRepository)
+			app, _, _, battlesRepoMock := appWithReposMocks()
 			battlesRepoMock.On("FindOne", battles.FindOneQuery{
 				ID: battleMock.ID,
 			}).Return(battleMock, nil)
-			app := batcomshttp.Setup(new(mocks.FactionsRepository), new(mocks.CommandersRepository), battlesRepoMock, true)
 
 			httptest.AssertFiberGET(t, app, "/battles/"+battleMock.ID.String(), http.StatusOK, func(res *http.Response) {
 				battlesRepoMock.AssertExpectations(t)
@@ -74,6 +72,15 @@ func TestBattlesHandlers(t *testing.T) {
 				})
 			})
 		}
+		for _, c := range buildInvalidDatesCases(baseURL) {
+			t.Run(c.description, func(t *testing.T) {
+				app, _, _, battlesRepoMock := appWithReposMocks()
+				httptest.AssertFiberGET(t, app, c.url, http.StatusBadRequest, func(res *http.Response) {
+					battlesRepoMock.AssertNotCalled(t, "FindMany")
+					httptest.AssertErrorMessage(t, res, c.expectedMessage)
+				})
+			})
+		}
 	})
 
 	t.Run("GET /factions/:factionID/battles", func(t *testing.T) {
@@ -88,8 +95,9 @@ func TestBattlesHandlers(t *testing.T) {
 			const pagesMock = 3
 			factionMock := mocks.Faction()
 			battlesMock := []battles.Battle{mocks.Battle()}
+			fromFactionURL := baseURL(factionMock.ID.String())
 
-			cases := buildBattlesCases(baseURL(factionMock.ID.String()), func(q battles.FindManyQuery) battles.FindManyQuery {
+			cases := buildBattlesCases(fromFactionURL, func(q battles.FindManyQuery) battles.FindManyQuery {
 				q.FactionID = factionMock.ID
 				return q
 			})
@@ -106,6 +114,20 @@ func TestBattlesHandlers(t *testing.T) {
 						battlesRepoMock.AssertExpectations(t)
 						httptest.AssertHeaderPages(t, res, pagesMock)
 						httptest.AssertJSONBattles(t, res, battlesMock)
+					})
+				})
+			}
+			for _, c := range buildInvalidDatesCases(fromFactionURL) {
+				t.Run(c.description, func(t *testing.T) {
+					app, factionsRepoMock, _, battlesRepoMock := appWithReposMocks()
+					factionsRepoMock.On("FindOne", factions.FindOneQuery{
+						ID: factionMock.ID,
+					}).Return(factionMock, nil)
+
+					httptest.AssertFiberGET(t, app, c.url, http.StatusBadRequest, func(res *http.Response) {
+						factionsRepoMock.AssertExpectations(t)
+						battlesRepoMock.AssertNotCalled(t, "FindMany")
+						httptest.AssertErrorMessage(t, res, c.expectedMessage)
 					})
 				})
 			}
@@ -143,8 +165,9 @@ func TestBattlesHandlers(t *testing.T) {
 			const pagesMock = 3
 			commanderMock := mocks.Commander()
 			battlesMock := []battles.Battle{mocks.Battle()}
+			fromCommanderURL := baseURL(commanderMock.ID.String())
 
-			cases := buildBattlesCases(baseURL(commanderMock.ID.String()), func(q battles.FindManyQuery) battles.FindManyQuery {
+			cases := buildBattlesCases(fromCommanderURL, func(q battles.FindManyQuery) battles.FindManyQuery {
 				q.CommanderID = commanderMock.ID
 				return q
 			})
@@ -161,6 +184,20 @@ func TestBattlesHandlers(t *testing.T) {
 						battlesRepoMock.AssertExpectations(t)
 						httptest.AssertHeaderPages(t, res, pagesMock)
 						httptest.AssertJSONBattles(t, res, battlesMock)
+					})
+				})
+			}
+			for _, c := range buildInvalidDatesCases(fromCommanderURL) {
+				t.Run(c.description, func(t *testing.T) {
+					app, _, commandersRepoMock, battlesRepoMock := appWithReposMocks()
+					commandersRepoMock.On("FindOne", commanders.FindOneQuery{
+						ID: commanderMock.ID,
+					}).Return(commanderMock, nil)
+
+					httptest.AssertFiberGET(t, app, c.url, http.StatusBadRequest, func(res *http.Response) {
+						commandersRepoMock.AssertExpectations(t)
+						battlesRepoMock.AssertNotCalled(t, "FindMany")
+						httptest.AssertErrorMessage(t, res, c.expectedMessage)
 					})
 				})
 			}
@@ -221,14 +258,80 @@ func buildBattlesCases(baseURL string, decorateQuery func(battles.FindManyQuery)
 			calledWith:  decorateQuery(battles.FindManyQuery{Result: "Treaty of Pressburg"}),
 		},
 		{
-			description: "With name, summary, place and result filters",
-			url:         baseURL + "&name=Austerlitz&summary=napoleonic&place=Moravia&result=Treaty+of+Pressburg",
+			description: "With fromDate filter",
+			url:         baseURL + "&fromDate=1769-08-15",
+			calledWith:  decorateQuery(battles.FindManyQuery{FromDate: "1769-08-15"}),
+		},
+		{
+			description: "With partial fromDate filter",
+			url:         baseURL + "&fromDate=1769-08",
+			calledWith:  decorateQuery(battles.FindManyQuery{FromDate: "1769-08-01"}),
+		},
+		{
+			description: "With toDate filter",
+			url:         baseURL + "&toDate=1821-05-05",
+			calledWith:  decorateQuery(battles.FindManyQuery{ToDate: "1821-05-05"}),
+		},
+		{
+			description: "With partial toDate filter",
+			url:         baseURL + "&toDate=1821",
+			calledWith:  decorateQuery(battles.FindManyQuery{ToDate: "1821-12-31"}),
+		},
+		{
+			description: "With name, summary, place, result, fromDate and toDate filters",
+			url: baseURL +
+				"&name=Austerlitz" +
+				"&summary=napoleonic" +
+				"&place=Moravia" +
+				"&result=Treaty+of+Pressburg" +
+				"&fromDate=1805-12-02" +
+				"&toDate=1805-12-02",
 			calledWith: decorateQuery(battles.FindManyQuery{
-				Name:    "Austerlitz",
-				Summary: "napoleonic",
-				Place:   "Moravia",
-				Result:  "Treaty of Pressburg",
+				Name:     "Austerlitz",
+				Summary:  "napoleonic",
+				Place:    "Moravia",
+				Result:   "Treaty of Pressburg",
+				FromDate: "1805-12-02",
+				ToDate:   "1805-12-02",
 			}),
+		},
+	}
+}
+
+type invalidDatesTableCase struct {
+	description     string
+	url             string
+	expectedMessage string
+}
+
+func buildInvalidDatesCases(baseURL string) []invalidDatesTableCase {
+	const invalidFromDateMessage = "Invalid fromDate, must be in YYYY-MM-DD format"
+	const invalidToDateMessage = "Invalid toDate, must be in YYYY-MM-DD format"
+	return []invalidDatesTableCase{
+		{
+			description:     "Invalid fromDate",
+			url:             baseURL + "&fromDate=x",
+			expectedMessage: invalidFromDateMessage,
+		},
+		{
+			description:     "Invalid toDate",
+			url:             baseURL + "&toDate=x",
+			expectedMessage: invalidToDateMessage,
+		},
+		{
+			description:     "Invalid fromDate with valid toDate",
+			url:             baseURL + "&fromDate=x&toDate=1821-05-05",
+			expectedMessage: invalidFromDateMessage,
+		},
+		{
+			description:     "Valid fromDate with invalid toDate",
+			url:             baseURL + "&fromDate=1769-08-15&toDate=x",
+			expectedMessage: invalidToDateMessage,
+		},
+		{
+			description:     "Invalid fromDate with invalid toDate",
+			url:             baseURL + "&fromDate=x&toDate=y",
+			expectedMessage: invalidFromDateMessage,
 		},
 	}
 }

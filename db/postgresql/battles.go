@@ -55,7 +55,6 @@ func (r *BattlesRepository) FindMany(query battles.FindManyQuery, page int) ([]b
 		Preload("BattleFactions.Faction").
 		Preload("BattleCommanders.Commander").
 		Preload("BattleCommanderFactions")
-
 	if query.FactionID != uuid.Nil {
 		db = db.Joins("JOIN battle_factions bf ON bf.battle_id = battles.id").
 			Where("bf.faction_id = ?", query.FactionID)
@@ -63,6 +62,20 @@ func (r *BattlesRepository) FindMany(query battles.FindManyQuery, page int) ([]b
 	if query.CommanderID != uuid.Nil {
 		db = db.Joins("JOIN battle_commanders bc ON bc.battle_id = battles.id").
 			Where("bc.commander_id = ?", query.CommanderID)
+	}
+	if query.FromDate != "" {
+		fromDateNum, err := dates.ToNum(query.FromDate)
+		if err != nil {
+			return []battles.Battle{}, 0, errors.Wrap(err, "Converting fromDate to numeric")
+		}
+		db = db.Where("start_date_num >= ?", fromDateNum)
+	}
+	if query.ToDate != "" {
+		toDateNum, err := dates.ToNum(query.ToDate)
+		if err != nil {
+			return []battles.Battle{}, 0, errors.Wrap(err, "Converting toDate to numeric")
+		}
+		db = db.Where("end_date_num <= ?", toDateNum)
 	}
 	db = ts(db, "name", query.Name)
 	db = ts(db, "summary", query.Summary)

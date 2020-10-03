@@ -36,4 +36,6 @@ type FindManyQuery struct {
 	Summary     string
 	Place       string
 	Result      string
+	FromDate    string
+	ToDate      string
 }

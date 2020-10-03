@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDates(t *testing.T) {
+func TestDatesParse(t *testing.T) {
 	cases := []struct {
 		raw      string
 		expected []string
@@ -274,5 +274,151 @@ func TestDates(t *testing.T) {
 		got, err := dates.Parse(c.raw)
 		require.NoErrorf(t, err, "Parsing date %q", c.raw)
 		assert.Equal(t, c.expected, got, "Parsing date %q", c.raw)
+	}
+}
+
+func TestToBeginning(t *testing.T) {
+	validCases := []struct {
+		date     string
+		expected string
+	}{
+		{
+			date:     "1769-08-15",
+			expected: "1769-08-15",
+		},
+		{
+			date:     "1769-08-15 BC",
+			expected: "1769-08-15 BC",
+		},
+		{
+			date:     "1769",
+			expected: "1769-01-01",
+		},
+		{
+			date:     "1769-01",
+			expected: "1769-01-01",
+		},
+		{
+			date:     "1769-02",
+			expected: "1769-02-01",
+		},
+		{
+			date:     "1769-03",
+			expected: "1769-03-01",
+		},
+		{
+			date:     "1769-04",
+			expected: "1769-04-01",
+		},
+		{
+			date:     "1769-05",
+			expected: "1769-05-01",
+		},
+		{
+			date:     "1769-06",
+			expected: "1769-06-01",
+		},
+		{
+			date:     "1769-07",
+			expected: "1769-07-01",
+		},
+		{
+			date:     "1769-08",
+			expected: "1769-08-01",
+		},
+		{
+			date:     "1769-09",
+			expected: "1769-09-01",
+		},
+		{
+			date:     "1769-10",
+			expected: "1769-10-01",
+		},
+		{
+			date:     "1769-11",
+			expected: "1769-11-01",
+		},
+		{
+			date:     "1769-12",
+			expected: "1769-12-01",
+		},
+	}
+	for _, c := range validCases {
+		endValue, err := dates.ToBeginning(c.date)
+		require.NoErrorf(t, err, "Converting to beginning of %q", c.date)
+		assert.Equal(t, c.expected, endValue)
+	}
+}
+
+func TestDatesToEnd(t *testing.T) {
+	validCases := []struct {
+		date     string
+		expected string
+	}{
+		{
+			date:     "1769-08-15",
+			expected: "1769-08-15",
+		},
+		{
+			date:     "1769-08-15 BC",
+			expected: "1769-08-15 BC",
+		},
+		{
+			date:     "1769",
+			expected: "1769-12-31",
+		},
+		{
+			date:     "1769-01",
+			expected: "1769-01-31",
+		},
+		{
+			date:     "1769-02",
+			expected: "1769-02-29",
+		},
+		{
+			date:     "1769-03",
+			expected: "1769-03-31",
+		},
+		{
+			date:     "1769-04",
+			expected: "1769-04-30",
+		},
+		{
+			date:     "1769-05",
+			expected: "1769-05-31",
+		},
+		{
+			date:     "1769-06",
+			expected: "1769-06-30",
+		},
+		{
+			date:     "1769-07",
+			expected: "1769-07-31",
+		},
+		{
+			date:     "1769-08",
+			expected: "1769-08-31",
+		},
+		{
+			date:     "1769-09",
+			expected: "1769-09-30",
+		},
+		{
+			date:     "1769-10",
+			expected: "1769-10-31",
+		},
+		{
+			date:     "1769-11",
+			expected: "1769-11-30",
+		},
+		{
+			date:     "1769-12",
+			expected: "1769-12-31",
+		},
+	}
+	for _, c := range validCases {
+		endValue, err := dates.ToEnd(c.date)
+		require.NoErrorf(t, err, "Converting to end of %q", c.date)
+		assert.Equal(t, c.expected, endValue)
 	}
 }

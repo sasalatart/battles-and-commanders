@@ -8,10 +8,34 @@ import (
 	"github.com/sasalatart/batcoms/domain/factions"
 	"github.com/sasalatart/batcoms/http/httptest"
 	uuid "github.com/satori/go.uuid"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestFactionsEndpoints(t *testing.T) {
+	type factionsEndpointCase struct {
+		description          string
+		url                  string
+		expectedFactions     []factions.Faction
+		expectedErrorCode    int
+		expectedErrorMessage string
+	}
+
+	assertFactionsEndpointCase := func(t *testing.T, c factionsEndpointCase, expectedPages int) {
+		t.Helper()
+		res, err := http.Get(c.url)
+		require.NoError(t, err, "Requesting factions")
+		defer res.Body.Close()
+		if c.expectedErrorMessage == "" {
+			assert.Equal(t, http.StatusOK, res.StatusCode)
+			httptest.AssertHeaderPages(t, res, expectedPages)
+			httptest.AssertJSONFactions(t, res, c.expectedFactions)
+		} else {
+			assert.Equal(t, c.expectedErrorCode, res.StatusCode)
+			httptest.AssertErrorMessage(t, res, c.expectedErrorMessage)
+		}
+	}
+
 	t.Run("GET /factions/:factionID", func(t *testing.T) {
 		t.Parallel()
 
@@ -42,11 +66,7 @@ func TestFactionsEndpoints(t *testing.T) {
 		t.Parallel()
 
 		const expectedPages = 1
-		cases := []struct {
-			description      string
-			url              string
-			expectedFactions []factions.Faction
-		}{
+		cases := []factionsEndpointCase{
 			{
 				description: "With no filters",
 				url:         URL("/factions"),
@@ -78,11 +98,7 @@ func TestFactionsEndpoints(t *testing.T) {
 		}
 		for _, c := range cases {
 			t.Run(c.description, func(t *testing.T) {
-				res, err := http.Get(c.url)
-				require.NoError(t, err, "Requesting factions")
-				defer res.Body.Close()
-				httptest.AssertHeaderPages(t, res, expectedPages)
-				httptest.AssertJSONFactions(t, res, c.expectedFactions)
+				assertFactionsEndpointCase(t, c, expectedPages)
 			})
 		}
 	})
@@ -94,54 +110,52 @@ func TestFactionsEndpoints(t *testing.T) {
 			return URL(fmt.Sprintf("/commanders/%s/factions", commanderID))
 		}
 
-		t.Run("ValidPersistedCommanderUUID", func(t *testing.T) {
-			const expectedPages = 1
-			commanderID := Napoleon(t).ID
-			cases := []struct {
-				description      string
-				url              string
-				expectedFactions []factions.Faction
-			}{
-				{
-					description:      "With no filters",
-					url:              route(commanderID.String()),
-					expectedFactions: []factions.Faction{FrenchFirstRepublic(t), FirstFrenchEmpire(t)},
-				},
-				{
-					description:      "With name filter",
-					url:              route(commanderID.String()) + "?name=empire",
-					expectedFactions: []factions.Faction{FirstFrenchEmpire(t)},
-				},
-				{
-					description:      "With summary filter",
-					url:              route(commanderID.String()) + "?summary=first+republic",
-					expectedFactions: []factions.Faction{FrenchFirstRepublic(t)},
-				},
-				{
-					description:      "With name and summary filters",
-					url:              route(commanderID.String()) + "?name=empire&summary=ruled+by+Napoleon+Bonaparte",
-					expectedFactions: []factions.Faction{FirstFrenchEmpire(t)},
-				},
-			}
-			for _, c := range cases {
-				t.Run(c.description, func(t *testing.T) {
-					res, err := http.Get(c.url)
-					require.NoError(t, err, "Requesting factions")
-					defer res.Body.Close()
-					httptest.AssertHeaderPages(t, res, expectedPages)
-					httptest.AssertJSONFactions(t, res, c.expectedFactions)
-				})
-			}
-		})
-
-		t.Run("ValidNonPersistedCommanderUUID", func(t *testing.T) {
-			url := route(uuid.NewV4().String())
-			httptest.AssertFailedGET(t, url, http.StatusNotFound, "Commander not found")
-		})
-
-		t.Run("InvalidCommanderUUID", func(t *testing.T) {
-			url := route("invalid-uuid")
-			httptest.AssertFailedGET(t, url, http.StatusBadRequest, "Invalid CommanderID")
-		})
+		const expectedPages = 1
+		commanderID := Napoleon(t).ID
+		cases := []struct {
+			description          string
+			url                  string
+			expectedFactions     []factions.Faction
+			expectedErrorCode    int
+			expectedErrorMessage string
+		}{
+			{
+				description:      "With no filters",
+				url:              route(commanderID.String()),
+				expectedFactions: []factions.Faction{FrenchFirstRepublic(t), FirstFrenchEmpire(t)},
+			},
+			{
+				description:      "With name filter",
+				url:              route(commanderID.String()) + "?name=empire",
+				expectedFactions: []factions.Faction{FirstFrenchEmpire(t)},
+			},
+			{
+				description:      "With summary filter",
+				url:              route(commanderID.String()) + "?summary=first+republic",
+				expectedFactions: []factions.Faction{FrenchFirstRepublic(t)},
+			},
+			{
+				description:      "With name and summary filters",
+				url:              route(commanderID.String()) + "?name=empire&summary=ruled+by+Napoleon+Bonaparte",
+				expectedFactions: []factions.Faction{FirstFrenchEmpire(t)},
+			},
+			{
+				description:          "With valid non-persisted CommanderID",
+				url:                  route(uuid.NewV4().String()),
+				expectedErrorCode:    http.StatusNotFound,
+				expectedErrorMessage: "Commander not found",
+			},
+			{
+				description:          "With invalid CommanderID",
+				url:                  route("invalid-uuid"),
+				expectedErrorCode:    http.StatusBadRequest,
+				expectedErrorMessage: "Invalid CommanderID",
+			},
+		}
+		for _, c := range cases {
+			t.Run(c.description, func(t *testing.T) {
+				assertFactionsEndpointCase(t, c, expectedPages)
+			})
+		}
 	})
 }
