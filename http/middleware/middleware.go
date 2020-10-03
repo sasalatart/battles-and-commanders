@@ -9,6 +9,7 @@ import (
 	"github.com/sasalatart/batcoms/domain/battles"
 	"github.com/sasalatart/batcoms/domain/commanders"
 	"github.com/sasalatart/batcoms/domain/factions"
+	"github.com/sasalatart/batcoms/pkg/dates"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -123,11 +124,40 @@ func WithCommanders(r commanders.Reader) func(*fiber.Ctx) {
 // and "result" query parameters to refine this search
 func WithBattles(r battles.Reader) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
+		fromDate := ctx.Query("fromDate")
+		if fromDate != "" {
+			if !dates.IsValid(fromDate) {
+				ctx.Next(newErrBadRequest("Invalid fromDate, must be in YYYY-MM-DD format"))
+				return
+			}
+			beginning, err := dates.ToBeginning(fromDate)
+			if err != nil {
+				ctx.Next(err)
+				return
+			}
+			fromDate = beginning
+		}
+		toDate := ctx.Query("toDate")
+		if toDate != "" {
+			if !dates.IsValid(toDate) {
+				ctx.Next(newErrBadRequest("Invalid toDate, must be in YYYY-MM-DD format"))
+				return
+			}
+			end, err := dates.ToEnd(toDate)
+			if err != nil {
+				ctx.Next(err)
+				return
+			}
+			toDate = end
+		}
+
 		query := battles.FindManyQuery{
 			Name:        ctx.Query("name"),
 			Summary:     ctx.Query("summary"),
 			Place:       ctx.Query("place"),
 			Result:      ctx.Query("result"),
+			FromDate:    fromDate,
+			ToDate:      toDate,
 			FactionID:   factionIDFromLocals(ctx),
 			CommanderID: commanderIDFromLocals(ctx),
 		}

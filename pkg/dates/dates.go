@@ -3,10 +3,26 @@ package dates
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
 )
+
+var daysPerMonth = map[int]int{
+	1:  31,
+	2:  29,
+	3:  31,
+	4:  30,
+	5:  31,
+	6:  30,
+	7:  31,
+	8:  31,
+	9:  30,
+	10: 31,
+	11: 30,
+	12: 31,
+}
 
 // Parse receives text containing a potential date or range of dates, and translates them into
 // YYYY-MM-DD format, returning a chronologically sorted slice of each one of those dates
@@ -110,4 +126,59 @@ func minMax(ss []string) (string, string) {
 	}
 	sort.Strings(ss)
 	return strings.TrimLeft(ss[0], "0"), strings.TrimLeft(ss[len(ss)-1], "0")
+}
+
+// ToBeginning fills the missing month and day of a partial date by setting them to "1" if they are
+// missing. For example, "1769" is converted into "1769-01-01", "1769-08" is converted into
+// "1769-08-01", and "1769-08-15" stays the same
+func ToBeginning(date string) (string, error) {
+	if !IsValid(date) {
+		return date, errors.Wrapf(ErrNotDate, "Validating date %q", date)
+	}
+
+	isBC := strings.Contains(date, "BC")
+	year := extractYear(date)
+	month := extractMonth(date)
+	day := extractDay(date)
+	if month == "" {
+		month = "01"
+	}
+	if day == "" {
+		day = "01"
+	}
+	result := fmt.Sprintf("%s-%s-%s", year, month, day)
+	if !isBC {
+		return result, nil
+	}
+	return result + " BC", nil
+}
+
+// ToEnd fills the missing month and day of a partial date by setting them to the last month of the
+// year (unless specified), and to the last day of that month (unless specified). For example,
+// "1769" is converted into "1769-12-31", "1769-08" is converted into "1769-08-31", and "1769-08-15"
+// stays the same
+func ToEnd(date string) (string, error) {
+	if !IsValid(date) {
+		return date, errors.Wrapf(ErrNotDate, "Validating date %q", date)
+	}
+
+	isBC := strings.Contains(date, "BC")
+	year := extractYear(date)
+	month := extractMonth(date)
+	day := extractDay(date)
+	if month == "" {
+		month = "12"
+	}
+	if day == "" {
+		monthNumber, err := strconv.Atoi(month)
+		if err != nil {
+			return "", errors.Wrapf(err, "Converting month %q to int", month)
+		}
+		day = fmt.Sprint(daysPerMonth[monthNumber])
+	}
+	result := fmt.Sprintf("%s-%s-%s", year, month, day)
+	if !isBC {
+		return result, nil
+	}
+	return result + " BC", nil
 }
