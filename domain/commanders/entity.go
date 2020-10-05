@@ -10,12 +10,3 @@ type Commander struct {
 	Name    string
 	Summary string
 }
-
-// CreationInput is a struct that contains all of the data required to create a commander. This
-// includes annotations required by validations
-type CreationInput struct {
-	WikiID  int    `validate:"required"`
-	URL     string `validate:"required,url"`
-	Name    string `validate:"required"`
-	Summary string
-}

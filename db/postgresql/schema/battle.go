@@ -11,9 +11,9 @@ type Battle struct {
 	PartOf                  string
 	Summary                 string  `gorm:"not null"`
 	StartDate               string  `gorm:"not null;index"`
-	StartDateNum            float32 `gorm:"not null;index"`
+	StartDateNum            float64 `gorm:"not null;index"`
 	EndDate                 string  `gorm:"not null;index"`
-	EndDateNum              float32 `gorm:"not null;index"`
+	EndDateNum              float64 `gorm:"not null;index"`
 	Place                   string  `gorm:"not null"`
 	Latitude                string
 	Longitude               string

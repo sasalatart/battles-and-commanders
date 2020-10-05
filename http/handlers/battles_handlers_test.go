@@ -11,6 +11,7 @@ import (
 	"github.com/sasalatart/batcoms/domain/factions"
 	"github.com/sasalatart/batcoms/http/httptest"
 	"github.com/sasalatart/batcoms/mocks"
+	"github.com/sasalatart/batcoms/pkg/dates"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -260,22 +261,30 @@ func buildBattlesCases(baseURL string, decorateQuery func(battles.FindManyQuery)
 		{
 			description: "With fromDate filter",
 			url:         baseURL + "&fromDate=1769-08-15",
-			calledWith:  decorateQuery(battles.FindManyQuery{FromDate: "1769-08-15"}),
+			calledWith: decorateQuery(battles.FindManyQuery{
+				FromDate: dates.Historic{Year: 1769, Month: 8, Day: 15},
+			}),
 		},
 		{
 			description: "With partial fromDate filter",
 			url:         baseURL + "&fromDate=1769-08",
-			calledWith:  decorateQuery(battles.FindManyQuery{FromDate: "1769-08-01"}),
+			calledWith: decorateQuery(battles.FindManyQuery{
+				FromDate: dates.Historic{Year: 1769, Month: 8, Day: 1},
+			}),
 		},
 		{
 			description: "With toDate filter",
 			url:         baseURL + "&toDate=1821-05-05",
-			calledWith:  decorateQuery(battles.FindManyQuery{ToDate: "1821-05-05"}),
+			calledWith: decorateQuery(battles.FindManyQuery{
+				ToDate: dates.Historic{Year: 1821, Month: 5, Day: 5},
+			}),
 		},
 		{
 			description: "With partial toDate filter",
 			url:         baseURL + "&toDate=1821",
-			calledWith:  decorateQuery(battles.FindManyQuery{ToDate: "1821-12-31"}),
+			calledWith: decorateQuery(battles.FindManyQuery{
+				ToDate: dates.Historic{Year: 1821, Month: 12, Day: 31},
+			}),
 		},
 		{
 			description: "With name, summary, place, result, fromDate and toDate filters",
@@ -291,8 +300,8 @@ func buildBattlesCases(baseURL string, decorateQuery func(battles.FindManyQuery)
 				Summary:  "napoleonic",
 				Place:    "Moravia",
 				Result:   "Treaty of Pressburg",
-				FromDate: "1805-12-02",
-				ToDate:   "1805-12-02",
+				FromDate: dates.Historic{Year: 1805, Month: 12, Day: 2},
+				ToDate:   dates.Historic{Year: 1805, Month: 12, Day: 2},
 			}),
 		},
 	}

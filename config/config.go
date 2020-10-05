@@ -11,6 +11,7 @@ func Setup() {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("config")
 	viper.AddConfigPath("../config")
+	viper.AddConfigPath("../../config") // For running Go Delve from cmd/x/main.go
 
 	if err := viper.ReadInConfig(); err != nil {
 		panic(errors.Wrap(err, "Reading viper config"))
