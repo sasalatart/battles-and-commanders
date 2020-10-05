@@ -63,18 +63,12 @@ func (r *BattlesRepository) FindMany(query battles.FindManyQuery, page int) ([]b
 		db = db.Joins("JOIN battle_commanders bc ON bc.battle_id = battles.id").
 			Where("bc.commander_id = ?", query.CommanderID)
 	}
-	if query.FromDate != "" {
-		fromDateNum, err := dates.ToNum(query.FromDate)
-		if err != nil {
-			return []battles.Battle{}, 0, errors.Wrap(err, "Converting fromDate to numeric")
-		}
+	fromDateNum := query.FromDate.ToNum()
+	if fromDateNum != 0 {
 		db = db.Where("start_date_num >= ?", fromDateNum)
 	}
-	if query.ToDate != "" {
-		toDateNum, err := dates.ToNum(query.ToDate)
-		if err != nil {
-			return []battles.Battle{}, 0, errors.Wrap(err, "Converting toDate to numeric")
-		}
+	toDateNum := query.ToDate.ToNum()
+	if toDateNum != 0 {
 		db = db.Where("end_date_num <= ?", toDateNum)
 	}
 	db = ts(db, "name", query.Name)
@@ -156,24 +150,16 @@ func serializeBattle(b battles.Battle) (*schema.Battle, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "Stringifying casualties")
 	}
-	startDateNum, err := dates.ToNum(b.StartDate)
-	if err != nil {
-		return nil, errors.Wrap(err, "Converting StartDate to number")
-	}
-	endDateNum, err := dates.ToNum(b.EndDate)
-	if err != nil {
-		return nil, errors.Wrap(err, "Converting EndDate to number")
-	}
 	res := &schema.Battle{
 		WikiID:             b.WikiID,
 		URL:                b.URL,
 		Name:               b.Name,
 		PartOf:             b.PartOf,
 		Summary:            b.Summary,
-		StartDate:          b.StartDate,
-		StartDateNum:       startDateNum,
-		EndDate:            b.EndDate,
-		EndDateNum:         endDateNum,
+		StartDate:          b.StartDate.String(),
+		StartDateNum:       b.StartDate.ToNum(),
+		EndDate:            b.EndDate.String(),
+		EndDateNum:         b.EndDate.ToNum(),
 		Place:              b.Location.Place,
 		Latitude:           b.Location.Latitude,
 		Longitude:          b.Location.Longitude,
@@ -196,6 +182,14 @@ func deserializeBattle(b *schema.Battle) (battles.Battle, error) {
 	casualties := statistics.SideNumbers{}
 	if err := fromJSON(b.Casualties, &casualties); err != nil {
 		return battles.Battle{}, errors.Wrapf(err, "Deserializing casualties")
+	}
+	startDate, err := dates.New(b.StartDate)
+	if err != nil {
+		return battles.Battle{}, errors.Wrapf(err, "Deserializing startDate")
+	}
+	endDate, err := dates.New(b.EndDate)
+	if err != nil {
+		return battles.Battle{}, errors.Wrapf(err, "Deserializing endDate")
 	}
 	commanders := battles.CommandersBySide{}
 	for _, bc := range b.BattleCommanders {
@@ -226,8 +220,8 @@ func deserializeBattle(b *schema.Battle) (battles.Battle, error) {
 		Name:      b.Name,
 		PartOf:    b.PartOf,
 		Summary:   b.Summary,
-		StartDate: b.StartDate,
-		EndDate:   b.EndDate,
+		StartDate: startDate,
+		EndDate:   endDate,
 		Location: locations.Location{
 			Place:     b.Place,
 			Latitude:  b.Latitude,

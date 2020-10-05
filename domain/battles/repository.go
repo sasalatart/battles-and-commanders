@@ -1,6 +1,9 @@
 package battles
 
 import (
+	"github.com/sasalatart/batcoms/domain/locations"
+	"github.com/sasalatart/batcoms/domain/statistics"
+	"github.com/sasalatart/batcoms/pkg/dates"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -36,6 +39,26 @@ type FindManyQuery struct {
 	Summary     string
 	Place       string
 	Result      string
-	FromDate    string
-	ToDate      string
+	FromDate    dates.Historic
+	ToDate      dates.Historic
+}
+
+// CreationInput is a struct that contains all of the data required to create a battle. This
+// includes annotations required by validations
+type CreationInput struct {
+	WikiID              int    `validate:"required"`
+	URL                 string `validate:"required,url"`
+	Name                string `validate:"required"`
+	PartOf              string
+	Summary             string         `validate:"required"`
+	StartDate           dates.Historic `validate:"required"`
+	EndDate             dates.Historic `validate:"required"`
+	Location            locations.Location
+	Result              string `validate:"required"`
+	TerritorialChanges  string
+	Strength            statistics.SideNumbers
+	Casualties          statistics.SideNumbers
+	FactionsBySide      IDsBySide
+	CommandersBySide    IDsBySide
+	CommandersByFaction CommandersByFaction
 }

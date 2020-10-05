@@ -124,33 +124,24 @@ func WithCommanders(r commanders.Reader) func(*fiber.Ctx) {
 // and "result" query parameters to refine this search
 func WithBattles(r battles.Reader) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
-		fromDate := ctx.Query("fromDate")
-		if fromDate != "" {
-			if !dates.IsValid(fromDate) {
+		var fromDate dates.Historic
+		if ctx.Query("fromDate") != "" {
+			date, err := dates.New(ctx.Query("fromDate"))
+			if err != nil {
 				ctx.Next(newErrBadRequest("Invalid fromDate, must be in YYYY-MM-DD format"))
 				return
 			}
-			beginning, err := dates.ToBeginning(fromDate)
-			if err != nil {
-				ctx.Next(err)
-				return
-			}
-			fromDate = beginning
+			fromDate = date.ToBeginning()
 		}
-		toDate := ctx.Query("toDate")
-		if toDate != "" {
-			if !dates.IsValid(toDate) {
+		var toDate dates.Historic
+		if ctx.Query("toDate") != "" {
+			date, err := dates.New(ctx.Query("toDate"))
+			if err != nil {
 				ctx.Next(newErrBadRequest("Invalid toDate, must be in YYYY-MM-DD format"))
 				return
 			}
-			end, err := dates.ToEnd(toDate)
-			if err != nil {
-				ctx.Next(err)
-				return
-			}
-			toDate = end
+			toDate = date.ToEnd()
 		}
-
 		query := battles.FindManyQuery{
 			Name:        ctx.Query("name"),
 			Summary:     ctx.Query("summary"),

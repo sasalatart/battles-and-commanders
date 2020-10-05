@@ -5,6 +5,7 @@ import (
 	"github.com/sasalatart/batcoms/domain/factions"
 	"github.com/sasalatart/batcoms/domain/locations"
 	"github.com/sasalatart/batcoms/domain/statistics"
+	"github.com/sasalatart/batcoms/pkg/dates"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -17,8 +18,8 @@ type Battle struct {
 	Name                string
 	PartOf              string
 	Summary             string
-	StartDate           string
-	EndDate             string
+	StartDate           dates.Historic
+	EndDate             dates.Historic
 	Location            locations.Location
 	Result              string
 	TerritorialChanges  string
@@ -41,26 +42,6 @@ type FactionsBySide struct {
 type CommandersBySide struct {
 	A []commanders.Commander
 	B []commanders.Commander
-}
-
-// CreationInput is a struct that contains all of the data required to create a battle. This
-// includes annotations required by validations
-type CreationInput struct {
-	WikiID              int    `validate:"required"`
-	URL                 string `validate:"required,url"`
-	Name                string `validate:"required"`
-	PartOf              string
-	Summary             string `validate:"required"`
-	StartDate           string `validate:"required"`
-	EndDate             string `validate:"required"`
-	Location            locations.Location
-	Result              string `validate:"required"`
-	TerritorialChanges  string
-	Strength            statistics.SideNumbers
-	Casualties          statistics.SideNumbers
-	FactionsBySide      IDsBySide
-	CommandersBySide    IDsBySide
-	CommandersByFaction CommandersByFaction
 }
 
 // IDsBySide groups the IDs of the factions or commanders that participated in a battle into the two

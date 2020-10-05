@@ -46,6 +46,6 @@ func TestDatesValidator(t *testing.T) {
 		{value: "1769-", expected: false},
 	}
 	for _, c := range cases {
-		assert.Equalf(t, dates.IsValid(c.value), c.expected, "Validating %s", c.value)
+		assert.Equalf(t, c.expected, dates.IsValid(c.value), "Validating %s", c.value)
 	}
 }
