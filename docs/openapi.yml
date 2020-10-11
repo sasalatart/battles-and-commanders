@@ -1,0 +1,496 @@
+openapi: 3.0.0
+
+info:
+  version: "1.0.0"
+  title: Battles and Commanders
+  description: |
+    API that serves historical battles, commanders and their factions.
+
+    You may find more documentation in the [GitHub repository](https://github.com/sasalatart/batcoms).
+  contact:
+    name: Sebastián Salata R-T
+    email: sa.salatart@gmail.com
+    url: salatart.com
+  license:
+    name: MIT
+
+servers:
+  - url: "https://batcoms.salatart.com"
+
+paths:
+  /battles/{battleID}:
+    get:
+      summary: Find a battle by its ID
+      parameters:
+        - $ref: "#/components/parameters/battleID"
+      responses:
+        "200":
+          $ref: "#/components/responses/battle"
+        "400":
+          description: Malformed battleID
+        "404":
+          description: Battle not found
+      tags:
+        - battles
+  /battles:
+    get:
+      summary: Find paginated battles
+      description: Returns all battles, paginated and filtered by name, summary, place, result, from date and/or to date
+      parameters:
+        - $ref: "#/components/parameters/pageQuery"
+        - $ref: "#/components/parameters/battleNameQuery"
+        - $ref: "#/components/parameters/battleSummaryQuery"
+        - $ref: "#/components/parameters/placeQuery"
+        - $ref: "#/components/parameters/resultQuery"
+        - $ref: "#/components/parameters/fromDateQuery"
+        - $ref: "#/components/parameters/toDateQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/battles"
+      tags:
+        - battles
+  /factions/{factionID}/battles:
+    get:
+      summary: Find paginated battles belonging to a specific faction
+      description: Returns all battles of a faction, paginated and filtered by name, summary, place, result, from date and/or to date
+      parameters:
+        - $ref: "#/components/parameters/factionID"
+        - $ref: "#/components/parameters/pageQuery"
+        - $ref: "#/components/parameters/battleNameQuery"
+        - $ref: "#/components/parameters/battleSummaryQuery"
+        - $ref: "#/components/parameters/placeQuery"
+        - $ref: "#/components/parameters/resultQuery"
+        - $ref: "#/components/parameters/fromDateQuery"
+        - $ref: "#/components/parameters/toDateQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/battles"
+        "400":
+          description: Malformed factionID or query parameters
+        "404":
+          description: Faction not found
+      tags:
+        - battles
+  /commanders/{commanderID}/battles:
+    get:
+      summary: Find paginated battles belonging to a specific commander
+      description: Returns all battles of a commander, paginated and filtered by name, summary, place, result, from date and/or to date
+      parameters:
+        - $ref: "#/components/parameters/commanderID"
+        - $ref: "#/components/parameters/pageQuery"
+        - $ref: "#/components/parameters/battleNameQuery"
+        - $ref: "#/components/parameters/battleSummaryQuery"
+        - $ref: "#/components/parameters/placeQuery"
+        - $ref: "#/components/parameters/resultQuery"
+        - $ref: "#/components/parameters/fromDateQuery"
+        - $ref: "#/components/parameters/toDateQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/battles"
+        "400":
+          description: Malformed commanderID or query parameters
+        "404":
+          description: Faction not found
+      tags:
+        - battles
+  /factions/{factionID}:
+    get:
+      summary: Find a faction by its ID
+      parameters:
+        - $ref: "#/components/parameters/factionID"
+      responses:
+        "200":
+          $ref: "#/components/responses/faction"
+        "400":
+          description: Malformed factionID
+        "404":
+          description: Faction not found
+      tags:
+        - factions
+  /factions:
+    get:
+      summary: Find paginated factions
+      description: Returns all factions, paginated and filtered by name or summary
+      parameters:
+        - $ref: "#/components/parameters/pageQuery"
+        - $ref: "#/components/parameters/factionNameQuery"
+        - $ref: "#/components/parameters/factionSummaryQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/factions"
+      tags:
+        - factions
+  /commanders/{commanderID}/factions:
+    get:
+      summary: Find paginated factions to which a specific commander belonged
+      description: Returns all factions of a commander, paginated and filtered by name or summary
+      parameters:
+        - $ref: "#/components/parameters/commanderID"
+        - $ref: "#/components/parameters/pageQuery"
+        - $ref: "#/components/parameters/factionNameQuery"
+        - $ref: "#/components/parameters/factionSummaryQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/factions"
+        "400":
+          description: Malformed commanderID
+        "404":
+          description: Commander not found
+      tags:
+        - factions
+  /commanders/{commanderID}:
+    get:
+      summary: Find a commander by their ID
+      parameters:
+        - $ref: "#/components/parameters/commanderID"
+      responses:
+        "200":
+          $ref: "#/components/responses/commander"
+        "400":
+          description: Malformed commanderID
+        "404":
+          description: Commander not found
+      tags:
+        - commanders
+  /commanders:
+    get:
+      summary: Find paginated commanders
+      description: Returns all commanders, paginated and filtered by name or summary
+      parameters:
+        - $ref: "#/components/parameters/pageQuery"
+        - $ref: "#/components/parameters/commanderNameQuery"
+        - $ref: "#/components/parameters/commanderSummaryQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/commanders"
+      tags:
+        - commanders
+  /factions/{factionID}/commanders:
+    get:
+      summary: Find paginated commanders who belonged to a specific faction
+      description: Returns all commanders of a faction, paginated and filtered by name or summary
+      parameters:
+        - $ref: "#/components/parameters/factionID"
+        - $ref: "#/components/parameters/pageQuery"
+        - $ref: "#/components/parameters/commanderNameQuery"
+        - $ref: "#/components/parameters/commanderSummaryQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/commanders"
+        "400":
+          description: Malformed factionID
+        "404":
+          description: Commander not found
+      tags:
+        - commanders
+
+components:
+  schemas:
+    Battle:
+      properties:
+        id:
+          type: string
+          format: uuid
+        wikiID:
+          type: integer
+          example: 118372
+        url:
+          type: string
+          example: "https://en.wikipedia.org/wiki/Battle_of_Austerlitz"
+        name:
+          type: string
+          example: "Battle of Austerlitz"
+        partOf:
+          type: string
+          example: "Part of the War of the Third Coalition"
+        summary:
+          type: string
+          example: "The Battle of Austerlitz, also known as the Battle of the Three Emperors, was one of the most important and decisive engagements of the Napoleonic Wars. In what is widely regarded as the greatest victory achieved by Napoleon, the Grande Armée of France defeated a larger Russian and Austrian army led by Emperor Alexander I and Holy Roman Emperor Francis II. The battle occurred near the town of Austerlitz in the Austrian Empire. Austerlitz brought the War of the Third Coalition to a rapid end, with the Treaty of Pressburg signed by the Austrians later in the month. The battle is often cited as a tactical masterpiece, in the same league as other historic engagements like Cannae or Gaugamela."
+        startDate:
+          $ref: "#/components/schemas/HistoricDate"
+        endDate:
+          $ref: "#/components/schemas/HistoricDate"
+        location:
+          $ref: "#/components/schemas/Location"
+        result:
+          type: string
+          example: "Decisive French victory. Treaty of Pressburg. Effective end of the Third Coalition"
+        territorialChanges:
+          type: string
+          example: "Dissolution of the Holy Roman Empire and creation of the Confederation of the Rhine"
+        strength:
+          $ref: "#/components/schemas/Strength"
+        casualties:
+          $ref: "#/components/schemas/Casualties"
+        factions:
+          $ref: "#/components/schemas/FactionsBySide"
+        commanders:
+          $ref: "#/components/schemas/CommandersBySide"
+        commandersByFaction:
+          $ref: "#/components/schemas/CommandersByFaction"
+    Faction:
+      properties:
+        id:
+          type: string
+          format: uuid
+        wikiID:
+          type: integer
+          example: 21418258
+        url:
+          type: string
+          example: "https://en.wikipedia.org/wiki/French_First_Empire"
+        name:
+          type: string
+          example: "First French Empire"
+        summary:
+          type: string
+          example: "The First French Empire, officially the French Empire, was the empire ruled by Napoleon Bonaparte, who established French hegemony over much of continental Europe at the beginning of the 19th century. Although France had already established a colonial empire overseas since the early 17th century, the French state had remained a kingdom under the Bourbons and a republic after the French Revolution. Historians refer to Napoleon's regime as the First Empire to distinguish it from the restorationist Second Empire (1852–1870) ruled by his nephew Napoleon III."
+    Commander:
+      properties:
+        id:
+          type: string
+          format: uuid
+        wikiID:
+          type: integer
+          example: 69880
+        url:
+          type: string
+          example: "https://en.wikipedia.org/wiki/Napoleon_I"
+        name:
+          type: string
+          example: "Napoleon"
+        summary:
+          type: string
+          example: 'Napoleon Bonaparte, born Napoleone di Buonaparte, byname "Le Corse" or "Le Petit Caporal", was a French statesman and military leader who became notorious as an artillery commander during the French Revolution. He led many successful campaigns during the French Revolutionary Wars and was Emperor of the French as Napoleon I from 1804 until 1814 and again briefly in 1815 during the Hundred Days. Napoleon dominated European and global affairs for more than a decade while leading France against a series of coalitions during the Napoleonic Wars. He won many of these wars and a vast majority of his battles, building a large empire that ruled over much of continental Europe before its final collapse in 1815. He is regarded as one of the greatest military commanders in history, and his wars and campaigns are studied at military schools worldwide. Napoleon''s political and cultural legacy has made him one of the most celebrated and controversial leaders in human history.'
+    HistoricDate:
+      properties:
+        year:
+          type: integer
+          example: 1805
+        month:
+          type: integer
+          example: 12
+        day:
+          type: integer
+          example: 2
+        isBCE:
+          type: integer
+          example: false
+    Location:
+      properties:
+        latitude:
+          type: string
+          example: "49°8′N"
+        longitude:
+          type: string
+          example: "16°46′E"
+        place:
+          type: string
+          example: "Austerlitz, Moravia, Austria"
+    Strength:
+      properties:
+        a:
+          type: string
+          example: "65,000–75,000"
+        b:
+          type: string
+          example: "84,000–95,000"
+        ab:
+          type: string
+          example: ""
+    Casualties:
+      properties:
+        a:
+          type: string
+          example: "1,305 killed 6,991 wounded 573 captured"
+        b:
+          type: string
+          example: "16,000 killed and wounded 20,000 captured"
+        ab:
+          type: string
+          example: ""
+    FactionsBySide:
+      properties:
+        a:
+          type: array
+          items:
+            $ref: "#/components/schemas/Faction"
+        b:
+          type: array
+          items:
+            $ref: "#/components/schemas/Faction"
+    CommandersBySide:
+      properties:
+        a:
+          type: array
+          items:
+            $ref: "#/components/schemas/Commander"
+        b:
+          type: array
+          items:
+            $ref: "#/components/schemas/Commander"
+    CommandersByFaction:
+      type: object
+      additionalProperties: true
+
+  parameters:
+    battleID:
+      name: battleID
+      in: path
+      description: ID of the battle
+      required: true
+      schema:
+        type: string
+        format: uuid
+    factionID:
+      name: factionID
+      in: path
+      description: ID of the faction
+      required: true
+      schema:
+        type: string
+        format: uuid
+    commanderID:
+      name: commanderID
+      in: path
+      description: ID of the commander
+      required: true
+      schema:
+        type: string
+        format: uuid
+    pageQuery:
+      name: page
+      description: Select page, defaults to 1
+      in: query
+      schema:
+        type: string
+        example: 1
+    battleNameQuery:
+      name: name
+      description: Filter by name
+      in: query
+      schema:
+        type: string
+        example: austerlitz
+    factionNameQuery:
+      name: name
+      description: Filter by name
+      in: query
+      schema:
+        type: string
+        example: french empire
+    commanderNameQuery:
+      name: name
+      description: Filter by name
+      in: query
+      schema:
+        type: string
+        example: napoleon
+    battleSummaryQuery:
+      name: summary
+      description: Filter by summary
+      in: query
+      schema:
+        type: string
+        example: Napoleonic Wars
+    factionSummaryQuery:
+      name: summary
+      description: Filter by summary
+      in: query
+      schema:
+        type: string
+        example: ruled by Napoleon Bonaparte
+    commanderSummaryQuery:
+      name: summary
+      description: Filter by summary
+      in: query
+      schema:
+        type: string
+        example: emperor of the French
+    placeQuery:
+      name: place
+      description: Filter by place
+      in: query
+      schema:
+        type: string
+        example: Moravia
+    resultQuery:
+      name: result
+      description: Filter by result
+      in: query
+      schema:
+        type: string
+        example: French victory
+    fromDateQuery:
+      name: fromDate
+      description: Only include those that started after a specific date
+      in: query
+      schema:
+        type: string
+        description: Must be in YYYY-MM-DD, YYYY-MM or YYYY format (optional BC suffix)
+        example: "1804"
+    toDateQuery:
+      name: toDate
+      description: Only include those that ended before a specific date
+      in: query
+      schema:
+        type: string
+        description: Must be in YYYY-MM-DD, YYYY-MM or YYYY format (optional BC suffix)
+        example: "1804-12-02"
+
+  headers:
+    x-page:
+      description: The page number corresponding to the paginated response.
+      schema:
+        type: integer
+        example: 1
+
+  responses:
+    battle:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Battle"
+    battles:
+      description: OK
+      headers:
+        x-page:
+          $ref: "#/components/headers/x-page"
+      content:
+        application/json:
+          schema:
+            items:
+              $ref: "#/components/schemas/Battle"
+    faction:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Faction"
+    factions:
+      description: OK
+      headers:
+        x-page:
+          $ref: "#/components/headers/x-page"
+      content:
+        application/json:
+          schema:
+            items:
+              $ref: "#/components/schemas/Faction"
+    commander:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Commander"
+    commanders:
+      description: OK
+      headers:
+        x-page:
+          $ref: "#/components/headers/x-page"
+      content:
+        application/json:
+          schema:
+            items:
+              $ref: "#/components/schemas/Commander"
