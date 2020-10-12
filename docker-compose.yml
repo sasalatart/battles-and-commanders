@@ -1,0 +1,26 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:12.4-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: password # Or use a .env file for real passwords
+      POSTGRES_DB: batcoms
+    volumes:
+      - postgresql:/var/lib/postgresql
+    restart: always
+
+  api:
+    build: .
+    container_name: api
+    environment:
+      POSTGRES_HOST: postgres
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+    restart: always
+
+volumes:
+  postgresql:

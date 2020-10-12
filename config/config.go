@@ -16,4 +16,13 @@ func Setup() {
 	if err := viper.ReadInConfig(); err != nil {
 		panic(errors.Wrap(err, "Reading viper config"))
 	}
+	mustBindEnv("POSTGRES_HOST")
+	mustBindEnv("POSTGRES_PORT")
+	mustBindEnv("POSTGRES_PASS")
+}
+
+func mustBindEnv(key string) {
+	if err := viper.BindEnv(key); err != nil {
+		panic(errors.Wrapf(err, "Failed binding env var %q", key))
+	}
 }
