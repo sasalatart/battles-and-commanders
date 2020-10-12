@@ -24,18 +24,18 @@ type ConnectionConfig struct {
 
 func defaultConfig() *ConnectionConfig {
 	return &ConnectionConfig{
-		Host: viper.GetString("PSQL_HOST"),
-		Port: viper.GetString("PSQL_PORT"),
-		Name: viper.GetString("PSQL_NAME"),
-		User: viper.GetString("PSQL_USER"),
-		Pass: viper.GetString("PSQL_PASS"),
+		Host: viper.GetString("POSTGRES_HOST"),
+		Port: viper.GetString("POSTGRES_PORT"),
+		Name: viper.GetString("POSTGRES_DB"),
+		User: viper.GetString("POSTGRES_USER"),
+		Pass: viper.GetString("POSTGRES_PASS"),
 	}
 }
 
 // DefaultTestConfig exposes a ConnectionConfig set up to work with the default test environment
 func DefaultTestConfig() *ConnectionConfig {
 	c := defaultConfig()
-	c.Name = viper.GetString("PSQL_NAME_TEST")
+	c.Name = viper.GetString("POSTGRES_DB_TEST")
 	return c
 }
 
