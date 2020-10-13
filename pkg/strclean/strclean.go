@@ -8,7 +8,7 @@ import (
 // Apply applies a series of transformations to its input in order to transform and remove unwanted
 // text that resulted from scraping activities
 func Apply(text string) string {
-	result := strings.Trim(text, "\n")
+	result := strings.Trim(text, " ,\n")
 	for _, op := range pipeline {
 		result = op.regex.ReplaceAllString(result, op.replaceWith)
 	}

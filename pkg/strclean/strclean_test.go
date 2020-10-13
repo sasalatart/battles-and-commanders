@@ -41,6 +41,10 @@ func TestStringCleaner(t *testing.T) {
 			expected: ".",
 		},
 		{
+			input:    ", some text",
+			expected: "some text",
+		},
+		{
 			input:    "word-1   word-2",
 			expected: "word-1 word-2",
 		},

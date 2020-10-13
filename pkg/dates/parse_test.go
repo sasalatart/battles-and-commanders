@@ -380,6 +380,17 @@ func TestDatesParse(t *testing.T) {
 				{Year: 1612, Month: 12, Day: 10},
 			},
 		},
+		{
+			"18 July 390 BC (traditional), 387 BC (probable)",
+			[]dates.Historic{{Year: 387, IsBCE: true}},
+		},
+		{
+			"September 25 – September 28?, 539 BC",
+			[]dates.Historic{
+				{Year: 539, Month: 9, Day: 25, IsBCE: true},
+				{Year: 539, Month: 9, Day: 28, IsBCE: true},
+			},
+		},
 	}
 	for _, c := range cases {
 		got, err := dates.Parse(c.raw)
