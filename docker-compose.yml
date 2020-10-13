@@ -12,7 +12,7 @@ services:
     restart: always
 
   api:
-    build: .
+    image: index.docker.io/sasalatart/batcoms
     container_name: api
     environment:
       POSTGRES_HOST: postgres
