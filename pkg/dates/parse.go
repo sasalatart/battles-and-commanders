@@ -129,9 +129,9 @@ var cleanerPipeline = []struct {
 	replaceWith string
 }{
 	{
-		// Prefer Gregorian Calendar and New System (N.S.) over other kinds
+		// Prefer Gregorian Calendar, New System (N.S.) and "probable" over other kinds
 		// Example: 29–30 November 1612 (Julian calendar); 9-10 December 1612 (Gregorian calendar) -> 9-10 December 1612
-		regex:       regexp.MustCompile(`(?i).*?[\)\.;]([^\(\.;]*)(\s\(\d{1,4}-\d{1,2}-\d{1,2}\)\s?)?\((gregorian|N\.?S\.?).*`),
+		regex:       regexp.MustCompile(`(?i).*?[\)\.;]([^\(\.;]*)(\s\(\d{1,4}-\d{1,2}-\d{1,2}\)\s?)?\((gregorian|N\.?S\.?|probable).*`),
 		replaceWith: `$1`,
 	},
 	{
@@ -178,7 +178,7 @@ var cleanerPipeline = []struct {
 	},
 	{
 		// Remove other kinds of approximations
-		regex:       regexp.MustCompile(`(?i)[\s,]*(~|Between|Spring|Summer|Fall|Autumn|Winter|Early to (Mid|Late)|Mid to Late|Early (days)?|Mid|Late|Solstice|Morning|Noon|Night|(First|Second) half|\?)(\sof)?[\s,]*`),
+		regex:       regexp.MustCompile(`(?i)[\s,]*(~|Between|Spring|Summer|Fall|Autumn|Winter|Early to (Mid|Late)|Mid to Late|Early (days)?|Mid|Late|Solstice|Morning|Noon|Night|(First|Second) half|\?)(\sof)?`),
 		replaceWith: "",
 	},
 	{
