@@ -158,9 +158,11 @@ jobs:
       - docker/check
       - docker/build:
           image: <<parameters.image_name>>
+          tag: latest
       - docker/push:
-          digest-path: /tmp/digest.txt
           image: <<parameters.image_name>>
+          tag: latest
+          digest-path: /tmp/digest.txt
       - run:
           command: |
             echo "Digest is: $(</tmp/digest.txt)"
