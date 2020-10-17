@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"errors"
-
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 	"github.com/sasalatart/batcoms/domain/battles"
 	"github.com/sasalatart/batcoms/domain/commanders"
 	"github.com/sasalatart/batcoms/domain/factions"
@@ -73,21 +71,4 @@ func Register(app *fiber.App, fr factions.Reader, cr commanders.Reader, br battl
 		middleware.WithBattles(br),
 		middleware.JSONFrom("battles"),
 	)
-}
-
-// ErrorsHandlerFactory creates a *fiber.App ErrorHandler, used to fine-tune responses when a
-// request is not successful. This can be in debug or non-debug mode
-func ErrorsHandlerFactory(debug bool) func(ctx *fiber.Ctx, err error) {
-	return func(ctx *fiber.Ctx, err error) {
-		var fiberError *fiber.Error
-		if isFiberError := errors.As(err, &fiberError); isFiberError {
-			ctx.Status(fiberError.Code).SendString(fiberError.Message)
-			return
-		}
-		message := fiber.ErrInternalServerError.Message
-		if debug {
-			message = err.Error()
-		}
-		ctx.Status(fiber.StatusInternalServerError).SendString(message)
-	}
 }

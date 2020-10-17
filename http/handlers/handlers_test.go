@@ -1,7 +1,7 @@
 package handlers_test
 
 import (
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 	"github.com/sasalatart/batcoms/http"
 	"github.com/sasalatart/batcoms/mocks"
 )

@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"fmt"
 	"log"
 
 	"github.com/sasalatart/batcoms/config"
@@ -38,5 +39,5 @@ func main() {
 		postgresql.NewBattlesRepository(db),
 		false,
 	)
-	log.Fatal(server.Listen(port))
+	log.Fatal(server.Listen(fmt.Sprintf(":%d", port)))
 }
