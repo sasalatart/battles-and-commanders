@@ -9,10 +9,10 @@ services:
       POSTGRES_DB: batcoms
     volumes:
       - postgresql:/var/lib/postgresql
-    restart: always
+    restart: on-failure
 
   api:
-    image: index.docker.io/sasalatart/batcoms
+    image: index.docker.io/sasalatart/battles-and-commanders:latest
     container_name: api
     environment:
       POSTGRES_HOST: postgres
@@ -20,7 +20,7 @@ services:
       - 3000:3000
     depends_on:
       - postgres
-    restart: always
+    restart: on-failure
 
 volumes:
   postgresql:
