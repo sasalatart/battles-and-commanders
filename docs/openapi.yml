@@ -428,7 +428,7 @@ components:
       schema:
         type: string
         description: Must be in YYYY-MM-DD, YYYY-MM or YYYY format (optional BC suffix)
-        example: "1804"
+        example: "1805"
     toDateQuery:
       name: toDate
       description: Only include those that ended before a specific date
@@ -436,7 +436,7 @@ components:
       schema:
         type: string
         description: Must be in YYYY-MM-DD, YYYY-MM or YYYY format (optional BC suffix)
-        example: "1804-12-02"
+        example: "1805-12-02"
 
   headers:
     x-page:
