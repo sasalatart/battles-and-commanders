@@ -6,9 +6,9 @@ import uuid "github.com/satori/go.uuid"
 // These may be countries, kingdoms, empires, or other similar entities depending on the historical
 // context of the period of time
 type Faction struct {
-	ID      uuid.UUID
-	WikiID  int
-	URL     string
-	Name    string
-	Summary string
+	ID      uuid.UUID `json:"id"`
+	WikiID  int       `json:"wikiID"`
+	URL     string    `json:"url"`
+	Name    string    `json:"name"`
+	Summary string    `json:"summary"`
 }

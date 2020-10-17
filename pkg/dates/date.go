@@ -11,8 +11,10 @@ var historicStringFormat = regexp.MustCompile(`^\d{1,4}(-\d{1,2}(-\d{1,2})?)?(\s
 // or not the underlying date was BCE. Both month and day are optional, because some dates in
 // history do not have that level of precision
 type Historic struct {
-	Year, Month, Day int
-	IsBCE            bool
+	Year  int  `json:"year"`
+	Month int  `json:"month,omitempty"`
+	Day   int  `json:"day,omitempty"`
+	IsBCE bool `json:"isBCE"`
 }
 
 func (h Historic) String() string {
