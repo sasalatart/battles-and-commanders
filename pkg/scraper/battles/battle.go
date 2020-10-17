@@ -18,7 +18,7 @@ func (s *Scraper) ScrapeOne(url string) (wikibattles.Battle, error) {
 
 	ctx := &battleCtx{&battle, colly.NewCollector(), nil}
 	ctx.collector.OnRequest(func(r *colly.Request) {
-		s.logger.Info(fmt.Sprintf("Scraping %s", r.URL))
+		s.logger.Info(fmt.Sprintf("Scraping %s\n", r.URL))
 	})
 	s.assertHasOneInfoBox(ctx)
 	s.subscribeMeta(ctx)

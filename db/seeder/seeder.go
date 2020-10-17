@@ -49,12 +49,12 @@ func (s *seeder) factions() idsMap {
 			Summary: wf.Extract,
 		}
 		if fID, err := s.factionsWriter.CreateOne(input); err != nil {
-			s.logger.Error(errors.Wrapf(err, "Creating faction with URL %s", input.URL))
+			s.logger.Error(errors.Wrapf(err, "Error creating faction with URL %s", input.URL))
 		} else {
 			fIDsByWikiID[wf.ID] = fID
 		}
 	}
-	s.logger.Info("\nFinished seeding factions")
+	s.logger.Info("\nFinished seeding factions\n")
 	return fIDsByWikiID
 }
 
@@ -72,12 +72,12 @@ func (s *seeder) commanders() idsMap {
 			Summary: wc.Extract,
 		}
 		if cID, err := s.commandersWriter.CreateOne(input); err != nil {
-			s.logger.Error(errors.Wrapf(err, "Creating commander with URL %s", input.URL))
+			s.logger.Error(errors.Wrapf(err, "Error creating commander with URL %s", input.URL))
 		} else {
 			cIDsByWikiID[wc.ID] = cID
 		}
 	}
-	s.logger.Info("\nFinished seeding commanders")
+	s.logger.Info("\nFinished seeding commanders\n")
 	return cIDsByWikiID
 }
 
@@ -89,7 +89,7 @@ func (s *seeder) battles(fIDsByWikiID, cIDsByWikiID idsMap) {
 		current++
 		dates, err := dates.Parse(wb.Date)
 		if err != nil {
-			s.logger.Error(errors.Wrapf(err, "Parsing date %q", wb.Date))
+			s.logger.Error(errors.Wrapf(err, "Error parsing date %q", wb.Date))
 			continue
 		}
 		input := battles.CreationInput{
@@ -116,10 +116,10 @@ func (s *seeder) battles(fIDsByWikiID, cIDsByWikiID idsMap) {
 			input.CommandersByFaction[fID] = s.translateWikiIDs(scWikiIDs, cIDsByWikiID)
 		}
 		if _, err := s.battlesWriter.CreateOne(input); err != nil {
-			s.logger.Error(errors.Wrapf(err, "Creating battle with URL %s", input.URL))
+			s.logger.Error(errors.Wrapf(err, "Error creating battle with URL %s", input.URL))
 		}
 	}
-	s.logger.Info("\nFinished seeding battles")
+	s.logger.Info("\nFinished seeding battles\n")
 }
 
 func (s *seeder) translateWikiIDs(from []int, idsMapper idsMap) []uuid.UUID {

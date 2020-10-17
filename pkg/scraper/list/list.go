@@ -23,10 +23,10 @@ func Scrape(l logger.Service) []wikibattles.BattleItem {
 	for _, urlPart := range battlesLists {
 		listURL := "https://en.wikipedia.org/wiki" + urlPart
 		if err := do(listURL, &items, hrefs, l); err != nil {
-			l.Error(errors.Wrapf(err, "Scraping list in %s", listURL))
+			l.Error(errors.Wrapf(err, "Error scraping list in %s\n", listURL))
 		}
 	}
-	l.Info(fmt.Sprintf("There are %d items that can be scraped", len(items)))
+	l.Info(fmt.Sprintf("There are %d items that can be scraped\n", len(items)))
 	return items
 }
 
@@ -50,7 +50,7 @@ func do(url string, battlesItems *[]wikibattles.BattleItem, hrefs hrefsCache, l 
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		l.Info(fmt.Sprintf("Scraping %s", r.URL))
+		l.Info(fmt.Sprintf("Scraping %s\n", r.URL))
 	})
 
 	return c.Visit(url)

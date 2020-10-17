@@ -395,6 +395,6 @@ func TestDatesParse(t *testing.T) {
 	for _, c := range cases {
 		got, err := dates.Parse(c.raw)
 		require.NoErrorf(t, err, "Parsing dates in text %q", c.raw)
-		assert.Equal(t, c.expected, got, "Parsing date %q", c.raw)
+		assert.Equal(t, c.expected, got, "Error parsing date %q", c.raw)
 	}
 }

@@ -99,7 +99,7 @@ func (s *Scraper) actorsSide(ctx *battleCtx, e *colly.HTMLElement, kind wikiacto
 
 			summary, err := summaries.Fetch(pURL)
 			if err != nil {
-				s.logger.Error(errors.Wrapf(err, "Fetching summary for %s", pURL))
+				s.logger.Error(errors.Wrapf(err, "Error fetching summary for %s", pURL))
 				return
 			}
 

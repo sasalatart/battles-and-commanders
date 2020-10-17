@@ -38,7 +38,7 @@ func main() {
 		go func(i int, b wikibattles.BattleItem) {
 			if _, err := battlesScraper.ScrapeOne(b.URL); err != nil {
 				failedCount++
-				loggerService.Error(errors.Wrapf(err, "Scraping %s", b.URL))
+				loggerService.Error(errors.Wrapf(err, "Error scraping %s", b.URL))
 			}
 			<-semaphore
 		}(i, battle)
