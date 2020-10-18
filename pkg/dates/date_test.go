@@ -244,4 +244,31 @@ func TestDate(t *testing.T) {
 			assert.Equal(t, c.expected, c.date.ToEnd())
 		}
 	})
+
+	t.Run("String", func(t *testing.T) {
+		cases := []struct {
+			input    dates.Historic
+			expected string
+		}{
+			{
+				input:    dates.Historic{Year: 1769, Month: 8, Day: 15},
+				expected: "1769-08-15",
+			},
+			{
+				input:    dates.Historic{Year: 1769, Month: 8},
+				expected: "1769-08",
+			},
+			{
+				input:    dates.Historic{Year: 1769},
+				expected: "1769",
+			},
+			{
+				input:    dates.Historic{Year: 31, Month: 9, Day: 2, IsBCE: true},
+				expected: "31-09-02 BC",
+			},
+		}
+		for _, c := range cases {
+			assert.Equal(t, c.expected, c.input.String())
+		}
+	})
 }
