@@ -6,7 +6,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/domain/wikibattles"
-	"github.com/sasalatart/batcoms/pkg/io"
 )
 
 // WikiBattlesRepo is an in-memory implementation of wikibattles.Repository
@@ -45,7 +44,7 @@ func (r *WikiBattlesRepo) Save(b wikibattles.Battle) error {
 	return nil
 }
 
-// Export saves data stored to the specified file using its input io.ExporterFunc
-func (r *WikiBattlesRepo) Export(fileName string, exporterFunc io.ExporterFunc) error {
-	return exporterFunc(fileName, r.byID)
+// Data returns a normalized map of all stored battles by their Wikipedia IDs
+func (r *WikiBattlesRepo) Data() map[int]*wikibattles.Battle {
+	return r.byID
 }

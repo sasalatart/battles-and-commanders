@@ -6,9 +6,5 @@ POSTGRES_USER: postgres
 POSTGRES_DB: batcoms
 POSTGRES_DB_TEST: batcoms_test
 POSTGRES_PASS: password
-SCRAPER_RESULTS:
-  ACTORS: actors.json
-  BATTLES: battles.json
-TEST_SEEDERS:
-  ACTORS: seeders/actors.json
-  BATTLES: seeders/battles.json
+SCRAPER_DATA: data.json
+TEST_DATA: seeder-data.json

@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/config"
-	"github.com/sasalatart/batcoms/db/memory"
 	"github.com/sasalatart/batcoms/domain/wikibattles"
 	"github.com/sasalatart/batcoms/pkg/io/json"
 	"github.com/sasalatart/batcoms/pkg/logger"
@@ -22,12 +22,7 @@ func init() {
 
 func main() {
 	loggerService := logger.New(ioutil.Discard, os.Stderr)
-	battlesScraper := battles.NewScraper(
-		memory.NewWikiActorsRepo(),
-		memory.NewWikiBattlesRepo(),
-		json.Export,
-		loggerService,
-	)
+	scraperService := battles.NewScraper(loggerService)
 
 	var failedCount int
 	semaphore := make(chan bool, 10)
@@ -36,7 +31,7 @@ func main() {
 		semaphore <- true
 		fmt.Printf("\r%d/%d (failed: %d)", i, len(list), failedCount)
 		go func(i int, b wikibattles.BattleItem) {
-			if _, err := battlesScraper.ScrapeOne(b.URL); err != nil {
+			if _, err := scraperService.ScrapeOne(b.URL); err != nil {
 				failedCount++
 				loggerService.Error(errors.Wrapf(err, "Error scraping %s", b.URL))
 			}
@@ -44,9 +39,9 @@ func main() {
 		}(i, battle)
 	}
 
-	actorsFileName := viper.GetString("SCRAPER_RESULTS.ACTORS")
-	battlesFileName := viper.GetString("SCRAPER_RESULTS.BATTLES")
-	if err := battlesScraper.ExportAll(actorsFileName, battlesFileName); err != nil {
-		loggerService.Error(err)
+	data := scraperService.Data()
+	fileName := viper.GetString("SCRAPER_DATA")
+	if err := json.Export(fileName, data); err != nil {
+		log.Fatalln(err)
 	}
 }

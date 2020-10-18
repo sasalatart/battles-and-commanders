@@ -7,10 +7,20 @@ import (
 	"github.com/sasalatart/batcoms/domain/battles"
 	"github.com/sasalatart/batcoms/domain/commanders"
 	"github.com/sasalatart/batcoms/domain/factions"
+	"github.com/sasalatart/batcoms/domain/wikiactors"
+	"github.com/sasalatart/batcoms/domain/wikibattles"
 	"github.com/sasalatart/batcoms/pkg/dates"
 	"github.com/sasalatart/batcoms/pkg/logger"
 	uuid "github.com/satori/go.uuid"
 )
+
+// ImportedData contains scraped battles and actors that have been read from a previously exported
+// file. These have been indexed by their Wikipedia IDs
+type ImportedData struct {
+	WikiBattlesByID    map[string]wikibattles.Battle `json:"BattlesByID"`
+	WikiFactionsByID   map[string]wikiactors.Actor   `json:"FactionsByID"`
+	WikiCommandersByID map[string]wikiactors.Actor   `json:"CommandersByID"`
+}
 
 // idsMap maps WikiIDs to their corresponding UUIDs
 type idsMap map[int]uuid.UUID
@@ -20,7 +30,7 @@ type seeder struct {
 	factionsWriter   factions.Writer
 	commandersWriter commanders.Writer
 	battlesWriter    battles.Writer
-	logger           logger.Service
+	logger           logger.Interface
 }
 
 // Seed fills factions, commanders and battles data stores with the available ImportedData
@@ -29,7 +39,7 @@ func Seed(
 	factionsWriter factions.Writer,
 	commandersWriter commanders.Writer,
 	battlesWriter battles.Writer,
-	logger logger.Service,
+	logger logger.Interface,
 ) {
 	service := seeder{importedData, factionsWriter, commandersWriter, battlesWriter, logger}
 	service.battles(service.factions(), service.commanders())
