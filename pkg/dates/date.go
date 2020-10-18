@@ -25,6 +25,9 @@ func (h Historic) String() string {
 	if h.Day != 0 {
 		result += fmt.Sprintf("-%02d", h.Day)
 	}
+	if h.IsBCE {
+		result += " BC"
+	}
 	return result
 }
 
