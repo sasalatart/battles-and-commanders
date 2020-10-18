@@ -175,6 +175,8 @@ _Battles and Commanders_ is [MIT licensed](./LICENSE).
 
 [bdg-build]: https://circleci.com/gh/sasalatart/battles-and-commanders.svg?style=svg
 [bdg-mit]: https://img.shields.io/badge/License-MIT-blue.svg
+[build]: https://circleci.com/gh/battles-and-commanders
 [cc-share-alike]: https://creativecommons.org/licenses/by-sa/3.0/
+[mit]: https://opensource.org/licenses/MIT
 [swaggerhub]: https://app.swaggerhub.com/apis-docs/sasalatart/Battles-and-Commanders/1.0.0
 [wikipedia]: https://www.wikipedia.org/
