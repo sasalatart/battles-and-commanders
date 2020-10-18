@@ -17,7 +17,7 @@ type hrefsCache map[string]struct{}
 
 // Scrape scrapes and retrieves the full list of Wikipedia's battles when grouped by different
 // criteria, in the form of wikibattles.BattleItem
-func Scrape(l logger.Service) []wikibattles.BattleItem {
+func Scrape(l logger.Interface) []wikibattles.BattleItem {
 	hrefs := make(hrefsCache)
 	var items []wikibattles.BattleItem
 	for _, urlPart := range battlesLists {
@@ -30,7 +30,7 @@ func Scrape(l logger.Service) []wikibattles.BattleItem {
 	return items
 }
 
-func do(url string, battlesItems *[]wikibattles.BattleItem, hrefs hrefsCache, l logger.Service) error {
+func do(url string, battlesItems *[]wikibattles.BattleItem, hrefs hrefsCache, l logger.Interface) error {
 	c := colly.NewCollector()
 
 	c.OnHTML(listItemsSelector, func(e *colly.HTMLElement) {

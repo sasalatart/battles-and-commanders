@@ -13,12 +13,12 @@ import (
 	"github.com/sasalatart/batcoms/config"
 	"github.com/sasalatart/batcoms/db/postgresql"
 	"github.com/sasalatart/batcoms/db/seeder"
+	"github.com/sasalatart/batcoms/pkg/io/json"
 	"github.com/sasalatart/batcoms/pkg/logger"
 	"github.com/spf13/viper"
 )
 
-var actorsURL = flag.String("actorsURL", "", "The URL from which actors file can be downloaded")
-var battlesURL = flag.String("battlesURL", "", "The URL from which battles file can be downloaded")
+var dataURL = flag.String("dataURL", "", "The URL from which the seed data file can be downloaded")
 
 func init() {
 	config.Setup()
@@ -31,18 +31,14 @@ func main() {
 
 	loggerService := logger.New(log.Writer(), os.Stderr)
 
-	actorsFileName := fileNameFor(*actorsURL, viper.GetString("SCRAPER_RESULTS.ACTORS"), loggerService)
-	if *actorsURL != "" {
-		defer os.Remove(actorsFileName)
-	}
-	battlesFileName := fileNameFor(*battlesURL, viper.GetString("SCRAPER_RESULTS.BATTLES"), loggerService)
-	if *battlesURL != "" {
-		defer os.Remove(battlesFileName)
+	dataFileName := fileNameFor(*dataURL, viper.GetString("SCRAPER_DATA"), loggerService)
+	if *dataURL != "" {
+		defer os.Remove(dataFileName)
 	}
 
 	importedData := new(seeder.ImportedData)
-	if err := seeder.JSONImport(importedData, actorsFileName, battlesFileName); err != nil {
-		log.Fatalf("Failed seeding: %s", err)
+	if err := json.Import(dataFileName, importedData); err != nil {
+		log.Fatalf("Error importing data: %s\n", err)
 	}
 
 	postgresql.Reset(db)
@@ -55,7 +51,7 @@ func main() {
 	)
 }
 
-func fileNameFor(url, defaultName string, loggerService logger.Service) string {
+func fileNameFor(url, defaultName string, loggerService logger.Interface) string {
 	handleError := func(err error, from string) {
 		if err != nil {
 			log.Fatalf("No data may be read from %s: %s", from, err)
@@ -74,7 +70,7 @@ func fileNameFor(url, defaultName string, loggerService logger.Service) string {
 	return tmpFile.Name()
 }
 
-func download(url string, logger logger.Service) (*os.File, error) {
+func download(url string, logger logger.Interface) (*os.File, error) {
 	logger.Info(fmt.Sprintf("Downloading from %s...\n", url))
 	resp, err := http.Get(url)
 	if err != nil {

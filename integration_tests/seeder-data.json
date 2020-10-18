@@ -130,5 +130,118 @@
       "Description": "Sixth Egyptian Pharaoh of the Eighteenth Dynasty",
       "Extract": "Thutmose III was the sixth pharaoh of the Eighteenth Dynasty. Officially, Thutmose III ruled Egypt for almost 54 years and his reign is usually dated from 28 April 1479 BC to 11 March 1425 BC, from the age of two and until his death at age fifty-six; however, during the first 22 years of his reign, he was coregent with his stepmother and aunt, Hatshepsut, who was named the pharaoh. While he was shown first on surviving monuments, both were assigned the usual royal names and insignia and neither is given any obvious seniority over the other. Thutmose served as the head of Hatshepsut's armies. During the final two years of his reign, he appointed his son and successor, Amenhotep II, as his junior co-regent. His firstborn son and heir to the throne, Amenemhat, predeceased Thutmose III."
     }
+  },
+  "BattlesByID": {
+    "118372": {
+      "ID": 118372,
+      "URL": "https://en.wikipedia.org/wiki/Battle_of_Austerlitz",
+      "Name": "Battle of Austerlitz",
+      "PartOf": "Part of the War of the Third Coalition",
+      "Description": "Battle of the Napoleonic Wars",
+      "Extract": "The Battle of Austerlitz, also known as the Battle of the Three Emperors, was one of the most important and decisive engagements of the Napoleonic Wars. In what is widely regarded as the greatest victory achieved by Napoleon, the Grande Armée of France defeated a larger Russian and Austrian army led by Emperor Alexander I and Holy Roman Emperor Francis II. The battle occurred near the town of Austerlitz in the Austrian Empire. Austerlitz brought the War of the Third Coalition to a rapid end, with the Treaty of Pressburg signed by the Austrians later in the month. The battle is often cited as a tactical masterpiece, in the same league as other historic engagements like Cannae or Gaugamela.",
+      "Date": "2 December 1805",
+      "Location": {
+        "Place": "Austerlitz, Moravia, Austria",
+        "Latitude": "49°8′N",
+        "Longitude": "16°46′E"
+      },
+      "Result": "Decisive French victory. Treaty of Pressburg. Effective end of the Third Coalition",
+      "TerritorialChanges": "Dissolution of the Holy Roman Empire and creation of the Confederation of the Rhine",
+      "Strength": { "A": "65,000–75,000", "B": "84,000–95,000", "AB": "" },
+      "Casualties": {
+        "A": "1,305 killed 6,991 wounded 573 captured",
+        "B": "16,000 killed and wounded 20,000 captured",
+        "AB": ""
+      },
+      "Factions": { "A": [21418258], "B": [20611504, 266894] },
+      "Commanders": { "A": [69880], "B": [27126603, 251000, 11551, 14092123] },
+      "CommandersByFaction": {
+        "20611504": [27126603, 251000],
+        "21418258": [69880],
+        "266894": [11551, 14092123]
+      }
+    },
+    "386922": {
+      "ID": 386922,
+      "URL": "https://en.wikipedia.org/wiki/Battle_of_the_Bridge_of_Arcole",
+      "Name": "Battle of Arcole",
+      "PartOf": "Part of the War of the First Coalition",
+      "Description": "battle",
+      "Extract": "The Battle of Arcole or Battle of Arcola was a battle fought between French and Austrian forces 25 kilometres (16 mi) southeast of Verona during the War of the First Coalition, a part of the French Revolutionary Wars. The battle saw a bold maneuver by Napoleon Bonaparte's French Army of Italy to outflank the Austrian army led by József Alvinczi and cut off its line of retreat. The French victory proved to be a highly significant event during the third Austrian attempt to lift the Siege of Mantua. Alvinczi planned to execute a two-pronged offensive against Bonaparte's army. The Austrian commander ordered Paul Davidovich to advance south along the Adige River valley with one corps while Alvinczi led the main army in an advance from the east. The Austrians hoped to raise the siege of Mantua where Dagobert Sigmund von Wurmser was trapped with a large garrison. If the two Austrian columns linked up and if Wurmser's troops were released, French prospects were grim.",
+      "Date": "15–17 November 1796",
+      "Location": {
+        "Place": "Arcole, Republic of Venice",
+        "Latitude": "",
+        "Longitude": ""
+      },
+      "Result": "French victory",
+      "TerritorialChanges": "",
+      "Strength": { "A": "20,000", "B": "24,000", "AB": "" },
+      "Casualties": {
+        "A": "3,500 killed or wounded 1,300 captured",
+        "B": "2,200 killed or wounded 4,000 captured",
+        "AB": ""
+      },
+      "Factions": { "A": [62243], "B": [1041515] },
+      "Commanders": { "A": [69880], "B": [2408835] },
+      "CommandersByFaction": { "1041515": [2408835], "62243": [69880] }
+    },
+    "312696": {
+      "ID": 312696,
+      "URL": "https://en.wikipedia.org/wiki/Battle_of_Lodi",
+      "Name": "Battle of Lodi",
+      "PartOf": "Part of the French Revolutionary Wars",
+      "Description": "battle of the Napoleonic Wars",
+      "Extract": "The Battle of Lodi was fought on 10 May 1796 between French forces under Napoleon Bonaparte and an Austrian rear guard led by Karl Philipp Sebottendorf at Lodi, Lombardy. The rear guard was defeated, but the main body of Johann Peter Beaulieu's Austrian Army had time to retreat.",
+      "Date": "10 May 1796",
+      "Location": {
+        "Place": "Lodi, present-day Italy",
+        "Latitude": "45°19′00″N",
+        "Longitude": "9°30′00″E"
+      },
+      "Result": "French victory",
+      "TerritorialChanges": "",
+      "Strength": {
+        "A": "15,500 infantry 2,000 cavalry 30 guns",
+        "B": "9,500. 14 guns",
+        "AB": ""
+      },
+      "Casualties": {
+        "A": "At least 350",
+        "B": "153 killed or wounded 1,700 captured 16 guns",
+        "AB": ""
+      },
+      "Factions": { "A": [62243], "B": [1041515] },
+      "Commanders": { "A": [69880], "B": [21631305, 25553719] },
+      "CommandersByFaction": {
+        "1041515": [21631305, 25553719],
+        "62243": [69880]
+      }
+    },
+    "636026": {
+      "ID": 636026,
+      "URL": "https://en.wikipedia.org/wiki/Battle_of_Megiddo_(15th_century_BC)",
+      "Name": "Battle of Megiddo (15th century BC)",
+      "PartOf": "",
+      "Description": "Ancient battle between the Egyptian Empire and Canaanite rebels",
+      "Extract": "The Battle of Megiddo was fought between Egyptian forces under the command of Pharaoh Thutmose III and a large rebellious coalition of Canaanite vassal states led by the king of Kadesh. It is the first battle to have been recorded in what is accepted as relatively reliable detail. Megiddo is also the first recorded use of the composite bow and the first body count. All details of the battle come from Egyptian sources—primarily the hieroglyphic writings on the Hall of Annals in the Temple of Amun-Re at Karnak, Thebes, by the military scribe Tjaneni.",
+      "Date": "April 16, 1457 BC",
+      "Location": {
+        "Place": "Megiddo, Canaan",
+        "Latitude": "32°34′59.38″N",
+        "Longitude": "35°10′55.51″E"
+      },
+      "Result": "Egyptian victory. Territorial expansion of the Egyptian Empire",
+      "TerritorialChanges": "",
+      "Strength": { "A": "10,000–20,000", "B": "10,000–15,000", "AB": "" },
+      "Casualties": {
+        "A": "4,000 killed 1,000 wounded",
+        "B": "8,300 killed 3,400 captured",
+        "AB": ""
+      },
+      "Factions": { "A": [585058], "B": [50250] },
+      "Commanders": { "A": [155730], "B": [] },
+      "CommandersByFaction": { "585058": [155730] }
+    }
   }
 }

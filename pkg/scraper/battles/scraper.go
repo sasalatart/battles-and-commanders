@@ -1,9 +1,9 @@
 package battles
 
 import (
-	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/db/memory"
-	"github.com/sasalatart/batcoms/pkg/io"
+	"github.com/sasalatart/batcoms/domain/wikiactors"
+	"github.com/sasalatart/batcoms/domain/wikibattles"
 	"github.com/sasalatart/batcoms/pkg/logger"
 )
 
@@ -12,33 +12,34 @@ import (
 type Scraper struct {
 	wikiActorsRepo  *memory.WikiActorsRepo
 	wikiBattlesRepo *memory.WikiBattlesRepo
-	exporterFunc    io.ExporterFunc
-	logger          logger.Service
+	logger          logger.Interface
+}
+
+// ExportedData is the struct used to retrieve all factions, commanders and battles that have been
+// scraped after successive runs of scraper.ScrapeOne. All of these have been normalized by their
+// Wikipedia IDs
+type ExportedData struct {
+	FactionsByID   map[int]*wikiactors.Actor
+	CommandersByID map[int]*wikiactors.Actor
+	BattlesByID    map[int]*wikibattles.Battle
 }
 
 // NewScraper creates a new instance of battles.Scraper
-func NewScraper(
-	wikiActorsRepo *memory.WikiActorsRepo,
-	wikiBattlesRepo *memory.WikiBattlesRepo,
-	exporterFunc io.ExporterFunc,
-	l logger.Service,
-) Scraper {
+func NewScraper(l logger.Interface) Scraper {
 	return Scraper{
-		wikiActorsRepo:  wikiActorsRepo,
-		wikiBattlesRepo: wikiBattlesRepo,
-		exporterFunc:    exporterFunc,
+		wikiActorsRepo:  memory.NewWikiActorsRepo(),
+		wikiBattlesRepo: memory.NewWikiBattlesRepo(),
 		logger:          l,
 	}
 }
 
-// ExportAll exports the scrapers' relevant information into two main normalized JSON files: one for
-// all battles, and another one for all of the factions and commanders in each one of those battles
-func (s *Scraper) ExportAll(actorsFileName, battlesFileName string) error {
-	if err := s.wikiActorsRepo.Export(actorsFileName, s.exporterFunc); err != nil {
-		return errors.Wrap(err, "Exporting actors results")
+// Data builds a battles.ExportedData struct with all of the scraped data obtained from successive
+// runs of scraper.ScrapeOne
+func (s *Scraper) Data() ExportedData {
+	factionsByID, commandersByID := s.wikiActorsRepo.Data()
+	return ExportedData{
+		FactionsByID:   factionsByID,
+		CommandersByID: commandersByID,
+		BattlesByID:    s.wikiBattlesRepo.Data(),
 	}
-	if err := s.wikiBattlesRepo.Export(battlesFileName, s.exporterFunc); err != nil {
-		return errors.Wrap(err, "Exporting battles results")
-	}
-	return nil
 }

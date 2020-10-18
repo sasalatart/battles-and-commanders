@@ -6,7 +6,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 	"github.com/sasalatart/batcoms/domain/wikiactors"
-	"github.com/sasalatart/batcoms/pkg/io"
 )
 
 // WikiActorsRepo is an in-memory implementation of wikiactors.Repository
@@ -69,13 +68,8 @@ func (r *WikiActorsRepo) Save(p wikiactors.Actor) error {
 	return nil
 }
 
-// Export saves data stored to the specified file using its input io.ExporterFunc
-func (r *WikiActorsRepo) Export(fileName string, exporterFunc io.ExporterFunc) error {
-	return exporterFunc(fileName, struct {
-		FactionsByID   map[int]*wikiactors.Actor
-		CommandersByID map[int]*wikiactors.Actor
-	}{
-		FactionsByID:   r.byIDByKind[wikiactors.FactionKind],
-		CommandersByID: r.byIDByKind[wikiactors.CommanderKind],
-	})
+// Data returns a normalized map of all stored factions by their Wikipedia IDs, and another one for
+// all stored commanders
+func (r *WikiActorsRepo) Data() (map[int]*wikiactors.Actor, map[int]*wikiactors.Actor) {
+	return r.byIDByKind[wikiactors.FactionKind], r.byIDByKind[wikiactors.CommanderKind]
 }

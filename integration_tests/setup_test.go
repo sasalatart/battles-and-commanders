@@ -2,7 +2,6 @@ package integration_test
 
 import (
 	"database/sql"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -13,6 +12,7 @@ import (
 	"github.com/sasalatart/batcoms/domain/battles"
 	"github.com/sasalatart/batcoms/domain/commanders"
 	"github.com/sasalatart/batcoms/domain/factions"
+	"github.com/sasalatart/batcoms/pkg/io/json"
 	"github.com/sasalatart/batcoms/pkg/logger"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
@@ -34,15 +34,14 @@ func init() {
 }
 
 func TestMain(m *testing.M) {
-	actorsFileName := viper.GetString("TEST_SEEDERS.ACTORS")
-	battlesFileName := viper.GetString("TEST_SEEDERS.BATTLES")
+	dataFileName := viper.GetString("TEST_DATA")
 	importedData := new(seeder.ImportedData)
-	if err := seeder.JSONImport(importedData, actorsFileName, battlesFileName); err != nil {
-		log.Fatalf("Failed seeding: %s", err)
+	if err := json.Import(dataFileName, importedData); err != nil {
+		log.Fatalf("Error importing data: %s\n", err)
 	}
 
 	postgresql.Reset(db)
-	seeder.Seed(importedData, factionsRepo, commandersRepo, battlesRepo, logger.New(ioutil.Discard, ioutil.Discard))
+	seeder.Seed(importedData, factionsRepo, commandersRepo, battlesRepo, logger.NewDiscard())
 
 	code := m.Run()
 	sqlDB.Close()
