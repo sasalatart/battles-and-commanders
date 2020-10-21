@@ -1,0 +1,5 @@
+FROM golang:1.15.2
+
+WORKDIR /go/src/github.com/sasalatart/batcoms/
+
+RUN go get -u github.com/cosmtrek/air

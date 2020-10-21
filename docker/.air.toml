@@ -1,0 +1,26 @@
+# Config file for [Air](https://github.com/cosmtrek/air) in TOML format
+
+# Working directory
+root = "."
+
+# Directory for builds & logs
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp/api cmd/api/main.go"
+bin = "tmp/api"
+include_ext = ["go", "yml", "yaml"]
+log = "air.log"
+delay = 1000
+
+# Stop running old binary when build errors occur
+stop_on_error = true
+
+# Send Interrupt signal before killing process
+send_interrupt = false
+
+# Delay after sending Interrupt signal
+kill_delay = 500
+
+[misc]
+clean_on_exit = true

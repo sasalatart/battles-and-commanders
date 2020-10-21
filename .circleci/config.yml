@@ -135,15 +135,7 @@ jobs:
     executor: go_executor
     steps:
       - checkout_and_cache
-      - run:
-          name: Build scraper
-          command: go build -o scraper cmd/scraper/main.go
-      - run:
-          name: Build seeder
-          command: go build -o seeder cmd/seeder/main.go
-      - run:
-          name: Build api
-          command: go build -o api cmd/api/main.go
+      - run: make build
 
   build_push_docker:
     description: Build the Docker image
@@ -160,6 +152,8 @@ jobs:
           image: <<parameters.image_name>>
           tag: latest
       - docker/push:
+          path: docker/Dockerfile
+          docker-context: .
           image: <<parameters.image_name>>
           tag: latest
           digest-path: /tmp/digest.txt

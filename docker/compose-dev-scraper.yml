@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  scraper:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile.dev
+    container_name: scraper_dev
+    volumes:
+      - ..:/go/src/github.com/sasalatart/batcoms/
+    command: go run cmd/scraper/main.go
