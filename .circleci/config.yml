@@ -104,7 +104,8 @@ jobs:
     executor: docker/machine
     steps:
       - checkout
-      - docker/dockerlint
+      - docker/dockerlint:
+          dockerfile: docker/Dockerfile
 
   test:
     description: Run tests
@@ -147,13 +148,12 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
+      - run: cp docker/Dockerfile Dockerfile
       - docker/check
       - docker/build:
           image: <<parameters.image_name>>
           tag: latest
       - docker/push:
-          path: docker/Dockerfile
-          docker-context: .
           image: <<parameters.image_name>>
           tag: latest
           digest-path: /tmp/digest.txt
