@@ -3,62 +3,50 @@
 ## About
 
 _Battles and Commanders_ is a Wikipedia scraper and API that serves historical battles, commanders
-and their factions. You can try the API and read its documentation [here][swaggerhub].
+and their factions. You can try the API and read its documentation [here][swaggerhub]. This project
+was built with [Go][go] and [Postgres][postgres].
 
-**This project is still work in progress**. Also, consider that scrapers are brittle: they are
-subject to the webpage's HTML structure updates, and if Wikipedia decides to alter its HTML, this
-scraper may stop working if not properly updated.
+> **The work here is still in progress**. Also, consider that scrapers are brittle: they are subject
+> to the webpage's HTML structure updates, and if Wikipedia decides to alter its HTML, this scraper
+> may stop working if not properly updated.
 
-## Setup
+## Development setup
 
-### Development
+This project requires [Docker][docker] and [docker-compose][docker-compose] to be installed.
 
-For both the scraper and the API, settings may be changed by editing the file in `config/config.yaml`,
-but I see no reason to change their current values.
+In development, Docker is used together with `Make` to let you spin up your local environment
+without worrying about complex commands and installing dependencies. You may still run the code
+natively with Go without Docker, although you will lose some features such as auto-reload. For a
+list and description of all the available `Make` commands, just run `make help`.
 
-#### Scraper
+Most settings may be changed by editing the file in `config/config.yaml`, although you will probably
+not need to change them. You might, however, want to override some, such as the database password.
 
-```sh
-$ go run cmd/scraper/main.go
-```
-
-After a successful run, the file `data.json` should have been created at the root dir of this
-project, containing normalized battles, factions and commanders.
-
-#### API
-
-1. Make sure you have a Postgres instance running.
-
-2. Turn on the API on port 3000:
-
-   ```sh
-   $ go run cmd/api/main.go
-   ```
-
-3. If you have not yet, then you will need to also run the seeder. The seeder can setup the database
-   by either reading from local files or from remote files whose URLs have been supplied:
-
-   ```sh
-   $ go run cmd/seeder/main.go -dataURL="https://bit.ly/3dOeqyZ"
-   ```
-
-   If you already ran the scraper and the `data.json` file is available in the root dir of the
-   project, then the `dataURL` option is unnecessary.
-
-### Running via Docker
+### Scraper
 
 ```sh
-# Start database and app server via docker-compose
-$ docker-compose up -d
-
-# Additionally, seeders should be ran
-$ docker exec api ./seeder -dataURL="https://bit.ly/3dOeqyZ"
-
-# Stop docker containers:
-$ docker-compose stop
+# Run the scraper inside a Docker container
+$ make scrape
 ```
 
-Now the api should be available on port 3000 of your machine.
+The resulting `data.json` file at the root dir of this project will contain normalized battles,
+factions and commanders. You may use this file for seeding the API (see next section), or for some
+other project.
+
+### API
+
+```sh
+# Turn on the API (http://localhost:3000) and a Postgres container (port 14000). The API has
+# auto-reload configured
+$ make dev_up
+
+# Run the seeder (just needed once). Alternatively, you may run "make dev_seed_local" if you have
+# the scraper results file in the root dir of this project
+$ make dev_seed_url
+
+# (Optional) remove Docker containers and volumes created by "make dev_up"
+$ make dev_destroy
+```
 
 ## Installing for use with your own Go projects
 
@@ -150,16 +138,16 @@ Some usage examples include:
 
 ## Testing
 
-Unit & integration tests have been included. In order to run the integration tests properly, the API
-must be running in `test` mode, and Postgres should also be running. Tests can be ran as follows:
-
 ```sh
-# Shell 1: Turn on the API in test mode
-$ go run cmd/api/main.go -test
+# Shell 1: Turn on the API in test mode (http://localhost:8888) and a Postgres container (port 14001)
+$ make test_up
 
-# Shell 2: Run the actual tests
-$ go test ./...
+# Shell 2: Run the actual tests inside the container
+$ make test
 ```
+
+Just like when running the API in dev mode, you may run the `make test_destroy` command to remove
+Docker containers and volumes created for running tests.
 
 ## Credits
 
@@ -177,6 +165,10 @@ _Battles and Commanders_ is [MIT licensed](./LICENSE).
 [bdg-mit]: https://img.shields.io/badge/License-MIT-blue.svg
 [build]: https://circleci.com/gh/battles-and-commanders
 [cc-share-alike]: https://creativecommons.org/licenses/by-sa/3.0/
+[docker-compose]: https://docs.docker.com/compose/
+[docker]: https://www.docker.com/
+[go]: https://golang.org/
 [mit]: https://opensource.org/licenses/MIT
+[postgres]: https://www.postgresql.org/
 [swaggerhub]: https://app.swaggerhub.com/apis-docs/sasalatart/Battles-and-Commanders/1.0.0
 [wikipedia]: https://www.wikipedia.org/

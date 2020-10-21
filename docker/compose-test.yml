@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:12.4-alpine
+    container_name: postgres_test
+    environment:
+      POSTGRES_DB: batcoms_test
+      POSTGRES_PASSWORD: password # Or use a .env file for real passwords
+    ports:
+      - 14001:5432
+    volumes:
+      - postgresql:/var/lib/postgresql
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile.dev
+    container_name: api_test
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PASSWORD: password # Or use a .env file for real passwords
+    ports:
+      - 8888:8888
+    depends_on:
+      - postgres
+    volumes:
+      - ..:/go/src/github.com/sasalatart/batcoms/
+    restart: unless-stopped
+    command: air -c docker/.air.test.toml
+
+volumes:
+  postgresql:
